@@ -1,3 +1,5 @@
 import CustomLinearGradient from './CustomLinearGradient';
+import {CheckIcon} from './Icons/index';
 
-export {CustomLinearGradient};
+export * from './common/index';
+export {CustomLinearGradient, CheckIcon};

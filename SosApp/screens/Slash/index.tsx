@@ -2,9 +2,13 @@ import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '../../navigation/RootNavigation';
-import {SCREEN} from '../../enums';
-import LinearGradient from 'react-native-linear-gradient';
-import {CustomLinearGradient} from '../../components';
+import {BUTTON, ETEXT, SCREEN} from '../../enums';
+import {
+  CheckIcon,
+  CustomButton,
+  CustomLinearGradient,
+  CustomText,
+} from '../../components';
 import {ArrowRight} from '../../themes';
 
 const SlashScreen = () => {
@@ -22,15 +26,37 @@ const SlashScreen = () => {
   }, [navigate]);
 
   return (
-    <CustomLinearGradient flex={1} customStyle={styles.container}>
-      <CustomLinearGradient customStyle={[styles.box, styles.shadow1]}>
-        <CustomLinearGradient customStyle={[styles.box, styles.shadow2]}>
-          <Text style={styles.boxText}>SOS</Text>
+    <CustomLinearGradient flex customStyle={styles.container}>
+      <CustomLinearGradient
+        borderRadius={20}
+        customStyle={[styles.box, styles.shadow1]}>
+        <CustomLinearGradient
+          borderRadius={20}
+          customStyle={[styles.box, styles.shadow2]}>
+          <CustomText text="SOS" bold size="large" />
         </CustomLinearGradient>
       </CustomLinearGradient>
-      <CustomLinearGradient borderRadius={10} customStyle={styles.button}>
-        <Text style={styles.textButton}>Get Started</Text>
-        <Image source={ArrowRight} style={styles.arrowIcon} />
+
+      <View>
+        <CustomButton label="Move with safety" type={BUTTON.OUTLINE}>
+          <CustomText text="Move with safety" bold />
+          <Image source={CheckIcon} style={styles.checkIcon} />
+        </CustomButton>
+      </View>
+
+      <CustomLinearGradient
+        borderRadius={10}
+        customStyle={[styles.shadow1]}
+        maxWidth>
+        <CustomLinearGradient
+          borderRadius={20}
+          customStyle={[styles.shadow2]}
+          maxWidth>
+          <CustomButton customStyle={styles.getStartbutton}>
+            <Text style={styles.textButton}>Get Started</Text>
+            <Image source={ArrowRight} style={styles.arrowIcon} />
+          </CustomButton>
+        </CustomLinearGradient>
       </CustomLinearGradient>
     </CustomLinearGradient>
   );
@@ -41,6 +67,7 @@ export default SlashScreen;
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: 284,
     paddingHorizontal: 36,
     paddingBottom: 62,
@@ -50,7 +77,6 @@ const styles = StyleSheet.create({
     height: 181,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
   },
   shadow1: {
     elevation: 4,
@@ -78,10 +104,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 64,
   },
-  button: {
-    paddingVertical: 16,
-    width: '100%',
-    flexDirection: 'row',
+  getStartbutton: {
+    paddingVertical: 6,
   },
   textButton: {
     fontSize: 22,
@@ -92,4 +116,5 @@ const styles = StyleSheet.create({
   arrowIcon: {
     marginLeft: 38,
   },
+  checkIcon: {marginLeft: 5},
 });

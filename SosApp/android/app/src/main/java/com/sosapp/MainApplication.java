@@ -1,4 +1,4 @@
-package com.sosapp;
+package com.huudu.sosapp;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

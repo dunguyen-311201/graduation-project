@@ -6,14 +6,18 @@ import {DART_BLUE_COLOR, LIGHT_BLUE_COLOR} from '../../themes';
 interface props {
   children: React.ReactNode;
   customStyle?: StyleProp<ViewStyle>;
-  flex?: 1 | 0;
+  flex?: boolean;
   borderRadius?: number;
+  maxWidth?: boolean;
+  row?: boolean;
 }
 
 const CustomLinearGradient = ({
   children,
+  maxWidth,
   customStyle,
-  flex = 0,
+  row,
+  flex,
   borderRadius = 0,
 }: props) => {
   return (
@@ -23,8 +27,10 @@ const CustomLinearGradient = ({
       end={{x: 1, y: 1}}
       style={[
         styles.linearGradient,
+        {...(flex && {flex: 1}), borderRadius},
         customStyle,
-        {...(flex === 1 && {flex}), borderRadius},
+        {...(row && styles.flexRow)},
+        {...(maxWidth && styles.maxWidth)},
       ]}>
       {children}
     </LinearGradient>
@@ -37,5 +43,11 @@ const styles = StyleSheet.create({
   linearGradient: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  maxWidth: {
+    width: '100%',
+  },
+  flexRow: {
+    flexDirection: 'row',
   },
 });

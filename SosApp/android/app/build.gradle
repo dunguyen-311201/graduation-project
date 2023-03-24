@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"
 
 import com.android.build.OutputFile
 
@@ -93,9 +94,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.sosapp"
+    namespace "com.huudu.sosapp"
     defaultConfig {
-        applicationId "com.sosapp"
+        applicationId "com.huudu.sosapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -149,6 +150,7 @@ android {
 }
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:31.2.3')
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 

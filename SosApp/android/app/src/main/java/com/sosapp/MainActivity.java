@@ -1,4 +1,4 @@
-package com.sosapp;
+package com.huudu.sosapp;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
