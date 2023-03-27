@@ -1,22 +1,23 @@
 import {Pressable, StyleSheet, Text, ViewStyle} from 'react-native';
 import React, {ReactNode} from 'react';
 
-import {BUTTON} from '../../../enums';
+import {EBUTTON} from '../../../enums';
+import {BUTTON} from '../../../types';
 import {BLACK_COLOR, EXLIGHT_BLUE_COLOR, WHITE_COLOR} from '../../../themes';
 
 const ButtonType = {
-  [BUTTON.DEFAULT]: {
+  [EBUTTON.DEFAULT]: {
     backgroundColor: BLACK_COLOR,
   },
-  [BUTTON.OUTLINE]: {
-    borderColor: EXLIGHT_BLUE_COLOR,
-    borderWidth: 1.5,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    alignSelf: 'flex-start',
+  [EBUTTON.OUTLINE]: {
+    // borderColor: EXLIGHT_BLUE_COLOR,
+    // borderWidth: 1.5,
+    // borderRadius: 16,
+    // paddingVertical: 14,
+    // paddingHorizontal: 24,
+    // alignSelf: 'flex-start',
   },
-  [BUTTON.PRIMARY]: {},
+  [EBUTTON.PRIMARY]: {},
 };
 
 type ButtonProps = {
@@ -24,6 +25,7 @@ type ButtonProps = {
   children?: ReactNode;
   borderRadius?: number;
   type?: BUTTON;
+  onPress?: () => void;
   customStyle?: ViewStyle;
 };
 
@@ -31,15 +33,17 @@ const CustomButton = ({
   label,
   children,
   borderRadius,
-  type,
+  type = EBUTTON.DEFAULT,
+  onPress,
   customStyle,
 }: ButtonProps) => {
   return (
     <Pressable
+      onPress={onPress}
       style={[
         styles.button,
         {...(borderRadius && {borderRadius})},
-        {...(type && {...ButtonType[type]})},
+        {...(type && {})},
         customStyle,
       ]}>
       {children ? children : <Text style={[styles.textButton]}>{label}</Text>}

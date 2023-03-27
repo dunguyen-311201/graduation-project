@@ -1,8 +1,8 @@
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '../../navigation/RootNavigation';
-import {BUTTON, ETEXT, SCREEN} from '../../enums';
+import {EBUTTON, SCREEN} from '../../enums';
 import {
   CheckIcon,
   CustomButton,
@@ -21,8 +21,8 @@ const SlashScreen = () => {
     });
   }, [setOptions]);
 
-  const handleNavigateToHome = useCallback(() => {
-    navigate(SCREEN.HOME_SCREEN);
+  const handleNavigateToSignupByPhone = useCallback(() => {
+    navigate(SCREEN.SIGN_UP_BY_PHONE_NUMBER);
   }, [navigate]);
 
   return (
@@ -38,7 +38,7 @@ const SlashScreen = () => {
       </CustomLinearGradient>
 
       <View>
-        <CustomButton label="Move with safety" type={BUTTON.OUTLINE}>
+        <CustomButton label="Move with safety" type={EBUTTON.OUTLINE}>
           <CustomText text="Move with safety" bold />
           <Image source={CheckIcon} style={styles.checkIcon} />
         </CustomButton>
@@ -52,7 +52,9 @@ const SlashScreen = () => {
           borderRadius={20}
           customStyle={[styles.shadow2]}
           maxWidth>
-          <CustomButton customStyle={styles.getStartbutton}>
+          <CustomButton
+            customStyle={styles.getStartbutton}
+            onPress={handleNavigateToSignupByPhone}>
             <Text style={styles.textButton}>Get Started</Text>
             <Image source={ArrowRight} style={styles.arrowIcon} />
           </CustomButton>
