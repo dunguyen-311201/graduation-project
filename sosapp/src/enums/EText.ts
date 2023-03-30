@@ -1,0 +1,13 @@
+export enum EText {
+  'fw7' = 'font-weight-700',
+  'fw6' = 'font-weight-600',
+  'fw4' = 'font-weight-400',
+  'fs6' = 'font-size-24',
+  'fs16' = 'font-size-64',
+  'fs5' = 'font-size-20',
+  'fs52' = 'font-size-22',
+  'fs72' = 'font-size-30',
+  'fw5' = 'font-weight-500',
+  'cbl' = 'color-blue',
+  'cga' = 'color-gray',
+}
