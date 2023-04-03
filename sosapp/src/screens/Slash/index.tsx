@@ -5,21 +5,19 @@ import {CustomButton, CustomLinearGradient, CustomText} from '@components';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme/icon';
 import Shadow from '@components/Shadow';
 import {useNavigation} from '@react-navigation/native';
-import {
-  RootScreenNavigationProps,
-  RootStackParamList,
-} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation/RootNavigation';
+import {EScreen} from '@enums';
 
 function SplashScreen() {
   const {setOptions, navigate} =
-    useNavigation<RootScreenNavigationProps<'Splash'>>();
+    useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const _navigateNext = useCallback(() => {
-    navigate('SignupByPhoneNumber');
+    navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
   }, [navigate]);
 
   return (
@@ -37,10 +35,8 @@ function SplashScreen() {
         </View>
 
         <CustomButton type="primary" onPress={_navigateNext}>
-          <Shadow customStyle={styles.button} paddingVertical={16}>
-            <CustomText text="Get Started" style={['fs52', 'fw7']} />
-            <Image source={ArrowRightIcon} style={styles.img} />
-          </Shadow>
+          <CustomText text="Get Started" style={['fs52', 'fw7']} />
+          <Image source={ArrowRightIcon} style={styles.img} />
         </CustomButton>
       </SafeAreaView>
     </CustomLinearGradient>
@@ -72,6 +68,7 @@ const styles = StyleSheet.create({
   ['box-logo']: {
     width: 181,
     height: 181,
+    borderRadius: 20,
   },
   img: {
     marginLeft: 20,

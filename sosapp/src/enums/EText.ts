@@ -10,4 +10,7 @@ export enum EText {
   'fw5' = 'font-weight-500',
   'cbl' = 'color-blue',
   'cga' = 'color-gray',
+  'cbla' = 'color-black',
+  'sm' = 'text-small',
+  'md' = 'text-medium',
 }

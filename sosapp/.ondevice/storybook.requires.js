@@ -16,6 +16,20 @@ global.STORIES = [
     importPathMatcher:
       "^\\.[\\\\/](?:components(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.(?:ts|tsx|js|jsx)?)$",
   },
+  {
+    titlePrefix: "",
+    directory: "./src/components",
+    files: "**/*.stories.?(ts|tsx|js|jsx)",
+    importPathMatcher:
+      "^\\.[\\\\/](?:src\\/components(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.(?:ts|tsx|js|jsx)?)$",
+  },
+  {
+    titlePrefix: "",
+    directory: "./src/components",
+    files: "**/**/*.stories.?(ts|tsx|js|jsx)",
+    importPathMatcher:
+      "^\\.[\\\\/](?:src\\/components(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.(?:ts|tsx|js|jsx)?)$",
+  },
 ];
 
 import "@storybook/addon-ondevice-notes/register";
@@ -50,6 +64,10 @@ try {
 const getStories = () => {
   return {
     "./components/Button/Button.stories.tsx": require("../components/Button/Button.stories.tsx"),
+    "./src/components/Back/Back.stories.tsx": require("../src/components/Back/Back.stories.tsx"),
+    "./src/components/common/Button/Button.stories.tsx": require("../src/components/common/Button/Button.stories.tsx"),
+    "./src/components/Back/Back.stories.tsx": require("../src/components/Back/Back.stories.tsx"),
+    "./src/components/common/Button/Button.stories.tsx": require("../src/components/common/Button/Button.stories.tsx"),
   };
 };
 

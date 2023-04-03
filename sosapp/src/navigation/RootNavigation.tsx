@@ -4,18 +4,26 @@ import {NavigationContainer} from '@react-navigation/native';
 import {
   ConfirmPhoneNumberScreen,
   HomeScreen,
-  SignupByGoogleOrFacebookScreen,
+  SignupBySocialScreen,
   SignupByPhoneNumberScreen,
   SplashScreen,
+  SetupNameScreen,
+  ConfirmPolicyScreen,
 } from '../screens';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack/lib/typescript/src/types';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {EScreen} from '@enums/EScreen';
 
 export type RootStackParamList = {
-  Splash: undefined;
-  Home: undefined;
-  SignupByPhoneNumber: undefined;
-  SignupByGoogleOrFacebook: undefined;
-  ConfirmPhoneNumber: undefined;
+  [EScreen.SPLASH]: undefined;
+  [EScreen.HOME]: undefined;
+  [EScreen.SIGNUP_BY_PHONE_NUMBER]: undefined;
+  [EScreen.SIGNUP_BY_SOCIAL]: undefined;
+  [EScreen.SIGNUP_NAME]: undefined;
+  [EScreen.CONFIRM_POLICY]: undefined;
+  [EScreen.CONFIRM_PHONE_NUMBER]: {
+    confirmation: FirebaseAuthTypes.ConfirmationResult;
+  };
 };
 
 export type RootScreenNavigationProps<T extends keyof RootStackParamList> =
@@ -26,20 +34,25 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Splash">
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Navigator initialRouteName={EScreen.SPLASH}>
+        <Stack.Screen name={EScreen.HOME} component={HomeScreen} />
+        <Stack.Screen name={EScreen.SPLASH} component={SplashScreen} />
         <Stack.Screen
-          name="SignupByPhoneNumber"
+          name={EScreen.SIGNUP_BY_PHONE_NUMBER}
           component={SignupByPhoneNumberScreen}
         />
         <Stack.Screen
-          name="SignupByGoogleOrFacebook"
-          component={SignupByGoogleOrFacebookScreen}
+          name={EScreen.SIGNUP_BY_SOCIAL}
+          component={SignupBySocialScreen}
         />
         <Stack.Screen
-          name="ConfirmPhoneNumber"
+          name={EScreen.CONFIRM_PHONE_NUMBER}
           component={ConfirmPhoneNumberScreen}
+        />
+        <Stack.Screen name={EScreen.SIGNUP_NAME} component={SetupNameScreen} />
+        <Stack.Screen
+          name={EScreen.CONFIRM_POLICY}
+          component={ConfirmPolicyScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

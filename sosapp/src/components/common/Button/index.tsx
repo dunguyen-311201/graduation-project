@@ -5,16 +5,17 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import {EButton} from '../../../enums';
-
-console.log(EButton);
+import Shadow from '@components/Shadow';
 
 type ButtonProps = {
   label?: string;
   children?: React.ReactNode;
   type?: keyof typeof EButton;
   customStyle?: StyleProp<ViewStyle>;
+  paddingVertical?: number;
+  paddingHorizontal?: number;
   onPress?: () => void;
 };
 
@@ -23,28 +24,60 @@ const CustomButton = ({
   label = '',
   type = 'default',
   customStyle,
+  paddingHorizontal,
+  paddingVertical,
   onPress,
 }: ButtonProps) => {
+  if (label) {
+    if (type === 'primary') {
+      type = 'default';
+    }
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={[
+          styles['button-container'],
+          styles[EButton[type]],
+          customStyle,
+        ]}>
+        <Text
+          style={[styles[EButton[type]], {paddingHorizontal, paddingVertical}]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles['button-container'], styles[EButton[type]], customStyle]}>
-      {children ? children : <Text style={styles[EButton[type]]}>{label}</Text>}
+      {type !== 'primary' ? (
+        children
+      ) : (
+        <Shadow customStyle={styles.button} paddingVertical={16}>
+          {children}
+        </Shadow>
+      )}
     </TouchableOpacity>
   );
 };
 
-export default CustomButton;
+export default memo(CustomButton);
 
 const styles = StyleSheet.create({
   ['button-container']: {
-    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  button: {
+    flexDirection: 'row',
+    borderRadius: 10,
   },
   [EButton.default]: {
     backgroundColor: '#000000',
     color: '#FFFFFF',
+    width: '100%',
     paddingVertical: 16,
     fontWeight: '700',
     fontSize: 22,

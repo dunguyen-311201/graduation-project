@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "79713863437",
+    "project_id": "graduation-project-sos-app",
+    "storage_bucket": "graduation-project-sos-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:79713863437:android:65057d7018eee21b749244",
+        "android_client_info": {
+          "package_name": "com.sosapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "79713863437-rg2kdhuvire7lg6met8uur68essc398m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrDMrdLxN6967O8s4NQpKrA2qpH-4WgC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "79713863437-rg2kdhuvire7lg6met8uur68essc398m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,53 +1,64 @@
-import {FlatList, Image, StyleSheet, Text, View} from 'react-native';
+import {FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
 import React, {useCallback, useState} from 'react';
-import {CustomInput, CustomText} from '@components/common';
+import {CustomInput} from '@components/common';
 import {PHONES} from '../../../constants';
 import {Nation} from '@types';
-import {BLACK_COLOR, WHITE_COLOR} from '@theme/color';
+import {WHITE_COLOR} from '@theme/color';
+import {DropDownIcon} from '@theme/icon';
+import NationSelect from './NationSelect';
 
 type INation = Nation & {phone?: string};
-
 const PhoneInput = () => {
+  const [isVisible, setIsvisible] = useState(false);
+
   const [nation, setNation] = useState<INation>({
     ...PHONES[0],
   });
 
   const _onChangeText = useCallback((value: string, field: string) => {
-    if (nation) {
-      setNation(_nation => {
-        ({..._nation, [field]: value});
-      });
-    }
+    setNation(_nation => {
+      return {..._nation, [field]: value};
+    });
+  }, []);
+
+  const handleSelectNation = useCallback((_nation: Nation) => {
+    setNation(_nation);
+    setIsvisible(false);
   }, []);
 
   const _renderItem = useCallback(
     ({item}: {item: Nation}) => (
-      <View style={styles.nationOption}>
-        <View style={styles.nationInfo}>
-          <Image source={{uri: item.url}} style={styles.flag} />
-          <Text>{item.name}</Text>
-        </View>
-        <CustomText text={item.code} style={['fw6', 'fs6']} />
-      </View>
+      <NationSelect nation={item} onSelect={handleSelectNation} />
     ),
-    [],
+    [handleSelectNation],
   );
 
   const _keyExtractor = useCallback(({code}: Nation) => code, []);
 
+  const handleVisibleSelect = useCallback(
+    () => setIsvisible(prev => !prev),
+    [],
+  );
+
   return (
     <View style={styles.phoneinput}>
-      <FlatList
-        style={styles.nationList}
-        data={PHONES}
-        renderItem={_renderItem}
-        keyExtractor={_keyExtractor}
-      />
-      <Image source={{uri: nation?.url}} />
+      {isVisible && (
+        <FlatList
+          style={styles.nationList}
+          data={PHONES}
+          renderItem={_renderItem}
+          keyExtractor={_keyExtractor}
+        />
+      )}
+      <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
+        <Image source={{uri: nation?.url}} style={styles.flag} />
+        <Image source={DropDownIcon} style={styles.dropDown} />
+      </Pressable>
       <CustomInput
         value={nation?.phone || ''}
         onChangeText={_onChangeText}
-        field={typeof nation}
+        field="phone"
+        inputMode="numeric"
         valueStyle={styles.phone}
         title={nation?.code}
         titleStyle={styles.phoneTitle}
@@ -61,6 +72,10 @@ export default PhoneInput;
 const styles = StyleSheet.create({
   phoneinput: {
     width: '100%',
+    position: 'relative',
+    flexDirection: 'row',
+    zIndex: 1,
+    marginTop: 20,
   },
   phoneTitle: {},
   phone: {
@@ -71,22 +86,22 @@ const styles = StyleSheet.create({
   nationList: {
     backgroundColor: WHITE_COLOR,
     borderRadius: 10,
-  },
-  nationOption: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    paddingHorizontal: 5,
-    paddingVertical: 5,
-    borderBottomColor: BLACK_COLOR,
-    borderBottomWidth: 1,
     position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    zIndex: 2,
   },
-  nationInfo: {
+  flagSelect: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 10,
   },
   flag: {
     width: 52,
     height: 31,
+  },
+  dropDown: {
+    marginLeft: 5,
   },
 });

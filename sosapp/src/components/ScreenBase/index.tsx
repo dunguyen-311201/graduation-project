@@ -1,6 +1,7 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React from 'react';
-import {BackIcon, CustomButton, CustomText} from '@components';
+import BackIcon from '../Back';
+import {CustomButton, CustomText} from '../common';
 
 type ScreenBaseProps = {
   title?: string;
@@ -28,7 +29,13 @@ const ScreenBase = ({
             customStyle={styles.title}
           />
         )}
-        {desc && <CustomText text={desc} style={['fs6', 'fw4']} />}
+        {desc && (
+          <CustomText
+            text={desc}
+            style={['fs6', 'fw4']}
+            customStyle={styles.desc}
+          />
+        )}
         {children}
       </View>
       <View>
@@ -49,8 +56,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 36,
     paddingHorizontal: 32,
+    paddingBottom: 62,
   },
   title: {
+    marginTop: 35,
+  },
+  desc: {
     marginTop: 35,
   },
 });

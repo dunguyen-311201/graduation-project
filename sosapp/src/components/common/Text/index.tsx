@@ -1,21 +1,40 @@
 import {StyleProp, StyleSheet, Text, ViewStyle} from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import {EText} from '@enums';
-import {LIGHT_BLUE_COLOR, TEXT_COLOR} from '@theme/color';
+import {BLACK_COLOR, LIGHT_BLUE_COLOR, TEXT_COLOR} from '@theme/color';
 
 type CustomTextProps = {
   text: string;
   style: (keyof typeof EText)[];
   customStyle?: StyleProp<ViewStyle>;
+  children?: React.ReactNode | string;
+  type?: keyof typeof EText;
 };
 
-const CustomText = ({text, style, customStyle}: CustomTextProps) => {
+const CustomText = ({
+  text,
+  type = 'md',
+  style,
+  customStyle,
+  children,
+}: CustomTextProps) => {
   const _styles = style.map(key => styles[EText[key]]);
 
-  return <Text style={[styles.text, ..._styles, customStyle]}>{text}</Text>;
+  return (
+    <Text
+      style={[
+        styles.text,
+        ..._styles,
+        {...(type && styles[EText[type]])},
+        customStyle,
+      ]}>
+      {text}
+      {children}
+    </Text>
+  );
 };
 
-export default CustomText;
+export default memo(CustomText);
 
 const styles = StyleSheet.create({
   text: {
@@ -50,5 +69,16 @@ const styles = StyleSheet.create({
   },
   [EText.cga]: {
     color: '#EDF6FF',
+  },
+  [EText.cbla]: {
+    color: BLACK_COLOR,
+  },
+  [EText.sm]: {
+    fontSize: 15,
+    fontWeight: '400',
+  },
+  [EText.md]: {
+    fontSize: 20,
+    fontWeight: '500',
   },
 });
