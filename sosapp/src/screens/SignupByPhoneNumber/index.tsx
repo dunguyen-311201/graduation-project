@@ -7,24 +7,27 @@ import {RootScreenNavigationProps} from '@navigation/RootNavigation';
 import {CustomText} from '@components/common';
 import ScreenBase from '@components/ScreenBase';
 import {ArrowRightBlueIcon} from '@theme/icon';
-import PhoneInput from './components/PhoneInput';
+import PhoneInput, {INation} from './components/PhoneInput';
 import {EScreen} from '@enums/EScreen';
 
 const SignupByPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
+  const [nation, setNation] = useState<INation>();
+
   const [confirm, setConfirm] =
     useState<FirebaseAuthTypes.ConfirmationResult>();
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    return subscriber;
   }, []);
 
   // Handle login
   function onAuthStateChanged(user) {
     if (user) {
+      console.log(user);
       // Some Android devices can automatically process the verification code (OTP) message, and the user would NOT need to enter the code.
       // Actually, if he/she tries to enter it, he/she will get an error message because the code was already used in the background.
       // In this function, make sure you hide the component(s) for entering the code and/or navigate away from this screen.
@@ -51,11 +54,11 @@ const SignupByPhoneNumberScreen = () => {
       title="Enter your mobile number"
       onBack={goBack}
       onNext={_navigateNext}>
-      <PhoneInput />
+      <PhoneInput data={nation} onChangePhone={setNation} />
       <TouchableOpacity style={styles.buttonToSocial} onPress={_navigateSocial}>
         <CustomText
           text="Or connect with social"
-          style={['fs6', 'fw5', 'cbl']}
+          type="text_medium_light_blue_24"
         />
         <Image source={ArrowRightBlueIcon} style={styles.iconSocial} />
       </TouchableOpacity>

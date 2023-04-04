@@ -6,4 +6,5 @@ export enum EScreen {
   CONFIRM_PHONE_NUMBER = 'confirm-phone-number-screen',
   SIGNUP_BY_PHONE_NUMBER = 'signuSp-by-phone-number-screen',
   SIGNUP_BY_SOCIAL = 'signup-by-social-screen',
+  MAP = 'map-screen',
 }

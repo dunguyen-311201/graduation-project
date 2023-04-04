@@ -1,7 +1,7 @@
 import {FlatList, StyleSheet, TextInput, View} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {CustomInput} from '@components/common';
-import {WHITE_COLOR} from '@theme/color';
+import {Styles as st} from '@utils';
 
 type TCode = {
   F1: string;
@@ -62,7 +62,7 @@ const ComfirmInput = ({onChangeText}: ComfirmInputProps) => {
         onChangeText={_onChangeText}
         value={item}
         maxLength={1}
-        valueStyle={styles.confirmText}
+        valueStyle={st.text_regular_27}
         inputMode="numeric"
         ref={input => {
           if (input !== null) {
@@ -99,11 +99,5 @@ export default ComfirmInput;
 const styles = StyleSheet.create({
   confirmNumber: {
     width: 16,
-  },
-  confirmText: {
-    fontSize: 24,
-    color: WHITE_COLOR,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

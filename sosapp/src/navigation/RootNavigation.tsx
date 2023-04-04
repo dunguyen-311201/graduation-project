@@ -13,6 +13,7 @@ import {
 import {NativeStackNavigationProp} from '@react-navigation/native-stack/lib/typescript/src/types';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {EScreen} from '@enums/EScreen';
+import MapScreen from '@screens/Map';
 
 export type RootStackParamList = {
   [EScreen.SPLASH]: undefined;
@@ -23,7 +24,9 @@ export type RootStackParamList = {
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
     confirmation: FirebaseAuthTypes.ConfirmationResult;
+    phone: string;
   };
+  [EScreen.MAP]: {};
 };
 
 export type RootScreenNavigationProps<T extends keyof RootStackParamList> =
@@ -54,6 +57,7 @@ const RootNavigation = () => {
           name={EScreen.CONFIRM_POLICY}
           component={ConfirmPolicyScreen}
         />
+        <Stack.Screen name={EScreen.MAP} component={MapScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

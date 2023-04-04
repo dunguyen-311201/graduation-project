@@ -1,2 +1,3 @@
-export * from './style';
 export * from './asyncStorage';
+export * from './styles';
+export * from './auth';

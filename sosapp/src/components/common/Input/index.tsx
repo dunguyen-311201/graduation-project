@@ -16,7 +16,7 @@ type CustomInputProps = {
   value?: string;
   inputMode?: InputModeOptions;
   errorMessage?: string;
-  titleStyle?: StyleProp<TextStyle>;
+  titleStyle?: TextStyle;
   errorMessageStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
   onChangeText: (value: string, field: string) => void;
@@ -39,7 +39,6 @@ const CustomInput: React.ForwardRefRenderFunction<
     valueStyle,
     maxLength,
     marginLeft,
-    errorMessageStyle,
     onChangeText,
     onBlur,
     onFocus,
@@ -61,13 +60,7 @@ const CustomInput: React.ForwardRefRenderFunction<
 
   return (
     <View style={[styles.inputgroup, {marginLeft}]}>
-      {title && (
-        <CustomText
-          text={title}
-          style={['fw5', 'fs6', 'cga']}
-          customStyle={titleStyle}
-        />
-      )}
+      {title && <CustomText text={title} customStyle={titleStyle} />}
       <TextInput
         value={value}
         ref={ref}
@@ -78,13 +71,7 @@ const CustomInput: React.ForwardRefRenderFunction<
         inputMode={inputMode}
         maxLength={maxLength}
       />
-      {errorMessage && (
-        <CustomText
-          text={errorMessage}
-          style={['fw5', 'fs6']}
-          customStyle={errorMessageStyle}
-        />
-      )}
+      {errorMessage && <CustomText text={errorMessage} />}
     </View>
   );
 };

@@ -3,6 +3,8 @@ const LIGHT_BLUE_COLOR = '#535AFF';
 const WHITE_COLOR = '#FFFFFF';
 const BLACK_COLOR = '#000000';
 const TEXT_COLOR = '#EDF6FF';
+const DARK_GRAY_COLOR = '#979797';
+const GRAY_COLOR = '#DADADA';
 
 export {
   TEXT_COLOR,
@@ -10,4 +12,6 @@ export {
   LIGHT_BLUE_COLOR,
   WHITE_COLOR,
   BLACK_COLOR,
+  DARK_GRAY_COLOR,
+  GRAY_COLOR,
 };

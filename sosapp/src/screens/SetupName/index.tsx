@@ -27,6 +27,7 @@ const SetupNameScreen = () => {
   const _onNext = useCallback(async () => {
     console.log(user);
     await auth().currentUser?.updateProfile({displayName: `${first} ${last}`});
+    console.log(auth().currentUser);
 
     navigate(EScreen.CONFIRM_POLICY);
   }, [user, first, last, navigate]);

@@ -7,24 +7,33 @@ import {WHITE_COLOR} from '@theme/color';
 import {DropDownIcon} from '@theme/icon';
 import NationSelect from './NationSelect';
 
-type INation = Nation & {phone?: string};
-const PhoneInput = () => {
+import {Styles as st} from '@utils';
+
+export type INation = Nation & {phone: string};
+
+const PhoneInput = ({
+  data,
+  onChangePhone,
+}: {
+  data: INation;
+  onChangePhone: (nation: INation) => void;
+}) => {
   const [isVisible, setIsvisible] = useState(false);
 
-  const [nation, setNation] = useState<INation>({
-    ...PHONES[0],
-  });
+  const _onChangeText = useCallback(
+    (value: string) => {
+      onChangePhone({...data, phone: value});
+    },
+    [onChangePhone, data],
+  );
 
-  const _onChangeText = useCallback((value: string, field: string) => {
-    setNation(_nation => {
-      return {..._nation, [field]: value};
-    });
-  }, []);
-
-  const handleSelectNation = useCallback((_nation: Nation) => {
-    setNation(_nation);
-    setIsvisible(false);
-  }, []);
+  const handleSelectNation = useCallback(
+    (_nation: Nation) => {
+      onChangePhone({...data, code: _nation.code});
+      setIsvisible(false);
+    },
+    [data, onChangePhone],
+  );
 
   const _renderItem = useCallback(
     ({item}: {item: Nation}) => (
@@ -51,17 +60,18 @@ const PhoneInput = () => {
         />
       )}
       <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
-        <Image source={{uri: nation?.url}} style={styles.flag} />
+        <Image source={{uri: data?.url}} style={styles.flag} />
         <Image source={DropDownIcon} style={styles.dropDown} />
       </Pressable>
       <CustomInput
-        value={nation?.phone || ''}
+        value={data?.phone}
         onChangeText={_onChangeText}
         field="phone"
         inputMode="numeric"
-        valueStyle={styles.phone}
-        title={nation?.code}
-        titleStyle={styles.phoneTitle}
+        valueStyle={st.text_medium_gray_24}
+        title={data?.code}
+        maxLength={9}
+        titleStyle={st.text_medium_24}
       />
     </View>
   );

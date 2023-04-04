@@ -32,7 +32,7 @@ const ConfirmPhoneNumberScreen = () => {
     const user: FirebaseAuthTypes.UserCredential | null =
       await confirmation.confirm(code);
     await setAsyncStorage('user', user);
-    navigate(EScreen.HOME);
+    navigate(EScreen.SIGNUP_NAME);
   }, [code, confirmation, navigate]);
 
   return (

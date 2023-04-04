@@ -22,20 +22,8 @@ const ScreenBase = ({
     <View style={styles.container}>
       <View>
         <BackIcon onPress={onBack} />
-        {title && (
-          <CustomText
-            text={title}
-            style={['fs72', 'fw5']}
-            customStyle={styles.title}
-          />
-        )}
-        {desc && (
-          <CustomText
-            text={desc}
-            style={['fs6', 'fw4']}
-            customStyle={styles.desc}
-          />
-        )}
+        {title && <CustomText text={title} type="text_medium_30" />}
+        {desc && <CustomText text={desc} type="text_medium_24" />}
         {children}
       </View>
       <View>

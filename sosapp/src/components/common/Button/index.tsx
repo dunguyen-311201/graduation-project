@@ -7,7 +7,8 @@ import {
 } from 'react-native';
 import React, {memo} from 'react';
 import {EButton} from '../../../enums';
-import Shadow from '@components/Shadow';
+import Shadow from '../../Shadow';
+import {Styles as st} from '@utils';
 
 type ButtonProps = {
   label?: string;
@@ -76,13 +77,10 @@ const styles = StyleSheet.create({
   },
   [EButton.default]: {
     backgroundColor: '#000000',
-    color: '#FFFFFF',
     width: '100%',
     paddingVertical: 16,
-    fontWeight: '700',
-    fontSize: 22,
     textAlign: 'center',
-    fontFamily: 'Roboto',
+    ...st.text_large_7_white,
   },
   [EButton.outline]: {
     alignSelf: 'flex-start',

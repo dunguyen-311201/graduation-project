@@ -8,13 +8,18 @@ import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation/RootNavigation';
 import {EScreen} from '@enums';
 
+import {refeshLogin} from '@utils';
+
 function SplashScreen() {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
 
   useEffect(() => {
     setOptions({headerShown: false});
-  }, [setOptions]);
+    if (refeshLogin()) {
+      navigate(EScreen.HOME);
+    }
+  }, [setOptions, navigate]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
@@ -25,17 +30,17 @@ function SplashScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.top}>
           <Shadow customStyle={styles['box-logo']}>
-            <CustomText text="SOS" style={['fs16', 'fw7']} />
+            <CustomText text="SOS" type="text_large_white" />
           </Shadow>
 
           <CustomButton type="outline" customStyle={styles.topButtom}>
-            <CustomText text="Move with safety" style={['fs5', 'fw6']} />
+            <CustomText text="Move with safety" type="text_regular_white" />
             <Image source={CheckShieldIcon} />
           </CustomButton>
         </View>
 
         <CustomButton type="primary" onPress={_navigateNext}>
-          <CustomText text="Get Started" style={['fs52', 'fw7']} />
+          <CustomText text="Get Started" type="text_large_7_white" />
           <Image source={ArrowRightIcon} style={styles.img} />
         </CustomButton>
       </SafeAreaView>

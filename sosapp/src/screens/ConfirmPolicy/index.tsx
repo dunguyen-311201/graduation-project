@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation/RootNavigation';
@@ -6,7 +6,6 @@ import {EScreen} from '@enums/EScreen';
 import ScreenBase from '@components/ScreenBase';
 import {ProfileIcon} from '@theme/icon';
 import {CustomText} from '@components/common';
-import {EText} from '@enums/EText';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =
@@ -31,30 +30,17 @@ const ConfirmPolicyScreen = () => {
           text={
             "By tapping the arrow below, you agree to SOS's Terms of Use and acknowledge that you have read the Privacy Policy"
           }
-          style={['fs5', 'fw4']}
-          customStyle={[styles.wrapText, styles.title]}
+          type="regular"
         />
 
         <CustomText
           text={
             'Check the box to indicate that you are atleast 18 years of age, agree to the'
           }
-          customStyle={[styles.wrapText, styles.desc]}
-          type="sm"
-          style={['fs5', 'fw4']}>
-          <CustomText
-            text={' Terms & Conditions '}
-            customStyle={styles.wrapText}
-            style={['fs5', 'fw4', 'cbl']}
-            type="sm"
-          />
+          type="regular">
+          <CustomText text={' Terms & Conditions '} type="regular" />
           {'and acknowledge the '}
-          <CustomText
-            text={' Privacy Policy.'}
-            customStyle={styles.wrapText}
-            style={['fs5', 'fw4', 'cbl']}
-            type="sm"
-          />
+          <CustomText text={' Privacy Policy.'} type="regular" />
         </CustomText>
       </View>
     </ScreenBase>
