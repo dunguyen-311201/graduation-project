@@ -8,6 +8,7 @@ import ConfirmPolicyScreen from './ConfirmPolicy';
 import SettingsScreen from './Settings';
 import MessagesScreen from './Messages';
 import MapScreen from './Map';
+import SendDistreeSignal from './SendDistressSignal';
 
 export {
   SplashScreen,
@@ -19,5 +20,6 @@ export {
   SetupNameScreen,
   ConfirmPolicyScreen,
   SettingsScreen,
+  SendDistreeSignal,
   MessagesScreen,
 };

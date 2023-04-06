@@ -3,7 +3,7 @@ import React from 'react';
 
 const SettingsScreen = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text>SettingsScreen</Text>
     </View>
   );
@@ -11,4 +11,6 @@ const SettingsScreen = () => {
 
 export default SettingsScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {},
+});

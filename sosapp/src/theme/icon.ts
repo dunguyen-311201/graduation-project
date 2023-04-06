@@ -5,6 +5,8 @@ const BackIcon = require('../assets/images/back.png');
 const DropDownIcon = require('../assets/images/drop-down.png');
 const ProfileIcon = require('../assets/images/vs_profile.png');
 const MenuIcon = require('../assets/images/menu.png');
+const SOSIcon = require('../assets/images/sos.png');
+const GoMapIcon = require('../assets/images/go-map.png');
 
 export {
   CheckShieldIcon,
@@ -14,4 +16,6 @@ export {
   ArrowRightBlueIcon,
   ProfileIcon,
   MenuIcon,
+  SOSIcon,
+  GoMapIcon,
 };

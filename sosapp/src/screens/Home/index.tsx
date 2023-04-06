@@ -1,50 +1,52 @@
-import {Platform, StyleSheet} from 'react-native';
-import React, {useEffect} from 'react';
+import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {RootScreenNavigationProps} from '@navigation/RootNavigation';
-import {getAsyncStorage} from '@utils/asyncStorage';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import Geolocation from '@react-native-community/geolocation';
+import {StackScreenNavigationProps} from '@navigation';
 
 import {EScreen} from '@enums';
-import ScreenBase from '@components/ScreenBase';
-import {BackHandler} from 'react-native';
+import {ScreenBase, Card} from '@components';
+import {GoMapIcon, SOSIcon} from '@theme/icon';
 
 const HomeScreen = () => {
-  const {setOptions, navigate} =
-    useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
+  const {navigate, setOptions} =
+    useNavigation<StackScreenNavigationProps<EScreen.HOME>>();
 
-  async function getUser() {
-    const user = await getAsyncStorage<FirebaseAuthTypes.UserCredential>(
-      'user',
-    );
-    const user1 = auth().currentUser;
-    console.log(user, user1);
-  }
   useEffect(() => {
-    Geolocation.getCurrentPosition(info => console.log(info));
-
     setOptions({headerShown: false});
-    getUser();
-  }, [navigate, setOptions]);
+  }, [setOptions]);
 
-  useEffect(() => {
-    const backAction = () => {
-      Platform.OS === 'android' ? BackHandler.exitApp() : false;
-      return true;
-    };
+  const _navigationMap = useCallback(() => {
+    navigate(EScreen.MAP);
+  }, [navigate]);
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
+  const _handleSendRescue = useCallback(() => {
+    navigate(EScreen.SEND_DISTRESS_SIGNAL);
+  }, [navigate]);
 
-    return () => backHandler.remove();
-  }, []);
-
-  return <ScreenBase desc="e" onOptions={() => {}} />;
+  return (
+    <ScreenBase
+      title={
+        'To find your pickup\nlocation\nautomatically, turn \non location services'
+      }
+      onOptions={() => {}}>
+      <View style={styles.options}>
+        <Card icon={SOSIcon} title="Send rescue" onPress={_handleSendRescue} />
+        <Card icon={GoMapIcon} title="Go to Map" onPress={_navigationMap} />
+        <Card
+          icon={SOSIcon}
+          title="Emergency rescue"
+          onPress={_navigationMap}
+        />
+      </View>
+    </ScreenBase>
+  );
 };
 
 export default HomeScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  options: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+});

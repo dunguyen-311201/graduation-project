@@ -2089,10 +2089,15 @@
     "@expo/config-plugins" "^5.0.4"
     plist "^3.0.5"
 
-"@react-native-firebase/messaging@^17.4.1":
-  version "17.4.1"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-17.4.1.tgz#11ed73db7eb5b026204a46760e1a1d3a3e8b2499"
-  integrity sha512-Sn4YVD2yOqAZfrY5KMeIFoh2f+JaQX/V/I7dSQX5vZ8RjP9cWVPJlA/CdLdORCe0DhusZMBJJfsJzCteQi8iiw==
+"@react-native-firebase/database@^17.4.2":
+  version "17.4.2"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/database/-/database-17.4.2.tgz#a291c044e77c1b6941d144a1f3b37ed7042ec270"
+  integrity sha512-RNVzdRueRIm6tOLI5EYPlA56MHigva0U60HvZwRV7ObHHZ6wxmQBAFRI7K6vNk/tNg4YnI5FPbLCts3XA1behA==
+
+"@react-native-firebase/messaging@^17.4.2":
+  version "17.4.2"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-17.4.2.tgz#ebc589bd0e77783f4b4330d71287fd150f9dc120"
+  integrity sha512-WgqDFjx4JfCed459jrFtzYcejIoBbQKBKGM5lSjmH/cIGU+5Kp9g0x5QNrXdZL5dNo91bW+jJB/6JMjOLH56fw==
 
 "@react-native/assets@1.0.0":
   version "1.0.0"

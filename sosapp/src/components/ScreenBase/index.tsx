@@ -1,5 +1,5 @@
 import {Image, Pressable, StyleSheet, View} from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import BackIcon from '../Back';
 import {CustomButton, CustomText} from '../common';
 import {MenuIcon} from '@theme/icon';
@@ -30,8 +30,20 @@ const ScreenBase = ({
             <Image source={MenuIcon} />
           </Pressable>
         )}
-        {title && <CustomText text={title} type="text_medium_30" />}
-        {desc && <CustomText text={desc} type="text_medium_24" />}
+        {title && (
+          <CustomText
+            text={title}
+            customStyle={styles.header}
+            type="text_medium_30"
+          />
+        )}
+        {desc && (
+          <CustomText
+            text={desc}
+            customStyle={styles.header}
+            type="text_medium_24"
+          />
+        )}
         {children}
       </View>
       <View>
@@ -43,7 +55,7 @@ const ScreenBase = ({
   );
 };
 
-export default ScreenBase;
+export default memo(ScreenBase);
 
 const styles = StyleSheet.create({
   container: {
@@ -54,10 +66,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingBottom: 62,
   },
-  title: {
+  header: {
     marginTop: 35,
-  },
-  desc: {
-    marginTop: 35,
+    marginBottom: 20,
   },
 });

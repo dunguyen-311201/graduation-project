@@ -5,21 +5,27 @@ import {CustomButton, CustomLinearGradient, CustomText} from '@components';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme/icon';
 import Shadow from '@components/Shadow';
 import {useNavigation} from '@react-navigation/native';
-import {RootScreenNavigationProps} from '@navigation/RootNavigation';
+import {StackScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
+
+import {useAuth} from '../../hooks';
 
 import {isAuthenticated} from '@utils';
 
 function SplashScreen() {
-  const {setOptions, navigate} =
-    useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
+  const {setOptions, navigate, reset} =
+    useNavigation<StackScreenNavigationProps<EScreen.SPLASH>>();
+
+  const {user} = useAuth();
 
   useEffect(() => {
     setOptions({headerShown: false});
+
     if (isAuthenticated()) {
       navigate(EScreen.HOME);
+      reset({index: 0, routes: [{name: EScreen.HOME}]});
     }
-  }, [setOptions, navigate]);
+  }, [setOptions, navigate, user, reset]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

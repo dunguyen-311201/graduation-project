@@ -5,7 +5,7 @@ import auth from '@react-native-firebase/auth';
 
 import ScreenBase from '@components/ScreenBase';
 import {EScreen} from '@enums/EScreen';
-import {RootScreenNavigationProps} from '@navigation/RootNavigation';
+import {StackScreenNavigationProps} from '@navigation';
 import {CustomInput} from '@components';
 
 type Name = {
@@ -14,7 +14,7 @@ type Name = {
 };
 const SetupNameScreen = () => {
   const {setOptions, navigate, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_NAME>>();
+    useNavigation<StackScreenNavigationProps<EScreen.SIGNUP_NAME>>();
 
   const [user, setUser] = useState<Name>({first: '', last: ''});
 
@@ -25,12 +25,10 @@ const SetupNameScreen = () => {
   const {first, last} = user;
 
   const _onNext = useCallback(async () => {
-    console.log(user);
     await auth().currentUser?.updateProfile({displayName: `${first} ${last}`});
-    console.log(auth().currentUser);
 
     navigate(EScreen.CONFIRM_POLICY);
-  }, [user, first, last, navigate]);
+  }, [first, last, navigate]);
 
   const _onChangeText = useCallback((value: string, field: string) => {
     setUser(prev => ({...prev, [field]: value}));

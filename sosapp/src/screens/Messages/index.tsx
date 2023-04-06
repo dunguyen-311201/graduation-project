@@ -3,7 +3,7 @@ import React from 'react';
 
 const MessagesScreen = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text>MessagesScreen</Text>
     </View>
   );
@@ -11,4 +11,6 @@ const MessagesScreen = () => {
 
 export default MessagesScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {},
+});

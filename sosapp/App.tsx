@@ -4,6 +4,7 @@ import React from 'react';
 import 'react-native-gesture-handler';
 
 import {RootNavigation} from '@navigation';
+
 function App() {
   return (
     <SafeAreaView style={styles.container}>
