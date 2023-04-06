@@ -31,7 +31,7 @@ const MapScreen = () => {
       <Marker coordinate={origin} title="I'm here!" />
       <Circle
         center={destination}
-        radius={1000}
+        radius={100}
         fillColor="red"
         strokeColor="blue"
         strokeWidth={2}

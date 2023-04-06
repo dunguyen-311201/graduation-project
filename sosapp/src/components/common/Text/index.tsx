@@ -1,5 +1,6 @@
 import {Text, TextStyle} from 'react-native';
 import React, {memo} from 'react';
+
 import {Styles} from '@utils';
 
 type CustomTextProps = {

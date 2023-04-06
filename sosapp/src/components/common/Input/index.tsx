@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, {forwardRef, memo, useCallback} from 'react';
 import CustomText from '../Text';
-import {TEXT_COLOR} from '@theme/color';
+import {TEXT_COLOR} from '@theme';
 
 type CustomInputProps = {
   title?: string;
@@ -54,6 +54,7 @@ const CustomInput: React.ForwardRefRenderFunction<
   const _onFocus = useCallback(() => {
     onFocus && onFocus(field);
   }, [onFocus, field]);
+
   const _onBlur = useCallback(() => {
     onBlur && onBlur(field);
   }, [onBlur, field]);

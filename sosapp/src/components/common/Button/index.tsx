@@ -6,7 +6,8 @@ import {
   ViewStyle,
 } from 'react-native';
 import React, {memo} from 'react';
-import {EButton} from '../../../enums';
+
+import {EButton} from '@enums';
 import Shadow from '../../Shadow';
 import {Styles as st} from '@utils';
 

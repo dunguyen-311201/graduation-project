@@ -9,7 +9,8 @@ import Geolocation from '@react-native-community/geolocation';
 import {EScreen} from '@enums';
 
 const HomeScreen = () => {
-  const {setOptions} = useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
+  const {setOptions, navigate} =
+    useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
 
   async function getUser() {
     const user = await getAsyncStorage<FirebaseAuthTypes.UserCredential>(
@@ -23,7 +24,7 @@ const HomeScreen = () => {
 
     setOptions({headerShown: false});
     getUser();
-  }, [setOptions]);
+  }, [navigate, setOptions]);
 
   return (
     <View>

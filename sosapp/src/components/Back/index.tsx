@@ -1,5 +1,5 @@
 import {Image, TouchableOpacity} from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import {BackIcon} from '../../theme';
 
 type Iconprops = {
@@ -14,4 +14,4 @@ const Back = ({onPress}: Iconprops) => {
   );
 };
 
-export default Back;
+export default memo(Back);
