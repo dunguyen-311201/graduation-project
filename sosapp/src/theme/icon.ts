@@ -4,6 +4,7 @@ const ArrowRightBlueIcon = require('../assets/images/arrow-right-blue.png');
 const BackIcon = require('../assets/images/back.png');
 const DropDownIcon = require('../assets/images/drop-down.png');
 const ProfileIcon = require('../assets/images/vs_profile.png');
+const MenuIcon = require('../assets/images/menu.png');
 
 export {
   CheckShieldIcon,
@@ -12,4 +13,5 @@ export {
   BackIcon,
   ArrowRightBlueIcon,
   ProfileIcon,
+  MenuIcon,
 };

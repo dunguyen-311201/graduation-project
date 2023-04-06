@@ -9,12 +9,13 @@ import ScreenBase from '@components/ScreenBase';
 import {ArrowRightBlueIcon} from '@theme/icon';
 import PhoneInput, {INation} from './components/PhoneInput';
 import {EScreen} from '@enums/EScreen';
+import {PHONES} from '@constants/PhoneNation';
 
 const SignupByPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
-  const [nation, setNation] = useState<INation>();
+  const [nation, setNation] = useState<INation>({...PHONES[0], phone: ''});
 
   const [confirm, setConfirm] =
     useState<FirebaseAuthTypes.ConfirmationResult>();
@@ -40,10 +41,13 @@ const SignupByPhoneNumberScreen = () => {
   }, [setOptions]);
 
   const _navigateNext = useCallback(async () => {
-    const confirmation = await auth().signInWithPhoneNumber('+84917874915');
+    console.log(`${nation.code}${nation.phone}`);
+    const confirmation = await auth().signInWithPhoneNumber(
+      `${nation.code}${nation.phone}`,
+    );
     setConfirm(confirmation);
     navigate(EScreen.CONFIRM_PHONE_NUMBER, {confirmation});
-  }, [navigate]);
+  }, [nation.code, nation.phone, navigate]);
 
   const _navigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);

@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 import React, {useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation/RootNavigation';
@@ -7,6 +7,8 @@ import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import Geolocation from '@react-native-community/geolocation';
 
 import {EScreen} from '@enums';
+import ScreenBase from '@components/ScreenBase';
+import {BackHandler} from 'react-native';
 
 const HomeScreen = () => {
   const {setOptions, navigate} =
@@ -26,11 +28,21 @@ const HomeScreen = () => {
     getUser();
   }, [navigate, setOptions]);
 
-  return (
-    <View>
-      <Text>HomeScreen</Text>
-    </View>
-  );
+  useEffect(() => {
+    const backAction = () => {
+      Platform.OS === 'android' ? BackHandler.exitApp() : false;
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  return <ScreenBase desc="e" onOptions={() => {}} />;
 };
 
 export default HomeScreen;

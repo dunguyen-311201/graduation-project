@@ -8,7 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation/RootNavigation';
 import {EScreen} from '@enums';
 
-import {refeshLogin} from '@utils';
+import {isAuthenticated} from '@utils';
 
 function SplashScreen() {
   const {setOptions, navigate} =
@@ -16,7 +16,7 @@ function SplashScreen() {
 
   useEffect(() => {
     setOptions({headerShown: false});
-    if (refeshLogin()) {
+    if (isAuthenticated()) {
       navigate(EScreen.HOME);
     }
   }, [setOptions, navigate]);

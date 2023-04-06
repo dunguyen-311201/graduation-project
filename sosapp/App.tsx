@@ -1,6 +1,7 @@
 // import StorybookUIRoot from './.ondevice/Storybook';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import React from 'react';
+import 'react-native-gesture-handler';
 
 import {RootNavigation} from '@navigation';
 function App() {

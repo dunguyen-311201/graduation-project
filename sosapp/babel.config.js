@@ -19,5 +19,11 @@ module.exports = {
       },
     ],
     ['babel-plugin-react-docgen-typescript', {exclude: 'node_modules'}],
+    [
+      'react-native-reanimated/plugin',
+      {
+        relativeSourceLocation: true,
+      },
+    ],
   ],
 };
