@@ -7,6 +7,8 @@ const ProfileIcon = require('../assets/images/vs_profile.png');
 const MenuIcon = require('../assets/images/menu.png');
 const SOSIcon = require('../assets/images/sos.png');
 const GoMapIcon = require('../assets/images/go-map.png');
+const FacebookIcon = require('../assets/images/logos_facebook.png');
+const GoogleIcon = require('../assets/images/flat-color-icons_google.png');
 
 export {
   CheckShieldIcon,
@@ -18,4 +20,6 @@ export {
   MenuIcon,
   SOSIcon,
   GoMapIcon,
+  FacebookIcon,
+  GoogleIcon,
 };

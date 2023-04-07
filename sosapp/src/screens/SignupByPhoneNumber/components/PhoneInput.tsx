@@ -1,5 +1,5 @@
 import {FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {memo, useCallback, useState} from 'react';
 import {CustomInput} from '@components/common';
 import {PHONES} from '../../../constants';
 import {Nation} from '@types';
@@ -11,13 +11,12 @@ import {Styles as st} from '@utils';
 
 export type INation = Nation & {phone: string};
 
-const PhoneInput = ({
-  data,
-  onChangePhone,
-}: {
+type PhoneInputProps = {
   data: INation;
   onChangePhone: (nation: INation) => void;
-}) => {
+};
+
+const PhoneInput = ({data, onChangePhone}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
 
   const _onChangeText = useCallback(
@@ -29,10 +28,13 @@ const PhoneInput = ({
 
   const handleSelectNation = useCallback(
     (_nation: Nation) => {
-      onChangePhone({...data, code: _nation.code});
+      const na = PHONES.find(item => item.code === _nation.code);
+
+      onChangePhone({...data, ...na});
+
       setIsvisible(false);
     },
-    [data, onChangePhone],
+    [onChangePhone, data],
   );
 
   const _renderItem = useCallback(
@@ -77,7 +79,7 @@ const PhoneInput = ({
   );
 };
 
-export default PhoneInput;
+export default memo(PhoneInput);
 
 const styles = StyleSheet.create({
   phoneinput: {

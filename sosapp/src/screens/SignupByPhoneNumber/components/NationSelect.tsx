@@ -1,17 +1,16 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useCallback} from 'react';
+import React, {memo, useCallback} from 'react';
 import {Pressable} from 'react-native';
 import {Image} from 'react-native';
 import {CustomText} from '@components/common';
 import {Nation} from '@types';
 
-const NationSelect = ({
-  nation,
-  onSelect,
-}: {
+type NationSelectProps = {
   nation: Nation;
   onSelect: (nation: Nation) => void;
-}) => {
+};
+
+const NationSelect = ({nation, onSelect}: NationSelectProps) => {
   const onSelectNation = useCallback(() => {
     onSelect(nation);
   }, [onSelect, nation]);
@@ -27,7 +26,7 @@ const NationSelect = ({
   );
 };
 
-export default NationSelect;
+export default memo(NationSelect);
 
 const styles = StyleSheet.create({
   nationOption: {

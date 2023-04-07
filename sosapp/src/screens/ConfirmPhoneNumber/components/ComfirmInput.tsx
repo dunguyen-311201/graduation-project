@@ -31,6 +31,10 @@ const ComfirmInput = ({onChangeText}: ComfirmInputProps) => {
     onChangeText(Object.values(code).join(''));
   }, [code, onChangeText]);
 
+  useEffect(() => {
+    refs.current[0].focus();
+  }, []);
+
   const _onChangeText = useCallback((_value: string, field: string) => {
     try {
       const f = parseInt(field.replace('F', ''), 10);

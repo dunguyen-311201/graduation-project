@@ -1,15 +1,14 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {
   DrawerContentComponentProps,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import SettingsScreen from '../screens/Settings';
-import MessagesScreen from '../screens/Messages';
+import {StyleSheet} from 'react-native';
+import {SettingsScreen, MessagesScreen} from '@screens';
 
 import DrawerContent from './DrawerContent';
 import StackNavigation from './StackNavigation';
-import {EScreen} from '@enums/EScreen';
-import {StyleSheet} from 'react-native';
+import {EScreen} from '@enums';
 
 const Drawer = createDrawerNavigator();
 

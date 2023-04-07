@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -8,9 +8,14 @@ import {Image, StyleSheet, View} from 'react-native';
 import {useAuth} from '@hooks/useAuth';
 import {ProfileIcon} from '@theme';
 import {CustomButton, CustomText} from '@components/common';
+import {StackScreenNavigationProps} from '.';
+import {EScreen} from '@enums/EScreen';
+import {useNavigation} from '@react-navigation/native';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const {user, logout} = useAuth();
+
+  const {navigate} = useNavigation<StackScreenNavigationProps<EScreen.HOME>>();
 
   let Icon = ProfileIcon;
 
@@ -18,12 +23,13 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
     Icon = {uri: user.photoURL};
   }
 
-  const _handleSignout = useCallback(() => {
-    logout();
-  }, [logout]);
+  const _handleSignout = useCallback(async () => {
+    await logout();
+    navigate(EScreen.SPLASH);
+  }, [logout, navigate]);
 
   if (user === null) {
-    return;
+    return null;
   }
 
   return (
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   bottom: {
-    marginLeft: 20,
+    marginHorizontal: 20,
     marginBottom: 20,
   },
 });

@@ -101,6 +101,11 @@ export const Styles = {
     ...BaseStyles.text_default,
     ...BaseStyles.text_small_5_14,
   },
+  text_small_light_blue_5_14: {
+    ...BaseStyles.text_default,
+    ...BaseStyles.text_small_5_14,
+    ...ColorStyles.light_blue,
+  },
   text_medium_24: {
     ...BaseStyles.text_default,
     ...BaseStyles.text_medium_24,

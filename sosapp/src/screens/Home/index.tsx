@@ -5,7 +5,7 @@ import {StackScreenNavigationProps} from '@navigation';
 
 import {EScreen} from '@enums';
 import {ScreenBase, Card} from '@components';
-import {GoMapIcon, SOSIcon} from '@theme/icon';
+import {GoMapIcon, SOSIcon} from '@theme';
 
 const HomeScreen = () => {
   const {navigate, setOptions} =
@@ -27,8 +27,7 @@ const HomeScreen = () => {
     <ScreenBase
       title={
         'To find your pickup\nlocation\nautomatically, turn \non location services'
-      }
-      onOptions={() => {}}>
+      }>
       <View style={styles.options}>
         <Card icon={SOSIcon} title="Send rescue" onPress={_handleSendRescue} />
         <Card icon={GoMapIcon} title="Go to Map" onPress={_navigationMap} />

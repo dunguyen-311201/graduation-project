@@ -36,7 +36,11 @@ const RootNavigation = () => {
   return (
     <Stack.Navigator initialRouteName={EScreen.SPLASH}>
       <Stack.Screen name={EScreen.HOME} component={HomeScreen} />
-      <Stack.Screen name={EScreen.SPLASH} component={SplashScreen} />
+      <Stack.Screen
+        name={EScreen.SPLASH}
+        component={SplashScreen}
+        options={{headerShown: false}}
+      />
       <Stack.Screen
         name={EScreen.SIGNUP_BY_PHONE_NUMBER}
         component={SignupByPhoneNumberScreen}

@@ -1,27 +1,43 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useLocation} from '../../hooks';
 import {firebase} from '@react-native-firebase/database';
+import {Button} from 'react-native';
 
 const SendDistreeSignal = () => {
   const {location} = useLocation(state => state);
 
   useEffect(() => {
-    async function sendSignal() {
-      const a = firebase
-        .app()
-        .database(
-          'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
-        )
-        .ref('/signals')
-        .push({location});
-      console.log(a);
-    }
-    // sendSignal();
+    const ref = firebase
+      .app()
+      .database(
+        'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
+      )
+      .ref('/signals');
+
+    ref.on('value', snapshot => {
+      console.log(snapshot.val());
+    });
+    return () => {
+      ref.off('value');
+    };
+  }, []);
+
+  const sendSignal = useCallback(async () => {
+    const a = firebase
+      .app()
+      .database(
+        'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
+      )
+      .ref('/signals')
+      .push({location});
+    console.log(a);
   }, [location]);
+
   return (
     <View>
       <Text>SEND_DISTRESS_SIGNAL</Text>
+      <Button title="Send Location" onPress={sendSignal} />
     </View>
   );
 };

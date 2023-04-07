@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {CustomButton, CustomLinearGradient, CustomText} from '@components';
@@ -8,47 +8,74 @@ import {useNavigation} from '@react-navigation/native';
 import {StackScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
 
-import {useAuth} from '../../hooks';
-
-import {isAuthenticated} from '@utils';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
+import {useAuth} from '@hooks/useAuth';
 
 function SplashScreen() {
-  const {setOptions, navigate, reset} =
+  const {navigate, reset} =
     useNavigation<StackScreenNavigationProps<EScreen.SPLASH>>();
 
-  const {user} = useAuth();
+  const [isNew, setIsNew] = useState(false);
+
+  const {isAuthenticated} = useAuth();
 
   useEffect(() => {
-    setOptions({headerShown: false});
+    // authenticated => navigate to Home Screen
 
-    if (isAuthenticated()) {
+    if (isAuthenticated) {
+      reset({
+        index: 0,
+        routes: [
+          {
+            name: EScreen.HOME,
+          },
+        ],
+      });
       navigate(EScreen.HOME);
-      reset({index: 0, routes: [{name: EScreen.HOME}]});
+    } else {
+      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
     }
-  }, [setOptions, navigate, user, reset]);
+  }, [isAuthenticated, navigate, reset]);
+
+  useEffect(() => {
+    async function setup() {
+      const isNewInstall = await getAsyncStorage('new');
+      if (isNewInstall === null) {
+        await setAsyncStorage('new', 1);
+        setIsNew(true);
+      } else {
+        setIsNew(false);
+      }
+    }
+    setup();
+  }, []);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
   }, [navigate]);
 
   return (
-    <CustomLinearGradient customStyle={styles['linearGradient-container']}>
-      <SafeAreaView style={styles.container}>
+    <CustomLinearGradient customStyle={styles.flex}>
+      <SafeAreaView style={[styles.container, styles.flex]}>
         <View style={styles.top}>
           <Shadow customStyle={styles['box-logo']}>
             <CustomText text="SOS" type="text_large_white" />
           </Shadow>
 
-          <CustomButton type="outline" customStyle={styles.topButtom}>
-            <CustomText text="Move with safety" type="text_regular_white" />
-            <Image source={CheckShieldIcon} />
-          </CustomButton>
+          {isNew && (
+            <CustomButton type="outline" customStyle={styles.topButtom}>
+              <CustomText text="Move with safety" type="text_regular_white" />
+              <Image source={CheckShieldIcon} />
+            </CustomButton>
+          )}
         </View>
 
-        <CustomButton type="primary" onPress={_navigateNext}>
-          <CustomText text="Get Started" type="text_large_7_white" />
-          <Image source={ArrowRightIcon} style={styles.img} />
-        </CustomButton>
+        {isNew && (
+          <CustomButton type="primary" onPress={_navigateNext}>
+            <CustomText text="Get Started" type="text_large_7_white" />
+            <Image source={ArrowRightIcon} style={styles.img} />
+          </CustomButton>
+        )}
       </SafeAreaView>
     </CustomLinearGradient>
   );
@@ -57,11 +84,10 @@ function SplashScreen() {
 export default SplashScreen;
 
 const styles = StyleSheet.create({
-  ['linearGradient-container']: {
+  flex: {
     flex: 1,
   },
   container: {
-    flex: 1,
     paddingHorizontal: 32,
     paddingTop: 282,
     paddingBottom: 62,

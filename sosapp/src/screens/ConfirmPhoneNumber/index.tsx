@@ -1,21 +1,17 @@
-import {StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {
-  RootScreenNavigationProps,
-  RootStackParamList,
-} from '@navigation/RootNavigation';
-import ScreenBase from '@components/ScreenBase';
-import ComfirmInput from './components/ComfirmInput';
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {setAsyncStorage} from '@utils/asyncStorage';
-import {EScreen} from '@enums/EScreen';
 
-type ConfirmRoute = RouteProp<RootStackParamList, EScreen.CONFIRM_PHONE_NUMBER>;
+import {ScreenBase} from '@components';
+import ComfirmInput from './components/ComfirmInput';
+import {EScreen} from '@enums';
+import {StackParamList} from '@navigation/StackNavigation';
+import {StackScreenNavigationProps} from '@navigation';
+
+type ConfirmRoute = RouteProp<StackParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
 const ConfirmPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
+    useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
   const [code, setCode] = useState('');
 
   const {confirmation} = useRoute<ConfirmRoute>().params;
@@ -29,11 +25,20 @@ const ConfirmPhoneNumberScreen = () => {
   }, []);
 
   const _navigateNext = useCallback(async () => {
-    const user: FirebaseAuthTypes.UserCredential | null =
-      await confirmation.confirm(code);
-    await setAsyncStorage('user', user);
-    navigate(EScreen.SIGNUP_NAME);
-  }, [code, confirmation, navigate]);
+    const user = await confirmation.confirm(code);
+    if (user) {
+      const {additionalUserInfo} = user;
+      if (additionalUserInfo?.isNewUser) {
+        navigate(EScreen.SIGNUP_NAME);
+        return;
+      }
+      navigate(EScreen.HOME);
+    }
+
+    /***
+     * validate
+     * */
+  }, [confirmation, code, navigate]);
 
   return (
     <ScreenBase
@@ -46,5 +51,3 @@ const ConfirmPhoneNumberScreen = () => {
 };
 
 export default ConfirmPhoneNumberScreen;
-
-const styles = StyleSheet.create({});

@@ -1,15 +1,15 @@
 import {Image, StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {RootScreenNavigationProps} from '@navigation/RootNavigation';
-import {EScreen} from '@enums/EScreen';
-import ScreenBase from '@components/ScreenBase';
-import {ProfileIcon} from '@theme/icon';
-import {CustomText} from '@components/common';
+
+import {EScreen} from '@enums';
+import {ProfileIcon} from '@theme';
+import {CustomText, ScreenBase} from '@components';
+import {StackScreenNavigationProps} from '@navigation';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
+    useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
 
   useEffect(() => {
     setOptions({headerShown: false});
@@ -30,17 +30,17 @@ const ConfirmPolicyScreen = () => {
           text={
             "By tapping the arrow below, you agree to SOS's Terms of Use and acknowledge that you have read the Privacy Policy"
           }
-          type="regular"
+          type="text_small_5_16"
         />
 
         <CustomText
           text={
             'Check the box to indicate that you are atleast 18 years of age, agree to the'
           }
-          type="regular">
-          <CustomText text={' Terms & Conditions '} type="regular" />
+          type="text_small_5_14">
+          <CustomText text={' Terms & Conditions '} type="text_small_5_14" />
           {'and acknowledge the '}
-          <CustomText text={' Privacy Policy.'} type="regular" />
+          <CustomText text={' Privacy Policy.'} type="text_small_5_14" />
         </CustomText>
       </View>
     </ScreenBase>

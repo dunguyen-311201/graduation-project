@@ -7,6 +7,7 @@ import ScreenBase from '@components/ScreenBase';
 import {EScreen} from '@enums/EScreen';
 import {StackScreenNavigationProps} from '@navigation';
 import {CustomInput} from '@components';
+import {Styles as st} from '@utils';
 
 type Name = {
   first: string;
@@ -40,8 +41,8 @@ const SetupNameScreen = () => {
         <CustomInput
           field="first"
           value={first}
-          titleStyle={styles.titleInput}
-          valueStyle={styles.textInput}
+          titleStyle={st.text_medium_24}
+          valueStyle={st.text_medium_gray_24}
           onChangeText={_onChangeText}
           title="Firt"
         />
@@ -49,8 +50,8 @@ const SetupNameScreen = () => {
         <CustomInput
           field="last"
           value={last}
-          titleStyle={styles.titleInput}
-          valueStyle={styles.textInput}
+          titleStyle={st.text_medium_24}
+          valueStyle={st.text_medium_gray_24}
           onChangeText={_onChangeText}
           title="Last"
         />
@@ -66,16 +67,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  titleInput: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
+
   separator: {
     width: 30,
-  },
-  textInput: {
-    color: '#979797',
-    fontWeight: '500',
-    fontSize: 24,
   },
 });
