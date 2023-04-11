@@ -7,13 +7,13 @@ import {Nation} from '@types';
 
 type NationSelectProps = {
   nation: Nation;
-  onSelect: (nation: Nation) => void;
+  onSelect: (code: string) => void;
 };
 
 const NationSelect = ({nation, onSelect}: NationSelectProps) => {
   const onSelectNation = useCallback(() => {
-    onSelect(nation);
-  }, [onSelect, nation]);
+    onSelect(nation.code);
+  }, [onSelect, nation.code]);
 
   return (
     <Pressable style={styles.nationOption} onPress={onSelectNation}>

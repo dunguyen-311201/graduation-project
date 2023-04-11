@@ -1,13 +1,17 @@
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
 import {StackScreenNavigationProps} from '@navigation';
+import {Context} from '@context';
+import {firebase} from '@react-native-firebase/firestore';
 
 const ConfirmPolicyScreen = () => {
+  const {userProfile, setUserProfile} = useContext(Context);
+
   const {setOptions, navigate, goBack} =
     useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
 
@@ -15,9 +19,24 @@ const ConfirmPolicyScreen = () => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  const _onNext = useCallback(() => {
+  const _onNext = useCallback(async () => {
+    if (userProfile) {
+      setUserProfile({role: {user: true}, ...userProfile});
+
+      firebase
+        .firestore()
+        .collection('users')
+        .add({
+          name: 'Ada Lovelace',
+          age: 30,
+        })
+        .then(() => {
+          console.log('User added!');
+        });
+    }
+
     navigate(EScreen.HOME);
-  }, [navigate]);
+  }, [navigate, setUserProfile, userProfile]);
 
   return (
     <ScreenBase onBack={goBack} onNext={_onNext}>

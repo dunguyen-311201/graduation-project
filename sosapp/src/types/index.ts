@@ -1,3 +1,3 @@
-import {Nation} from './Nation';
-
-export {Nation};
+export * from './Nation';
+export * from './Location';
+export * from './User';

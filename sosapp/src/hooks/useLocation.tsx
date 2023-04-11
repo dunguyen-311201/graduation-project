@@ -1,12 +1,6 @@
+import {Location} from '@types';
 import {create} from 'zustand';
 import {devtools, persist} from 'zustand/middleware';
-
-export type Location = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
 
 export type useLocationProps = {
   location: Location;
@@ -18,13 +12,13 @@ export const useLocation = create<useLocationProps>()(
     persist(
       set => ({
         location: {
-          latitude: 16.0322432,
-          longitude: 16.0322432,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
+          latitude: 0,
+          longitude: 0,
         },
         setLocation: (location: Location) => {
-          set({location});
+          set({
+            location,
+          });
         },
       }),
       {

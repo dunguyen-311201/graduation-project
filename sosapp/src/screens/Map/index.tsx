@@ -12,8 +12,9 @@ import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete'
 import MapViewDirections from 'react-native-maps-directions';
 import {BLACK_COLOR} from '@theme/color';
 import {CustomText} from '@components/common';
+import CustomMarker from './components/CustomMarker';
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyCxMk5DpzvJT7eIumILFD_bG65iJ1vOuxI';
+const GOOGLE_MAPS_APIKEY = 'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
 
 const origin = {latitude: 37.3318456, longitude: -122.0296002};
 const destination = {latitude: 37.771707, longitude: -122.4053769};
@@ -30,8 +31,6 @@ const MapScreen = () => {
       setLocation({
         latitude,
         longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
       });
     });
 
@@ -65,15 +64,22 @@ const MapScreen = () => {
           />
         </View>
       </View>
-      <MapView provider={PROVIDER_GOOGLE} style={styles.map} region={location}>
-        <MapViewDirections
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        region={{...location, latitudeDelta: 0.005, longitudeDelta: 0.005}}>
+        {/* <MapViewDirections
           origin={origin}
           destination={destination}
           apikey={GOOGLE_MAPS_APIKEY}
           strokeWidth={30}
           strokeColor="hotpink"
+        /> */}
+        <CustomMarker
+          coordinate={location}
+          title="I'm here!"
+          onChangeLocation={setLocation}
         />
-        <Marker coordinate={location} title="I'm here!" />
         <Circle
           center={origin} //{location}
           radius={10}

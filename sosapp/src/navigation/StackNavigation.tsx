@@ -24,7 +24,7 @@ export type StackParamList = {
   [EScreen.SIGNUP_NAME]: undefined;
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
-    confirmation: FirebaseAuthTypes.ConfirmationResult;
+    confirm: (phone: string) => Promise<void>;
   };
   [EScreen.MAP]: undefined;
   [EScreen.SEND_DISTRESS_SIGNAL]: undefined;

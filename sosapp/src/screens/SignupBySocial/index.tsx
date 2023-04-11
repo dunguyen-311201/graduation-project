@@ -6,13 +6,10 @@ import {StackScreenNavigationProps} from '@navigation';
 import {ScreenBase, Social} from '@components';
 import {EScreen} from '@enums/EScreen';
 import {FacebookIcon, GoogleIcon} from '@theme';
-import {useAuth} from '@hooks/useAuth';
 
 const SignupBySocialScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<StackScreenNavigationProps<EScreen.SIGNUP_BY_SOCIAL>>();
-
-  const {signupByGoogle, signupByFacebook} = useAuth();
 
   useEffect(() => {
     setOptions({headerShown: false});
@@ -22,13 +19,9 @@ const SignupBySocialScreen = () => {
     navigate(EScreen.HOME);
   }, [navigate]);
 
-  const handleSignupFacebook = useCallback(async () => {
-    await signupByFacebook();
-  }, [signupByFacebook]);
+  const handleSignupFacebook = useCallback(async () => {}, []);
 
-  const handleSignupGoogle = useCallback(async () => {
-    await signupByGoogle();
-  }, [signupByGoogle]);
+  const handleSignupGoogle = useCallback(async () => {}, []);
 
   return (
     <ScreenBase

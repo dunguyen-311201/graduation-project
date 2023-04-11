@@ -1,46 +1,41 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
 
 import ScreenBase from '@components/ScreenBase';
 import {EScreen} from '@enums/EScreen';
 import {StackScreenNavigationProps} from '@navigation';
 import {CustomInput} from '@components';
 import {Styles as st} from '@utils';
+import {Context} from '@context';
 
-type Name = {
-  first: string;
-  last: string;
-};
 const SetupNameScreen = () => {
+  const {userProfile, setUserProfile} = useContext(Context);
+
   const {setOptions, navigate, goBack} =
     useNavigation<StackScreenNavigationProps<EScreen.SIGNUP_NAME>>();
-
-  const [user, setUser] = useState<Name>({first: '', last: ''});
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  const {first, last} = user;
-
   const _onNext = useCallback(async () => {
-    await auth().currentUser?.updateProfile({displayName: `${first} ${last}`});
-
     navigate(EScreen.CONFIRM_POLICY);
-  }, [first, last, navigate]);
+  }, [navigate]);
 
-  const _onChangeText = useCallback((value: string, field: string) => {
-    setUser(prev => ({...prev, [field]: value}));
-  }, []);
+  const _onChangeText = useCallback(
+    (value: string, field: string) => {
+      setUserProfile({[field]: value, ...userProfile});
+    },
+    [setUserProfile, userProfile],
+  );
 
   return (
     <ScreenBase desc="What's your name?" onBack={goBack} onNext={_onNext}>
       <View style={styles.group}>
         <CustomInput
-          field="first"
-          value={first}
+          field="firstName"
+          value={userProfile?.firstName}
           titleStyle={st.text_medium_24}
           valueStyle={st.text_medium_gray_24}
           onChangeText={_onChangeText}
@@ -48,8 +43,8 @@ const SetupNameScreen = () => {
         />
         <View style={styles.separator} />
         <CustomInput
-          field="last"
-          value={last}
+          field="lastName"
+          value={userProfile?.lastName}
           titleStyle={st.text_medium_24}
           valueStyle={st.text_medium_gray_24}
           onChangeText={_onChangeText}

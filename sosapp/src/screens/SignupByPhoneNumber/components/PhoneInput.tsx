@@ -9,32 +9,34 @@ import NationSelect from './NationSelect';
 
 import {Styles as st} from '@utils';
 
-export type INation = Nation & {phone: string};
-
 type PhoneInputProps = {
-  data: INation;
-  onChangePhone: (nation: INation) => void;
+  nation: Nation;
+  phone?: string;
+  onChangePhone: (phone: string) => void;
+  onChangeNation: (code: string) => void;
 };
 
-const PhoneInput = ({data, onChangePhone}: PhoneInputProps) => {
+const PhoneInput = ({
+  nation,
+  phone,
+  onChangePhone,
+  onChangeNation,
+}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
 
-  const _onChangeText = useCallback(
+  const handleChangeText = useCallback(
     (value: string) => {
-      onChangePhone({...data, phone: value});
+      onChangePhone(value);
     },
-    [onChangePhone, data],
+    [onChangePhone],
   );
 
   const handleSelectNation = useCallback(
-    (_nation: Nation) => {
-      const na = PHONES.find(item => item.code === _nation.code);
-
-      onChangePhone({...data, ...na});
-
+    (code: string) => {
+      onChangeNation(code);
       setIsvisible(false);
     },
-    [onChangePhone, data],
+    [onChangeNation],
   );
 
   const _renderItem = useCallback(
@@ -62,16 +64,16 @@ const PhoneInput = ({data, onChangePhone}: PhoneInputProps) => {
         />
       )}
       <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
-        <Image source={{uri: data?.url}} style={styles.flag} />
+        <Image source={{uri: nation?.url}} style={styles.flag} />
         <Image source={DropDownIcon} style={styles.dropDown} />
       </Pressable>
       <CustomInput
-        value={data?.phone}
-        onChangeText={_onChangeText}
+        value={phone}
+        onChangeText={handleChangeText}
         field="phone"
         inputMode="numeric"
         valueStyle={st.text_medium_gray_24}
-        title={data?.code}
+        title={nation?.code}
         maxLength={9}
         titleStyle={st.text_medium_24}
       />

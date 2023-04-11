@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {ScreenBase} from '@components';
@@ -6,15 +6,18 @@ import ComfirmInput from './components/ComfirmInput';
 import {EScreen} from '@enums';
 import {StackParamList} from '@navigation/StackNavigation';
 import {StackScreenNavigationProps} from '@navigation';
+import {Context} from '@context';
 
 type ConfirmRoute = RouteProp<StackParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
 const ConfirmPhoneNumberScreen = () => {
+  const {userProfile} = useContext(Context);
+
   const {setOptions, navigate, goBack} =
     useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
   const [code, setCode] = useState('');
 
-  const {confirmation} = useRoute<ConfirmRoute>().params;
+  const {confirm} = useRoute<ConfirmRoute>().params;
 
   useEffect(() => {
     setOptions({headerShown: false});
@@ -25,24 +28,21 @@ const ConfirmPhoneNumberScreen = () => {
   }, []);
 
   const _navigateNext = useCallback(async () => {
-    const user = await confirmation.confirm(code);
-    if (user) {
-      const {additionalUserInfo} = user;
-      if (additionalUserInfo?.isNewUser) {
-        navigate(EScreen.SIGNUP_NAME);
-        return;
-      }
-      navigate(EScreen.HOME);
-    }
+    try {
+      await confirm(code);
 
-    /***
-     * validate
-     * */
-  }, [confirmation, code, navigate]);
+      navigate(EScreen.SIGNUP_NAME);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [code, confirm, navigate]);
 
   return (
     <ScreenBase
-      desc="Enter the 6-digit code sent to you at"
+      desc={
+        'Enter the 6-digit code sent to you at\n' +
+        userProfile?.user.phoneNumber
+      }
       onBack={goBack}
       onNext={_navigateNext}>
       <ComfirmInput onChangeText={_onChangeText} />

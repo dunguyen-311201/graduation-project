@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {CustomButton, CustomLinearGradient, CustomText} from '@components';
@@ -7,21 +7,15 @@ import Shadow from '@components/Shadow';
 import {useNavigation} from '@react-navigation/native';
 import {StackScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
-
-import {getAsyncStorage, setAsyncStorage} from '@utils';
-import {useAuth} from '@hooks/useAuth';
+import {Context} from '@context';
 
 function SplashScreen() {
+  const {isAuthenticated} = useContext(Context);
+
   const {navigate, reset} =
     useNavigation<StackScreenNavigationProps<EScreen.SPLASH>>();
 
-  const [isNew, setIsNew] = useState(false);
-
-  const {isAuthenticated} = useAuth();
-
   useEffect(() => {
-    // authenticated => navigate to Home Screen
-
     if (isAuthenticated) {
       reset({
         index: 0,
@@ -37,18 +31,7 @@ function SplashScreen() {
     }
   }, [isAuthenticated, navigate, reset]);
 
-  useEffect(() => {
-    async function setup() {
-      const isNewInstall = await getAsyncStorage('new');
-      if (isNewInstall === null) {
-        await setAsyncStorage('new', 1);
-        setIsNew(true);
-      } else {
-        setIsNew(false);
-      }
-    }
-    setup();
-  }, []);
+  const isNew = true;
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

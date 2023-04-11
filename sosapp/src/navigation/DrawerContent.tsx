@@ -1,36 +1,35 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useContext, useMemo} from 'react';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {Image, StyleSheet, View} from 'react-native';
-import {useAuth} from '@hooks/useAuth';
 import {ProfileIcon} from '@theme';
 import {CustomButton, CustomText} from '@components/common';
 import {StackScreenNavigationProps} from '.';
 import {EScreen} from '@enums/EScreen';
 import {useNavigation} from '@react-navigation/native';
 
-const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {user, logout} = useAuth();
+import auth from '@react-native-firebase/auth';
+import {Context} from '@context';
 
+const DrawerContent = (props: DrawerContentComponentProps) => {
   const {navigate} = useNavigation<StackScreenNavigationProps<EScreen.HOME>>();
 
-  let Icon = ProfileIcon;
+  const {userProfile} = useContext(Context);
 
-  if (user !== null) {
-    Icon = {uri: user.photoURL};
-  }
+  const Icon = useMemo(() => {
+    if (userProfile.user === null) {
+      return ProfileIcon;
+    }
+    return userProfile.user.photoURL;
+  }, [userProfile]);
 
   const _handleSignout = useCallback(async () => {
-    await logout();
+    await auth().signOut();
     navigate(EScreen.SPLASH);
-  }, [logout, navigate]);
-
-  if (user === null) {
-    return null;
-  }
+  }, [navigate]);
 
   return (
     <View style={styles.container}>
@@ -41,9 +40,9 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
           <View style={styles.info}>
             <Image source={Icon} style={styles.avatar} />
             <CustomText
-              {...(user.displayName !== null
-                ? {text: user.displayName}
-                : {text: ''})}
+              text={`${userProfile?.firstName || ''} ${
+                userProfile?.lastName || ''
+              }`}
               customStyle={styles.name}
               type="text_medium_light_blue_18"
             />
