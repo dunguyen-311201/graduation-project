@@ -1,7 +1,7 @@
 import {StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {StackScreenNavigationProps} from '@navigation';
+import {RootScreenNavigationProps} from '@navigation';
 
 import {EScreen} from '@enums';
 import {ScreenBase, Card} from '@components';
@@ -9,7 +9,7 @@ import {GoMapIcon, SOSIcon} from '@theme';
 
 const HomeScreen = () => {
   const {navigate, setOptions} =
-    useNavigation<StackScreenNavigationProps<EScreen.HOME>>();
+    useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
 
   useEffect(() => {
     setOptions({headerShown: false});

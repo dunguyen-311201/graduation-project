@@ -5,7 +5,7 @@ import MapView, {Circle, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 
 import Geolocation from '@react-native-community/geolocation';
 import {useNavigation} from '@react-navigation/native';
-import {StackScreenNavigationProps} from '@navigation';
+import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums/EScreen';
 import {useLocation} from '../../hooks';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
@@ -14,14 +14,14 @@ import {BLACK_COLOR} from '@theme/color';
 import {CustomText} from '@components/common';
 import CustomMarker from './components/CustomMarker';
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
+const GOOGLE_MAPS_APIKEY = 'AIzaSyB1KoK7KQe0YzwScTNjC71HRS17my056bk'; //'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
 
 const origin = {latitude: 37.3318456, longitude: -122.0296002};
 const destination = {latitude: 37.771707, longitude: -122.4053769};
 
 const MapScreen = () => {
   const {setOptions, navigate} =
-    useNavigation<StackScreenNavigationProps<EScreen.MAP>>();
+    useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
 
   const {location, setLocation} = useLocation(state => state);
 

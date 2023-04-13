@@ -7,8 +7,8 @@ import {StyleSheet} from 'react-native';
 import {SettingsScreen, MessagesScreen} from '@screens';
 
 import DrawerContent from './DrawerContent';
-import StackNavigation from './StackNavigation';
 import {EScreen} from '@enums';
+import StackNavigation from './StackNavigation';
 
 const Drawer = createDrawerNavigator();
 

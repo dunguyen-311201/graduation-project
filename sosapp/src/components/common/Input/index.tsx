@@ -12,16 +12,16 @@ import {TEXT_COLOR} from '@theme';
 
 type CustomInputProps = {
   title?: string;
-  field: string;
+  field?: string;
   value?: string;
   inputMode?: InputModeOptions;
   errorMessage?: string;
   titleStyle?: TextStyle;
   errorMessageStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
-  onChangeText: (value: string, field: string) => void;
-  onBlur?: (field: string) => void;
-  onFocus?: (field: string) => void;
+  onChangeText: (value: string, field?: string) => void;
+  onBlur?: (field?: string) => void;
+  onFocus?: (field?: string) => void;
   marginLeft?: number;
   maxLength?: number;
 };
@@ -85,9 +85,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: TEXT_COLOR,
     borderBottomWidth: 1,
-    flex: 2,
   },
   inputControl: {
-    flex: 1,
+    minWidth: 200,
   },
 });

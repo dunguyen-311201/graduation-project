@@ -5,38 +5,31 @@ import {useNavigation} from '@react-navigation/native';
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
-import {StackScreenNavigationProps} from '@navigation';
-import {Context} from '@context';
+import {RootScreenNavigationProps} from '@navigation';
 import {firebase} from '@react-native-firebase/firestore';
 
 const ConfirmPolicyScreen = () => {
-  const {userProfile, setUserProfile} = useContext(Context);
-
   const {setOptions, navigate, goBack} =
-    useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
+    useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const _onNext = useCallback(async () => {
-    if (userProfile) {
-      setUserProfile({role: {user: true}, ...userProfile});
+    firebase
+      .firestore()
+      .collection('users')
+      .add({
+        name: 'Ada Lovelace',
+        age: 30,
+      })
+      .then(() => {
+        console.log('User added!');
+      });
 
-      firebase
-        .firestore()
-        .collection('users')
-        .add({
-          name: 'Ada Lovelace',
-          age: 30,
-        })
-        .then(() => {
-          console.log('User added!');
-        });
-    }
-
-    navigate(EScreen.HOME);
-  }, [navigate, setUserProfile, userProfile]);
+    navigate(EScreen.DRAWER);
+  }, [navigate]);
 
   return (
     <ScreenBase onBack={goBack} onNext={_onNext}>

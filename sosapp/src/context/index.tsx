@@ -1,43 +1,56 @@
-import {UserProfile} from '@types';
 import React, {createContext, useEffect} from 'react';
 import {create} from 'zustand';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {View} from 'react-native';
+import {StyleSheet} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import RootNavigation from '@navigation/RootNavigation';
 
 export type ContextProps = {
-  userProfile: UserProfile;
-  setUserProfile: (user: UserProfile) => void;
-  isAuthenticated: boolean;
+  currentUser: FirebaseAuthTypes.User | null;
+  setCurrentUser: (user: FirebaseAuthTypes.User) => void;
+  handleLogout: () => Promise<void>;
 };
 
-export const Context = createContext<ContextProps>({} as ContextProps);
+export const Context = createContext<ContextProps>({
+  currentUser: null,
+  setCurrentUser: () => {},
+  handleLogout: () => Promise.resolve(),
+});
 
-type ContextProvideProps = {
-  children: React.ReactNode;
-};
 const useStore = create<ContextProps>(set => {
-  const _user = auth().currentUser as FirebaseAuthTypes.User;
   return {
-    userProfile: {user: _user},
-    setUserProfile: (user: UserProfile) => set({userProfile: user}),
-    isAuthenticated: false,
+    currentUser: auth().currentUser as FirebaseAuthTypes.User,
+    setCurrentUser: (currentUser: FirebaseAuthTypes.User) => set({currentUser}),
+    handleLogout: () => auth().signOut(),
   };
 });
 
-export const ContextProvider = ({children}: ContextProvideProps) => {
+export const ContextProvider = () => {
   const store = useStore();
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(user => {
       if (user) {
-        store.setUserProfile({user});
-        store.isAuthenticated = true;
-      } else {
-        store.isAuthenticated = false;
+        store.setCurrentUser(user);
       }
     });
 
-    return subscriber();
+    return subscriber;
   }, [store]);
 
-  return <Context.Provider value={store}>{children}</Context.Provider>;
+  return (
+    <Context.Provider value={store}>
+      <SafeAreaView style={styles.container}>
+        <RootNavigation />
+      </SafeAreaView>
+    </Context.Provider>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'red',
+  },
+});

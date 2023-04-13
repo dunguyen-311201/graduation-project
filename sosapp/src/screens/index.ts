@@ -9,6 +9,7 @@ import SettingsScreen from './Settings';
 import MessagesScreen from './Messages';
 import MapScreen from './Map';
 import SendDistreeSignal from './SendDistressSignal';
+import SignupScreen from './Signup';
 
 export {
   SplashScreen,
@@ -22,4 +23,5 @@ export {
   SettingsScreen,
   SendDistreeSignal,
   MessagesScreen,
+  SignupScreen,
 };

@@ -2,14 +2,14 @@ import {StyleSheet} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
-import {StackScreenNavigationProps} from '@navigation';
+import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase, Social} from '@components';
 import {EScreen} from '@enums/EScreen';
 import {FacebookIcon, GoogleIcon} from '@theme';
 
 const SignupBySocialScreen = () => {
   const {setOptions, navigate, goBack} =
-    useNavigation<StackScreenNavigationProps<EScreen.SIGNUP_BY_SOCIAL>>();
+    useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_BY_SOCIAL>>();
 
   useEffect(() => {
     setOptions({headerShown: false});

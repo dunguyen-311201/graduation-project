@@ -1,22 +1,24 @@
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
-import {StackScreenNavigationProps} from '@navigation';
+import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase, CustomText} from '@components';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
 import {EScreen} from '@enums';
 import {PHONES} from '@constants';
-import {Context, ContextProps} from '@context';
 import {Nation} from '@types';
 
 const SignupByPhoneNumberScreen = () => {
-  const {userProfile, setUserProfile} = useContext<ContextProps>(Context);
+  const [phone, setPhone] = useState('');
+
+  const [comfirmation, setConfirmation] =
+    useState<FirebaseAuthTypes.ConfirmationResult>();
 
   const {setOptions, navigate, goBack} =
-    useNavigation<StackScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
+    useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
@@ -24,43 +26,40 @@ const SignupByPhoneNumberScreen = () => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  const handleVerification = async (
-    verificationId: string,
-    verificationCode: string,
-  ) => {
-    const credential = auth.PhoneAuthProvider.credential(
-      verificationId,
-      verificationCode,
-    );
-    await auth().signInWithCredential(credential);
-  };
+  const handleAuth = useCallback(
+    async (verificationCode: string) => {
+      if (comfirmation) {
+        const credential = auth.PhoneAuthProvider.credential(
+          comfirmation.verificationId,
+          verificationCode,
+        );
+        await auth().signInWithCredential(credential);
+      }
+    },
+    [comfirmation],
+  );
 
   const _navigateNext = useCallback(async () => {
     const confirmation = await auth().signInWithPhoneNumber(
-      `${nation.code}${userProfile?.phone}`,
+      `${nation.code}${phone}`,
     );
 
-    const verificationId = confirmation.verificationId;
+    setConfirmation(confirmation);
 
-    if (verificationId !== null) {
-      navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-        confirm: async (code: string) => {
-          handleVerification(verificationId, code);
-        },
-      });
-    }
-  }, [nation.code, navigate, userProfile?.phone]);
+    navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+      phone,
+      confirm: handleAuth,
+    });
+  }, [nation.code, navigate, phone, handleAuth]);
 
   const _navigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
   }, [navigate]);
 
-  const handleChangePhone = useCallback(
-    (phone: string) => {
-      setUserProfile({...userProfile, phone});
-    },
-    [setUserProfile, userProfile],
-  );
+  const handleChangePhone = useCallback((_phone: string) => {
+    setPhone(_phone);
+  }, []);
+
   const handleChangeNation = useCallback((code: string) => {
     const na = PHONES.find(item => item.code === code);
     if (na) {
@@ -75,7 +74,7 @@ const SignupByPhoneNumberScreen = () => {
       onNext={_navigateNext}>
       <PhoneInput
         nation={nation}
-        phone={userProfile?.phone}
+        phone={phone}
         onChangeNation={handleChangeNation}
         onChangePhone={handleChangePhone}
       />

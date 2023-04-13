@@ -1,19 +1,8 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
-import {
-  ConfirmPhoneNumberScreen,
-  HomeScreen,
-  SignupBySocialScreen,
-  SignupByPhoneNumberScreen,
-  SplashScreen,
-  SetupNameScreen,
-  ConfirmPolicyScreen,
-  MapScreen,
-  SendDistreeSignal,
-} from '../screens';
+import {HomeScreen, MapScreen, SendDistreeSignal} from '../screens';
 import {EScreen} from '@enums';
 
 export type StackParamList = {
@@ -24,40 +13,20 @@ export type StackParamList = {
   [EScreen.SIGNUP_NAME]: undefined;
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
+    phone: string;
     confirm: (phone: string) => Promise<void>;
   };
   [EScreen.MAP]: undefined;
   [EScreen.SEND_DISTRESS_SIGNAL]: undefined;
+  [EScreen.SIGN_UP]: undefined;
 };
 
 const Stack = createNativeStackNavigator<StackParamList>();
 
-const RootNavigation = () => {
+const StackNavigation = () => {
   return (
     <Stack.Navigator initialRouteName={EScreen.SPLASH}>
       <Stack.Screen name={EScreen.HOME} component={HomeScreen} />
-      <Stack.Screen
-        name={EScreen.SPLASH}
-        component={SplashScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name={EScreen.SIGNUP_BY_PHONE_NUMBER}
-        component={SignupByPhoneNumberScreen}
-      />
-      <Stack.Screen
-        name={EScreen.SIGNUP_BY_SOCIAL}
-        component={SignupBySocialScreen}
-      />
-      <Stack.Screen
-        name={EScreen.CONFIRM_PHONE_NUMBER}
-        component={ConfirmPhoneNumberScreen}
-      />
-      <Stack.Screen name={EScreen.SIGNUP_NAME} component={SetupNameScreen} />
-      <Stack.Screen
-        name={EScreen.CONFIRM_POLICY}
-        component={ConfirmPolicyScreen}
-      />
       <Stack.Screen name={EScreen.MAP} component={MapScreen} />
       <Stack.Screen
         name={EScreen.SEND_DISTRESS_SIGNAL}
@@ -67,4 +36,4 @@ const RootNavigation = () => {
   );
 };
 
-export default RootNavigation;
+export default StackNavigation;

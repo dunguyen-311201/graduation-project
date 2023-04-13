@@ -1,20 +1,13 @@
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
-
+import {EUser} from './../enums/EUser';
 export interface Roles {
   user: boolean;
   author?: boolean;
   admin?: boolean;
 }
 
-export class UserProfile implements FirebaseAuthTypes.UserCredential {
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  role?: Roles;
-  additionalUserInfo?: FirebaseAuthTypes.AdditionalUserInfo | undefined;
-  user: FirebaseAuthTypes.User;
-
-  constructor(user: FirebaseAuthTypes.User) {
-    this.user = user;
-  }
+export interface TUser {
+  [EUser.first]?: string;
+  [EUser.last]?: string;
+  [EUser.role]?: Roles;
+  [EUser.uid]?: string;
 }

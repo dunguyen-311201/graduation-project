@@ -7,7 +7,7 @@ import {
 import {Image, StyleSheet, View} from 'react-native';
 import {ProfileIcon} from '@theme';
 import {CustomButton, CustomText} from '@components/common';
-import {StackScreenNavigationProps} from '.';
+import {RootScreenNavigationProps} from '.';
 import {EScreen} from '@enums/EScreen';
 import {useNavigation} from '@react-navigation/native';
 
@@ -15,16 +15,16 @@ import auth from '@react-native-firebase/auth';
 import {Context} from '@context';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {navigate} = useNavigation<StackScreenNavigationProps<EScreen.HOME>>();
+  const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
 
-  const {userProfile} = useContext(Context);
+  const {currentUser} = useContext(Context);
 
   const Icon = useMemo(() => {
-    if (userProfile.user === null) {
+    if (currentUser === null) {
       return ProfileIcon;
     }
-    return userProfile.user.photoURL;
-  }, [userProfile]);
+    return currentUser.photoURL;
+  }, [currentUser]);
 
   const _handleSignout = useCallback(async () => {
     await auth().signOut();
@@ -40,9 +40,7 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
           <View style={styles.info}>
             <Image source={Icon} style={styles.avatar} />
             <CustomText
-              text={`${userProfile?.firstName || ''} ${
-                userProfile?.lastName || ''
-              }`}
+              text="Du Nguyen"
               customStyle={styles.name}
               type="text_medium_light_blue_18"
             />

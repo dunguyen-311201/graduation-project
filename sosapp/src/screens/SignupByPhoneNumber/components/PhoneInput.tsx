@@ -91,12 +91,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     marginTop: 20,
   },
-  phoneTitle: {},
-  phone: {
-    color: '#979797',
-    fontWeight: '500',
-    fontSize: 24,
-  },
+
   nationList: {
     backgroundColor: WHITE_COLOR,
     borderRadius: 10,

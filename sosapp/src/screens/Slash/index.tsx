@@ -1,37 +1,19 @@
-import React, {useCallback, useContext, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {CustomButton, CustomLinearGradient, CustomText} from '@components';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme/icon';
 import Shadow from '@components/Shadow';
 import {useNavigation} from '@react-navigation/native';
-import {StackScreenNavigationProps} from '@navigation';
+import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
-import {Context} from '@context';
 
-function SplashScreen() {
-  const {isAuthenticated} = useContext(Context);
+type SplashProps = {
+  isStart?: boolean;
+};
 
-  const {navigate, reset} =
-    useNavigation<StackScreenNavigationProps<EScreen.SPLASH>>();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      reset({
-        index: 0,
-        routes: [
-          {
-            name: EScreen.HOME,
-          },
-        ],
-      });
-      navigate(EScreen.HOME);
-    } else {
-      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-    }
-  }, [isAuthenticated, navigate, reset]);
-
-  const isNew = true;
+function SplashScreen({isStart = true}: SplashProps) {
+  const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
@@ -45,7 +27,7 @@ function SplashScreen() {
             <CustomText text="SOS" type="text_large_white" />
           </Shadow>
 
-          {isNew && (
+          {isStart && (
             <CustomButton type="outline" customStyle={styles.topButtom}>
               <CustomText text="Move with safety" type="text_regular_white" />
               <Image source={CheckShieldIcon} />
@@ -53,7 +35,7 @@ function SplashScreen() {
           )}
         </View>
 
-        {isNew && (
+        {isStart && (
           <CustomButton type="primary" onPress={_navigateNext}>
             <CustomText text="Get Started" type="text_large_7_white" />
             <Image source={ArrowRightIcon} style={styles.img} />
