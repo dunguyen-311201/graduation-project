@@ -38,7 +38,7 @@ const RootNavigation = () => {
 
   const initRoute = useMemo(() => {
     if (!currentUser) {
-      return EScreen.SPLASH;
+      return EScreen.DRAWER;
     }
     return EScreen.DRAWER;
   }, [currentUser]);

@@ -1,9 +1,10 @@
 import {Dimensions, StyleSheet, View} from 'react-native';
 import React, {useEffect, useCallback, useState} from 'react';
-import MapView, {Circle, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
+import Geolocation from '@react-native-community/geolocation';
+
 navigator.geolocation = require('react-native-geolocation-service');
 
-import Geolocation from '@react-native-community/geolocation';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums/EScreen';
@@ -19,10 +20,12 @@ import {CustomText} from '@components/common';
 import CustomMarker from './components/CustomMarker';
 import {Location} from '@types';
 import MapViewDirections from 'react-native-maps-directions';
+import Config from 'react-native-config';
 
-const GOOGLE_MAPS_APIKEY = 'API_KEY';
+const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
+
 const query = {
-  key: GOOGLE_MAPS_APIKEY,
+  key: GOOGLE_MAPS_API_KEY,
   language: 'vn',
 };
 
@@ -39,10 +42,10 @@ const MapScreen = () => {
   }, [setOptions]);
 
   useEffect(() => {
-    // Geolocation.getCurrentPosition(info => {
-    //   const {latitude, longitude} = info.coords;
-    //   setLocation(latitude, longitude, 'My Location');
-    // });
+    Geolocation.getCurrentPosition(info => {
+      const {latitude, longitude} = info.coords;
+      setLocation(latitude, longitude, 'My Location');
+    });
   }, [setLocation]);
 
   const selectToLocation = useCallback(
@@ -106,7 +109,7 @@ const MapScreen = () => {
         <MapViewDirections
           origin={location}
           destination={toLocation}
-          apikey={GOOGLE_MAPS_APIKEY}
+          apikey={GOOGLE_MAPS_API_KEY}
           strokeWidth={8}
           strokeColor="#3A4C11"
         />
