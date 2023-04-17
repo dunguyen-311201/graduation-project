@@ -1,6 +1,9 @@
-import {StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import PushNotification from 'react-native-push-notification';
+import messaging from '@react-native-firebase/messaging';
+
 import {RootScreenNavigationProps} from '@navigation';
 
 import {EScreen} from '@enums';
@@ -9,11 +12,19 @@ import {GoMapIcon, SOSIcon} from '@theme';
 
 const HomeScreen = () => {
   const {navigate, setOptions} =
-    useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
+    useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+
+    return unsubscribe;
+  }, []);
 
   const _navigationMap = useCallback(() => {
     navigate(EScreen.MAP);

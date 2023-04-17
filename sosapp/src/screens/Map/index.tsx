@@ -1,5 +1,5 @@
 import {Dimensions, StyleSheet, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import MapView, {Circle, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 // import MapViewDirections from 'react-native-maps-directions';
 
@@ -16,14 +16,18 @@ import CustomMarker from './components/CustomMarker';
 
 const GOOGLE_MAPS_APIKEY = 'AIzaSyB1KoK7KQe0YzwScTNjC71HRS17my056bk'; //'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
 
-const origin = {latitude: 37.3318456, longitude: -122.0296002};
-const destination = {latitude: 37.771707, longitude: -122.4053769};
+// const origin = {latitude: 37.3318456, longitude: -122.0296002};
+// const destination = {latitude: 37.771707, longitude: -122.4053769};
 
 const MapScreen = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
 
   const {location, setLocation} = useLocation(state => state);
+
+  // const [location, setLocation] = useState<Location>();
+
+  console.log(location);
 
   useEffect(() => {
     Geolocation.getCurrentPosition(info => {
@@ -39,7 +43,7 @@ const MapScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.search}>
+      {/* <View style={styles.search}>
         <View style={styles.inputTitle}>
           <CustomText text="From" type="text_medium_24" />
           <CustomText text="Where to" type="text_medium_24" />
@@ -63,7 +67,7 @@ const MapScreen = () => {
             }}
           />
         </View>
-      </View>
+      </View> */}
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -75,17 +79,21 @@ const MapScreen = () => {
           strokeWidth={30}
           strokeColor="hotpink"
         /> */}
-        <CustomMarker
-          coordinate={location}
-          title="I'm here!"
-          onChangeLocation={setLocation}
-        />
-        <Circle
-          center={origin} //{location}
-          radius={10}
-          fillColor="#2091EB"
-          strokeWidth={0}
-        />
+        {location && (
+          <View>
+            <CustomMarker
+              coordinate={location}
+              title="I'm here!"
+              onChangeLocation={setLocation}
+            />
+            <Circle
+              center={location}
+              radius={10}
+              fillColor="#2091EB"
+              strokeWidth={0}
+            />
+          </View>
+        )}
       </MapView>
     </View>
   );

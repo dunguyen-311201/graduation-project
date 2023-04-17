@@ -4,7 +4,7 @@ import {
   createDrawerNavigator,
 } from '@react-navigation/drawer';
 import {StyleSheet} from 'react-native';
-import {SettingsScreen, MessagesScreen} from '@screens';
+import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
 
 import DrawerContent from './DrawerContent';
 import {EScreen} from '@enums';
@@ -12,6 +12,7 @@ import {EScreen} from '@enums';
 export type DrawerParamList = {
   [EScreen.SETTINGS]: undefined;
   [EScreen.MESSAGES]: undefined;
+  [EScreen.HOME]: undefined;
 };
 
 const Drawer = createDrawerNavigator();
@@ -24,6 +25,14 @@ const DrawerNavigation = () => {
 
   return (
     <Drawer.Navigator drawerContent={renderContent}>
+      <Drawer.Screen
+        name={EScreen.HOME}
+        options={{
+          title: EScreen.HOME.split('-')[0],
+          drawerLabelStyle: {...styles.title},
+        }}
+        component={HomeScreen}
+      />
       <Drawer.Screen
         name={EScreen.SETTINGS}
         options={{

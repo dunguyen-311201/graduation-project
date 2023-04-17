@@ -10,4 +10,9 @@ export interface TUser {
   [EUser.last]?: string;
   [EUser.role]?: Roles;
   [EUser.uid]?: string;
+  [EUser.displayName]?: string;
+  [EUser.email]?: string;
+  [EUser.phoneNumber]?: string;
+  [EUser.photoURL]?: string;
+  [EUser.role]?: Roles;
 }

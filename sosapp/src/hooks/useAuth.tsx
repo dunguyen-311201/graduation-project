@@ -6,6 +6,10 @@ const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User>();
 
   useEffect(() => {
+    if (currentUser === null) {
+      setCurrentUser(undefined);
+    }
+
     const subscriber = auth().onAuthStateChanged(user => {
       if (user) {
         setCurrentUser(user);
@@ -26,6 +30,7 @@ const useAuth = () => {
   const handleLogout = useCallback(async () => {
     if (currentUser) {
       await auth().signOut();
+      setCurrentUser(null);
     }
   }, [currentUser]);
 

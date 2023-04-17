@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "79713863437",
-    "project_id": "graduation-project-sos-app",
-    "storage_bucket": "graduation-project-sos-app.appspot.com"
+    "project_number": "1023059966845",
+    "project_id": "graduation-project-c9688",
+    "storage_bucket": "graduation-project-c9688.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:79713863437:android:65057d7018eee21b749244",
+        "mobilesdk_app_id": "1:1023059966845:android:3fb6c36c8d6c4710c42a14",
         "android_client_info": {
           "package_name": "com.sosapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "79713863437-rg2kdhuvire7lg6met8uur68essc398m.apps.googleusercontent.com",
+          "client_id": "1023059966845-d3kfhi23h04rbmvkg0camaqv53i17nqk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCrDMrdLxN6967O8s4NQpKrA2qpH-4WgC0"
+          "current_key": "AIzaSyC5s6whMWsN2EE9GJGX_n78OkXFmH1j-xQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "79713863437-rg2kdhuvire7lg6met8uur68essc398m.apps.googleusercontent.com",
+              "client_id": "1023059966845-d3kfhi23h04rbmvkg0camaqv53i17nqk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

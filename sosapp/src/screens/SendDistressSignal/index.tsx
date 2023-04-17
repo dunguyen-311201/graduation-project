@@ -10,9 +10,7 @@ const SendDistreeSignal = () => {
   useEffect(() => {
     const ref = firebase
       .app()
-      .database(
-        'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
-      )
+      .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
       .ref('/signals');
 
     ref.on('value', snapshot => {
@@ -26,9 +24,7 @@ const SendDistreeSignal = () => {
   const sendSignal = useCallback(async () => {
     firebase
       .app()
-      .database(
-        'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
-      )
+      .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
       .ref('/signals')
       .push({location});
   }, [location]);

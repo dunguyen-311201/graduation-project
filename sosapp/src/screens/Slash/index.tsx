@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {CustomButton, CustomLinearGradient, CustomText} from '@components';
@@ -7,6 +7,7 @@ import Shadow from '@components/Shadow';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
+import {useAuth} from '@hooks';
 
 type SplashProps = {
   isStart?: boolean;
@@ -14,6 +15,14 @@ type SplashProps = {
 
 function SplashScreen({isStart = true}: SplashProps) {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
+
+  const {currentUser} = useAuth();
+
+  useEffect(() => {
+    if (currentUser) {
+      navigate(EScreen.DRAWER);
+    }
+  }, [currentUser, navigate]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

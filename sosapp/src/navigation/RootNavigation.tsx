@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {EScreen} from '@enums/EScreen';
 import DrawerNavigation from './DrawerNavigation';
@@ -37,7 +37,7 @@ const RootNavigation = () => {
   const {currentUser} = useAuth();
 
   const initRoute = useMemo(() => {
-    if (!currentUser || currentUser === null) {
+    if (!currentUser) {
       return EScreen.SPLASH;
     }
     return EScreen.DRAWER;
