@@ -4,9 +4,10 @@ import {CustomInput} from '@components/common';
 import {useAuth} from '@hooks';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {TUser} from '@types/User';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 // import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
-// const GOOGLE_MAPS_APIKEY = 'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
+const GOOGLE_MAPS_APIKEY = 'API_KEY';
 
 const SettingsScreen = () => {
   const {currentUser} = useAuth();
@@ -44,7 +45,7 @@ const SettingsScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* <GooglePlacesAutocomplete
+      <GooglePlacesAutocomplete
         placeholder="Search"
         styles={{
           container: {
@@ -56,7 +57,7 @@ const SettingsScreen = () => {
         }}
         onPress={(data, details = null) => {
           // 'details' is provided when fetchDetails = true
-          console.log(data, details);
+          console.log(details?.geometry?.location);
         }}
         query={{
           key: GOOGLE_MAPS_APIKEY,
@@ -64,7 +65,7 @@ const SettingsScreen = () => {
         }}
         enablePoweredByContainer={true}
         nearbyPlacesAPI="GooglePlacesSearch"
-      /> */}
+      />
       <CustomInput
         title="Display Name"
         onChangeText={handleChangeText}

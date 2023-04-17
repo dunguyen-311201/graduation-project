@@ -4,4 +4,5 @@ export type Location = {
   altitude?: number;
   accuracy?: number;
   altitudeAccuracy?: number;
+  lable?: string;
 };

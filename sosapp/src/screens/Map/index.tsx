@@ -1,23 +1,30 @@
 import {Dimensions, StyleSheet, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useCallback, useState} from 'react';
 import MapView, {Circle, Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-// import MapViewDirections from 'react-native-maps-directions';
+navigator.geolocation = require('react-native-geolocation-service');
 
 import Geolocation from '@react-native-community/geolocation';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums/EScreen';
 import {useLocation} from '../../hooks';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import MapViewDirections from 'react-native-maps-directions';
+import {
+  GooglePlaceData,
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+} from 'react-native-google-places-autocomplete';
+// import MapViewDirections from 'react-native-maps-directions';
 import {BLACK_COLOR} from '@theme/color';
 import {CustomText} from '@components/common';
 import CustomMarker from './components/CustomMarker';
+import {Location} from '@types';
+import MapViewDirections from 'react-native-maps-directions';
 
-const GOOGLE_MAPS_APIKEY = 'AIzaSyB1KoK7KQe0YzwScTNjC71HRS17my056bk'; //'AIzaSyBN9oFyb8tZu1zHzUcE1cMR4--NCOucmOM';
-
-// const origin = {latitude: 37.3318456, longitude: -122.0296002};
-// const destination = {latitude: 37.771707, longitude: -122.4053769};
+const GOOGLE_MAPS_APIKEY = 'API_KEY';
+const query = {
+  key: GOOGLE_MAPS_APIKEY,
+  language: 'vn',
+};
 
 const MapScreen = () => {
   const {setOptions, navigate} =
@@ -25,25 +32,44 @@ const MapScreen = () => {
 
   const {location, setLocation} = useLocation(state => state);
 
-  // const [location, setLocation] = useState<Location>();
-
-  console.log(location);
+  const [toLocation, setToLocation] = useState<Location>();
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(info => {
-      const {latitude, longitude} = info.coords;
-      setLocation({
-        latitude,
-        longitude,
-      });
-    });
-
     setOptions({headerShown: false});
-  }, [navigate, setLocation, setOptions]);
+  }, [setOptions]);
+
+  useEffect(() => {
+    // Geolocation.getCurrentPosition(info => {
+    //   const {latitude, longitude} = info.coords;
+    //   setLocation(latitude, longitude, 'My Location');
+    // });
+  }, [setLocation]);
+
+  const selectToLocation = useCallback(
+    (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+      const _location = detail?.geometry?.location;
+      if (_location) {
+        const {lat, lng} = _location;
+        setToLocation({latitude: lat, longitude: lng});
+      }
+    },
+    [],
+  );
+
+  const selectFromLocation = useCallback(
+    (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+      const _location = detail?.geometry?.location;
+      if (_location) {
+        const {lat, lng} = _location;
+        setLocation(lat, lng);
+      }
+    },
+    [setLocation],
+  );
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.search}>
+      <View style={styles.search}>
         <View style={styles.inputTitle}>
           <CustomText text="From" type="text_medium_24" />
           <CustomText text="Where to" type="text_medium_24" />
@@ -51,34 +77,39 @@ const MapScreen = () => {
 
         <View style={styles.inputSearch}>
           <GooglePlacesAutocomplete
-            placeholder="Type places..."
-            query={{key: {GOOGLE_MAPS_APIKEY}, language: 'en'}}
-            minLength={2}
-            onPress={(data, details = null) => {
-              console.log(data, details);
-            }}
+            placeholder="type"
+            styles={inputStyles}
+            fetchDetails={true}
+            onPress={selectFromLocation}
+            currentLocation={true}
+            textInputProps={{value: location?.lable}}
+            query={query}
+            enablePoweredByContainer={true}
+            nearbyPlacesAPI="GooglePlacesSearch"
           />
+
           <GooglePlacesAutocomplete
-            placeholder="Type places..."
-            query={{key: {GOOGLE_MAPS_APIKEY}, language: 'en'}}
-            minLength={2}
-            onPress={(data, details = null) => {
-              console.log(data, details);
-            }}
+            placeholder="type"
+            styles={inputStyles}
+            fetchDetails={true}
+            onPress={selectToLocation}
+            query={query}
+            enablePoweredByContainer={true}
+            nearbyPlacesAPI="GooglePlacesSearch"
           />
         </View>
-      </View> */}
+      </View>
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         region={{...location, latitudeDelta: 0.005, longitudeDelta: 0.005}}>
-        {/* <MapViewDirections
-          origin={origin}
-          destination={destination}
+        <MapViewDirections
+          origin={location}
+          destination={toLocation}
           apikey={GOOGLE_MAPS_APIKEY}
-          strokeWidth={30}
-          strokeColor="hotpink"
-        /> */}
+          strokeWidth={8}
+          strokeColor="#3A4C11"
+        />
         {location && (
           <View>
             <CustomMarker
@@ -88,9 +119,9 @@ const MapScreen = () => {
             />
             <Circle
               center={location}
-              radius={10}
-              fillColor="#2091EB"
-              strokeWidth={0}
+              radius={500}
+              fillColor="#42ff22"
+              strokeWidth={2}
             />
           </View>
         )}
@@ -131,5 +162,19 @@ const styles = StyleSheet.create({
   map: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
+  },
+  bottomOption: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+  },
+});
+
+const inputStyles = StyleSheet.create({
+  container: {
+    flex: 0,
+  },
+  textInput: {
+    fontSize: 18,
   },
 });

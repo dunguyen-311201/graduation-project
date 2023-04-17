@@ -4,14 +4,14 @@ import {Location} from '@types';
 
 type MarkerProps = {
   coordinate: Location;
-  onChangeLocation: (location: Location) => void;
+  onChangeLocation: (lat: number, lng: number) => void;
   title: string;
 };
 
 const CustomMarker = ({coordinate, title, onChangeLocation}: MarkerProps) => {
   const handleDragStart = (event: MarkerDragStartEndEvent) => {
-    console.log(event.nativeEvent.coordinate);
-    onChangeLocation(event.nativeEvent.coordinate);
+    const {latitude, longitude} = event.nativeEvent.coordinate;
+    onChangeLocation(latitude, longitude);
   };
 
   return (

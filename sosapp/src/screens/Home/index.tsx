@@ -15,7 +15,7 @@ const HomeScreen = () => {
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   useEffect(() => {
-    setOptions({headerShown: false});
+    // setOptions({headerShown: false});
   }, [setOptions]);
 
   useEffect(() => {

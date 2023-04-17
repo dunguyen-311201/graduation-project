@@ -1,10 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Location} from '@types';
 import {create} from 'zustand';
 import {devtools, persist} from 'zustand/middleware';
 
 export type useLocationProps = {
   location: Location;
-  setLocation: (location: Location) => void;
+  setLocation: (latitude: number, longitude: number, lable?: string) => void;
 };
 
 export const useLocation = create<useLocationProps>()(
@@ -15,14 +16,15 @@ export const useLocation = create<useLocationProps>()(
           latitude: 0,
           longitude: 0,
         },
-        setLocation: (location: Location) => {
+        setLocation: (latitude: number, longitude: number, lable?: string) => {
           set({
-            location,
+            location: {latitude, longitude, lable},
           });
         },
       }),
       {
         name: 'location-storage',
+        getStorage: () => AsyncStorage,
       },
     ),
   ),
