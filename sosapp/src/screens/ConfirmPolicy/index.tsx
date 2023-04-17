@@ -1,12 +1,12 @@
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useContext, useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
-import {RootScreenNavigationProps} from '@navigation';
 import {firebase} from '@react-native-firebase/firestore';
+import {RootScreenNavigationProps} from '@navigation';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =

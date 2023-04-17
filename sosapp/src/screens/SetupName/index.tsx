@@ -9,6 +9,7 @@ import {CustomInput} from '@components';
 import {Styles as st} from '@utils';
 import {TUser} from '@types';
 import {EUser} from '@enums/EUser';
+import {useAuth} from '@hooks';
 
 const SetupNameScreen = () => {
   const [user, setUser] = useState<TUser>();
@@ -16,13 +17,16 @@ const SetupNameScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_NAME>>();
 
+  const {updateDisplayName} = useAuth();
+
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const handleNext = useCallback(async () => {
+    await updateDisplayName(`${user?.firstName} ${user?.lastName}`);
     navigate(EScreen.CONFIRM_POLICY);
-  }, [navigate]);
+  }, [navigate, updateDisplayName, user?.firstName, user?.lastName]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {

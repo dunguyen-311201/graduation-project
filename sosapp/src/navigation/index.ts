@@ -1,12 +1,14 @@
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {DrawerParamList} from './DrawerNavigation';
 import {CompositeNavigationProp} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import RootNavigation from './RootNavigation';
-import {StackParamList} from './StackNavigation';
+import {DrawerNavigationProp} from '@react-navigation/drawer';
 
-export type RootScreenNavigationProps<T extends keyof StackParamList> =
+import RootNavigation, {RootParamList} from './RootNavigation';
+
+export type RootScreenNavigationProps<T extends keyof RootParamList> =
   CompositeNavigationProp<
-    NativeStackNavigationProp<StackParamList, T>,
-    StackNavigationProp<StackParamList, T>
+    StackNavigationProp<RootParamList, T>,
+    DrawerNavigationProp<DrawerParamList>
   >;
+
 export {RootNavigation};

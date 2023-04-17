@@ -8,7 +8,11 @@ import {SettingsScreen, MessagesScreen} from '@screens';
 
 import DrawerContent from './DrawerContent';
 import {EScreen} from '@enums';
-import StackNavigation from './StackNavigation';
+
+export type DrawerParamList = {
+  [EScreen.SETTINGS]: undefined;
+  [EScreen.MESSAGES]: undefined;
+};
 
 const Drawer = createDrawerNavigator();
 
@@ -20,14 +24,6 @@ const DrawerNavigation = () => {
 
   return (
     <Drawer.Navigator drawerContent={renderContent}>
-      <Drawer.Screen
-        name={EScreen.STACK}
-        component={StackNavigation}
-        options={{
-          headerShown: false,
-          drawerLabelStyle: {...styles.title},
-        }}
-      />
       <Drawer.Screen
         name={EScreen.SETTINGS}
         options={{

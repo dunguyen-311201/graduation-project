@@ -1,6 +1,4 @@
 export enum EScreen {
-  START = 'start-screen',
-  STACK = 'home',
   SPLASH = 'slash-screen',
   CONFIRM_POLICY = 'confirm-policy-screen',
   HOME = 'home-screen',
@@ -12,6 +10,5 @@ export enum EScreen {
   SETTINGS = 'settings-screen',
   MESSAGES = 'messages-screen',
   SEND_DISTRESS_SIGNAL = 'send-distress-signal-screen',
-  SIGN_UP = 'signup-up-screen',
   DRAWER = 'drawer-screen',
 }

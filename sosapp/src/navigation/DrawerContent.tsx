@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -6,30 +6,31 @@ import {
 } from '@react-navigation/drawer';
 import {Image, StyleSheet, View} from 'react-native';
 import {ProfileIcon} from '@theme';
-import {CustomButton, CustomText} from '@components/common';
-import {RootScreenNavigationProps} from '.';
-import {EScreen} from '@enums/EScreen';
-import {useNavigation} from '@react-navigation/native';
+import {CustomButton, CustomText} from '@components';
 
-import auth from '@react-native-firebase/auth';
-import {Context} from '@context';
+import {useAuth} from '@hooks';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.HOME>>();
+  const {currentUser, handleLogout} = useAuth();
 
-  const {currentUser} = useContext(Context);
+  const [icon, displayName] = useMemo(() => {
+    let _icon = ProfileIcon,
+      _displayName = 'User';
 
-  const Icon = useMemo(() => {
-    if (currentUser === null) {
-      return ProfileIcon;
+    if (currentUser && currentUser !== null) {
+      if (currentUser.photoURL !== null) {
+        _icon = {uri: currentUser.photoURL};
+      }
+      if (currentUser.displayName !== null) {
+        _displayName = currentUser?.displayName;
+      }
     }
-    return currentUser.photoURL;
+    return [_icon, _displayName];
   }, [currentUser]);
 
   const _handleSignout = useCallback(async () => {
-    await auth().signOut();
-    navigate(EScreen.SPLASH);
-  }, [navigate]);
+    await handleLogout();
+  }, [handleLogout]);
 
   return (
     <View style={styles.container}>
@@ -38,9 +39,9 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
         contentContainerStyle={styles.drawerContent}>
         <View style={styles.profile}>
           <View style={styles.info}>
-            <Image source={Icon} style={styles.avatar} />
+            <Image source={icon} style={styles.avatar} />
             <CustomText
-              text="Du Nguyen"
+              text={displayName}
               customStyle={styles.name}
               type="text_medium_light_blue_18"
             />

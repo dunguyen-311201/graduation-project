@@ -24,14 +24,13 @@ const SendDistreeSignal = () => {
   }, []);
 
   const sendSignal = useCallback(async () => {
-    const a = firebase
+    firebase
       .app()
       .database(
         'https://graduation-project-sos-app-default-rtdb.firebaseio.com',
       )
       .ref('/signals')
       .push({location});
-    console.log(a);
   }, [location]);
 
   return (
