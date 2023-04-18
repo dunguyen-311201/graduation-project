@@ -1,4 +1,4 @@
 import useAuth from './useAuth';
 
-export * from './useLocation';
+export * from './useDeviceLocation';
 export {useAuth};

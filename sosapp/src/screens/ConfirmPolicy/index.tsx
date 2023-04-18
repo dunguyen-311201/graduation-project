@@ -5,8 +5,9 @@ import {useNavigation} from '@react-navigation/native';
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
-import {firebase} from '@react-native-firebase/firestore';
+// import {firebase} from '@react-native-firebase/firestore';
 import {RootScreenNavigationProps} from '@navigation';
+import {setAsyncStorage} from '@utils/asyncStorage';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =
@@ -17,16 +18,18 @@ const ConfirmPolicyScreen = () => {
   }, [setOptions]);
 
   const _onNext = useCallback(async () => {
-    firebase
-      .firestore()
-      .collection('users')
-      .add({
-        name: 'Ada Lovelace',
-        age: 30,
-      })
-      .then(() => {
-        console.log('User added!');
-      });
+    // firebase
+    //   .firestore()
+    //   .collection('users')
+    //   .add({
+    //     name: 'Ada Lovelace',
+    //     age: 30,
+    //   })
+    //   .then(() => {
+    //     console.log('User added!');
+    //   });
+
+    await setAsyncStorage('isNew', false);
 
     navigate(EScreen.DRAWER);
   }, [navigate]);

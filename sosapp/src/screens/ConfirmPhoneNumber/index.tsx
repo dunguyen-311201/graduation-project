@@ -34,9 +34,12 @@ const ConfirmPhoneNumberScreen = () => {
         code,
       );
 
-      await auth().signInWithCredential(credential);
-
-      navigate(EScreen.SIGNUP_NAME);
+      const a = await auth().signInWithCredential(credential);
+      if (a.additionalUserInfo?.isNewUser) {
+        navigate(EScreen.SIGNUP_NAME);
+        return;
+      }
+      navigate(EScreen.DRAWER);
     } catch (error) {
       console.log(error);
     }

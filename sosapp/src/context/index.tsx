@@ -1,22 +1,31 @@
-import React, {createContext} from 'react';
-import {create} from 'zustand';
+import {getAsyncStorage} from '@utils/asyncStorage';
+import React, {createContext, useEffect, useState} from 'react';
 
 export type ContextProps = {
   children?: React.ReactNode;
-  color?: string;
-  setColor?: (value: string) => void;
+  isFirstAuthenticated?: boolean;
+  setIsFirstAuthenticated?: (value: boolean) => void;
 };
 
-export const Context = createContext<ContextProps>({color: '#FFFFFF'});
-
-const useStore = create<ContextProps>(set => {
-  return {
-    setColor: (value: string) => set({color: value}),
-  };
+export const Context = createContext<ContextProps>({
+  isFirstAuthenticated: true,
+  setIsFirstAuthenticated: (value: boolean) => {
+    value;
+  },
 });
 
 export const ContextProvider = ({children}: ContextProps) => {
-  const store = useStore();
+  const [store, setStore] = useState<ContextProps>({});
+
+  useEffect(() => {
+    const setup = async () => {
+      const isNew = await getAsyncStorage('isNew');
+      console.log({isNew});
+      setStore({isFirstAuthenticated: isNew === null});
+    };
+
+    setup();
+  }, []);
 
   return <Context.Provider value={store}>{children}</Context.Provider>;
 };

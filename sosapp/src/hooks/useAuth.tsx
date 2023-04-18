@@ -11,7 +11,7 @@ const useAuth = () => {
     }
 
     const subscriber = auth().onAuthStateChanged(user => {
-      if (user) {
+      if (user && user.displayName !== null) {
         setCurrentUser(user);
       }
     });
@@ -30,7 +30,6 @@ const useAuth = () => {
   const handleLogout = useCallback(async () => {
     if (currentUser) {
       await auth().signOut();
-      setCurrentUser(null);
     }
   }, [currentUser]);
 

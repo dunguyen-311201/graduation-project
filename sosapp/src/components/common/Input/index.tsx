@@ -19,11 +19,14 @@ type CustomInputProps = {
   titleStyle?: TextStyle;
   errorMessageStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
-  onChangeText: (value: string, field?: string) => void;
+  onChangeText?: (value: string, field?: string) => void;
   onBlur?: (field?: string) => void;
   onFocus?: (field?: string) => void;
   marginLeft?: number;
   maxLength?: number;
+  nColumn?: number;
+  placeholder?: string;
+  onEndEditing?: (feild: string) => void;
 };
 const CustomInput: React.ForwardRefRenderFunction<
   TextInput,
@@ -40,13 +43,16 @@ const CustomInput: React.ForwardRefRenderFunction<
     maxLength,
     marginLeft,
     onChangeText,
+    placeholder,
     onBlur,
     onFocus,
+    nColumn,
+    onEndEditing,
   } = props;
 
   const _onChangeText = useCallback(
     (_value: string) => {
-      onChangeText(_value, field);
+      onChangeText && onChangeText(_value, field);
     },
     [onChangeText, field],
   );
@@ -59,18 +65,31 @@ const CustomInput: React.ForwardRefRenderFunction<
     onBlur && onBlur(field);
   }, [onBlur, field]);
 
+  const _onEndEditing = useCallback(() => {
+    onEndEditing && field && onEndEditing(field);
+  }, [onEndEditing, field]);
+
   return (
-    <View style={[styles.inputgroup, {marginLeft}]}>
+    <View
+      style={[
+        styles.inputgroup,
+        {
+          marginLeft,
+          ...(nColumn && {width: `${100 / (nColumn + nColumn * 0.1)}%`}),
+        },
+      ]}>
       {title && <CustomText text={title} customStyle={titleStyle} />}
       <TextInput
         value={value}
         ref={ref}
-        style={[styles.inputControl, valueStyle]}
+        style={[styles.input, valueStyle]}
         onChangeText={_onChangeText}
         onBlur={_onBlur}
         onFocus={_onFocus}
         inputMode={inputMode}
         maxLength={maxLength}
+        placeholder={placeholder}
+        onEndEditing={_onEndEditing}
       />
       {errorMessage && <CustomText text={errorMessage} />}
     </View>
@@ -85,8 +104,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: TEXT_COLOR,
     borderBottomWidth: 1,
+    width: '78%',
   },
-  inputControl: {
-    minWidth: 200,
+  input: {
+    width: '100%',
   },
 });

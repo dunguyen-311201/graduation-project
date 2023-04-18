@@ -9,6 +9,7 @@ import {ProfileIcon} from '@theme';
 import {CustomButton, CustomText} from '@components';
 
 import {useAuth} from '@hooks';
+import {EScreen} from '@enums/EScreen';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const {currentUser, handleLogout} = useAuth();
@@ -30,7 +31,8 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
 
   const _handleSignout = useCallback(async () => {
     await handleLogout();
-  }, [handleLogout]);
+    props.navigation.navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
+  }, [handleLogout, props.navigation]);
 
   return (
     <View style={styles.container}>

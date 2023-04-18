@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useContext, useMemo} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {EScreen} from '@enums/EScreen';
@@ -15,6 +15,7 @@ import {
 } from '@screens';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {useAuth} from '@hooks';
+import {Context} from '@context/index';
 
 export type RootParamList = {
   [EScreen.DRAWER]: undefined;
@@ -34,14 +35,21 @@ export type RootParamList = {
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
+  const {isFirstAuthenticated} = useContext(Context);
+
   const {currentUser} = useAuth();
 
   const initRoute = useMemo(() => {
-    if (!currentUser) {
+    if (currentUser && currentUser.displayName !== null) {
       return EScreen.DRAWER;
     }
-    return EScreen.DRAWER;
-  }, [currentUser]);
+
+    if (isFirstAuthenticated) {
+      return EScreen.SIGNUP_BY_PHONE_NUMBER;
+    }
+
+    return EScreen.SPLASH;
+  }, [currentUser, isFirstAuthenticated]);
 
   return (
     <NavigationContainer>

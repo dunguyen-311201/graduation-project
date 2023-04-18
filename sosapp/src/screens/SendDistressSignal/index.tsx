@@ -1,11 +1,11 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
-import {useLocation} from '../../hooks';
+import {useDeviceLocation} from '../../hooks';
 import {firebase} from '@react-native-firebase/database';
 import {Button} from 'react-native';
 
 const SendDistreeSignal = () => {
-  const {location} = useLocation(state => state);
+  const {deviceLocation} = useDeviceLocation();
 
   useEffect(() => {
     const ref = firebase
@@ -26,8 +26,8 @@ const SendDistreeSignal = () => {
       .app()
       .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
       .ref('/signals')
-      .push({location});
-  }, [location]);
+      .push({deviceLocation});
+  }, [deviceLocation]);
 
   return (
     <View>

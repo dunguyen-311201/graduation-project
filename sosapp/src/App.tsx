@@ -4,12 +4,15 @@ import {StyleSheet} from 'react-native';
 import 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RootNavigation} from './navigation';
+import {ContextProvider} from './context';
 
 function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <RootNavigation />
-    </SafeAreaView>
+    <ContextProvider>
+      <SafeAreaView style={styles.container}>
+        <RootNavigation />
+      </SafeAreaView>
+    </ContextProvider>
   );
 }
 
