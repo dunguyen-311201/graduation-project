@@ -18,6 +18,8 @@ function SplashScreen({isStart = true}: SplashProps) {
 
   const {currentUser} = useAuth();
 
+  console.log(21, {currentUser});
+
   useEffect(() => {
     if (currentUser) {
       navigate(EScreen.DRAWER);

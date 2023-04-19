@@ -10,9 +10,11 @@ import {EScreen} from '@enums';
 import {PHONES} from '@constants';
 import {Nation} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
+import useAuth from '@hooks/useAuth';
 
 const SignupByPhoneNumberScreen = () => {
   const [phone, setPhone] = useState('');
+  const {currentUser} = useAuth();
 
   const [comfirmation, setConfirmation] =
     useState<FirebaseAuthTypes.ConfirmationResult>();
@@ -24,7 +26,14 @@ const SignupByPhoneNumberScreen = () => {
 
   useEffect(() => {
     setOptions({headerShown: false});
-  }, [setOptions]);
+    if (currentUser) {
+      if (currentUser.displayName !== null) {
+        navigate(EScreen.DRAWER);
+        return;
+      }
+      navigate(EScreen.SIGNUP_INFO);
+    }
+  }, [currentUser, navigate, setOptions]);
 
   const _navigateNext = useCallback(async () => {
     const _comfirmation = await auth().signInWithPhoneNumber(
@@ -62,6 +71,7 @@ const SignupByPhoneNumberScreen = () => {
       <PhoneInput
         nation={nation}
         phone={phone}
+        onEndEditing={_navigateNext}
         onChangeNation={handleChangeNation}
         onChangePhone={handleChangePhone}
       />

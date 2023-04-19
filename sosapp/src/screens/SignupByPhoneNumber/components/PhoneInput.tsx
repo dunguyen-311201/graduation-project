@@ -12,6 +12,7 @@ import {Styles as st} from '@utils';
 type PhoneInputProps = {
   nation: Nation;
   phone?: string;
+  onEndEditing?: () => void;
   onChangePhone: (phone: string) => void;
   onChangeNation: (code: string) => void;
 };
@@ -21,6 +22,7 @@ const PhoneInput = ({
   phone,
   onChangePhone,
   onChangeNation,
+  onEndEditing,
 }: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
 
@@ -74,6 +76,7 @@ const PhoneInput = ({
         inputMode="numeric"
         valueStyle={st.text_medium_gray_24}
         title={nation?.code}
+        onEndEditing={onEndEditing}
         maxLength={9}
         titleStyle={st.text_medium_24}
       />

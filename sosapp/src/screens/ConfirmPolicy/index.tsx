@@ -1,38 +1,37 @@
 import {Image, StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {firebase} from '@react-native-firebase/firestore';
+import message from '@react-native-firebase/messaging';
 
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
-// import {firebase} from '@react-native-firebase/firestore';
 import {RootScreenNavigationProps} from '@navigation';
-import {setAsyncStorage} from '@utils/asyncStorage';
+import useAuth from '@hooks/useAuth';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
+
+  const {currentUser} = useAuth();
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const _onNext = useCallback(async () => {
-    // firebase
-    //   .firestore()
-    //   .collection('users')
-    //   .add({
-    //     name: 'Ada Lovelace',
-    //     age: 30,
-    //   })
-    //   .then(() => {
-    //     console.log('User added!');
-    //   });
+    if (currentUser) {
+      const token = await message().getToken();
 
-    await setAsyncStorage('isNew', false);
+      await firebase.firestore().collection('users').add({
+        deviceToken: token,
+        uid: currentUser?.uid,
+      });
 
-    navigate(EScreen.DRAWER);
-  }, [navigate]);
+      navigate(EScreen.DRAWER);
+    }
+  }, [currentUser, navigate]);
 
   return (
     <ScreenBase onBack={goBack} onNext={_onNext}>

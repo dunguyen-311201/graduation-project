@@ -13,6 +13,7 @@ export type DrawerParamList = {
   [EScreen.SETTINGS]: undefined;
   [EScreen.MESSAGES]: undefined;
   [EScreen.HOME]: undefined;
+  [EScreen.HELP]: undefined;
 };
 
 const Drawer = createDrawerNavigator();
@@ -45,6 +46,14 @@ const DrawerNavigation = () => {
         name={EScreen.MESSAGES}
         options={{
           title: EScreen.MESSAGES.split('-')[0],
+          drawerLabelStyle: {...styles.title},
+        }}
+        component={MessagesScreen}
+      />
+      <Drawer.Screen
+        name={EScreen.HELP}
+        options={{
+          title: EScreen.HELP.split('-')[0],
           drawerLabelStyle: {...styles.title},
         }}
         component={MessagesScreen}

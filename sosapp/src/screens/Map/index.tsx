@@ -17,7 +17,7 @@ import {useDeviceLocation} from '@hooks';
 import CustomMarker from './components/CustomMarker';
 import MapViewDirections from 'react-native-maps-directions';
 import Config from 'react-native-config';
-import {BackIcon} from '@components';
+import {BackIcon, CustomText} from '@components';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -44,13 +44,11 @@ const MapScreen = () => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  console.log(locations);
-
   useEffect(() => {
     setLocations({from: deviceLocation});
   }, [deviceLocation]);
 
-  const {from, to} = locations || {};
+  const {from, to, distance, timeout} = locations || {};
 
   useEffect(() => {
     const getDistance = async () => {
@@ -76,7 +74,6 @@ const MapScreen = () => {
   }, [from?.description, to?.description]);
 
   const handleSearch = useCallback((_location: Location, _field?: string) => {
-    console.log(_field);
     if (_field === 'to') {
       setLocations(prev => ({...prev, to: _location}));
     }
@@ -91,10 +88,12 @@ const MapScreen = () => {
 
   const handleChangeLocation = useCallback(() => {}, []);
 
+  console.log({distance});
+
   return (
     <View style={styles.container}>
       {!isDirection ? (
-        <View style={[styles.navbar1]}>
+        <View style={[styles.navbar, styles.single]}>
           <View style={styles.iconBack}>
             <BackIcon onPress={goBack} />
           </View>
@@ -131,10 +130,19 @@ const MapScreen = () => {
               customStyle={styles.lastItem}
             />
           </View>
-          <View>
+          <View style={styles.distanceInfo}>
             <Pressable onPress={handleToDirectionandSearch}>
               <Image source={ClearInputIcon} style={styles.icon} />
             </Pressable>
+            {timeout && (
+              <CustomText text={timeout} type="text_small_light_blue_5_14" />
+            )}
+            {distance && (
+              <CustomText
+                text={distance + ' km'}
+                type="text_small_light_blue_5_14"
+              />
+            )}
           </View>
         </View>
       )}
@@ -213,13 +221,15 @@ const styles = StyleSheet.create({
     backgroundColor: TEXT_COLOR,
     zIndex: 2,
   },
-  navbar1: {
+  single: {
     width: '100%',
     height: 80,
+    flexDirection: 'column',
+    position: 'absolute',
     backgroundColor: TEXT_COLOR,
   },
   direction: {minHeight: 150},
-  iconBack: {position: 'absolute', top: 25, left: 10},
+  iconBack: {position: 'absolute', top: 30, left: 10},
   group: {
     flex: 1,
   },
@@ -234,5 +244,11 @@ const styles = StyleSheet.create({
     height: 20,
     resizeMode: 'contain',
     marginRight: 20,
+  },
+  distanceInfo: {
+    height: '100%',
+    maxWidth: 80,
+    justifyContent: 'space-between',
+    paddingVertical: 20,
   },
 });

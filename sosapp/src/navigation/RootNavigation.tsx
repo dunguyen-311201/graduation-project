@@ -9,7 +9,7 @@ import {
   ConfirmPolicyScreen,
   MapScreen,
   SendDistreeSignal,
-  SetupNameScreen,
+  SetupInfoScreen,
   SignupByPhoneNumberScreen,
   SignupBySocialScreen,
 } from '@screens';
@@ -22,7 +22,7 @@ export type RootParamList = {
   [EScreen.SPLASH]: undefined;
   [EScreen.SIGNUP_BY_PHONE_NUMBER]: undefined;
   [EScreen.SIGNUP_BY_SOCIAL]: undefined;
-  [EScreen.SIGNUP_NAME]: undefined;
+  [EScreen.SIGNUP_INFO]: undefined;
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
     phone: string;
@@ -78,7 +78,7 @@ const RootNavigation = () => {
           name={EScreen.CONFIRM_PHONE_NUMBER}
           component={ConfirmPhoneNumberScreen}
         />
-        <Stack.Screen name={EScreen.SIGNUP_NAME} component={SetupNameScreen} />
+        <Stack.Screen name={EScreen.SIGNUP_INFO} component={SetupInfoScreen} />
         <Stack.Screen
           name={EScreen.CONFIRM_POLICY}
           component={ConfirmPolicyScreen}

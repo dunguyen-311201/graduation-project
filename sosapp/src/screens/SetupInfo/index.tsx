@@ -1,22 +1,24 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Switch} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import ScreenBase from '@components/ScreenBase';
 import {EScreen} from '@enums/EScreen';
 import {RootScreenNavigationProps} from '@navigation';
-import {CustomInput} from '@components';
+import {CustomInput, CustomText} from '@components';
 import {Styles as st} from '@utils';
 import {TUser} from '@types';
 import {EUser} from '@enums/EUser';
 import {useAuth} from '@hooks';
 import {TextInput} from 'react-native-gesture-handler';
 
-const SetupNameScreen = () => {
+const SetupInfoScreen = () => {
   const [user, setUser] = useState<TUser>();
 
   const {setOptions, navigate, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_NAME>>();
+    useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
+
+  const [focusable, setFocusable] = useState(false);
 
   const {updateDisplayName} = useAuth();
 
@@ -88,15 +90,26 @@ const SetupNameScreen = () => {
           onEndEditing={handleEndEditing}
         />
       </View>
+      <View style={styles.group}>
+        <CustomText
+          text="You want to turn on join the rescue"
+          type="text_medium_light_blue_18"
+        />
+        <Switch
+          value={focusable}
+          onValueChange={() => setFocusable(prev => !prev)}
+        />
+      </View>
     </ScreenBase>
   );
 };
 
-export default SetupNameScreen;
+export default SetupInfoScreen;
 
 const styles = StyleSheet.create({
   group: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
 });

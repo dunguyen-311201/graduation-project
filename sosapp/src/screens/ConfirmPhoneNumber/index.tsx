@@ -6,7 +6,7 @@ import {ScreenBase, CustomInput} from '@components';
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 
-import {Styles as st} from '@utils';
+import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
 import {RootParamList} from '@navigation/RootNavigation';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
@@ -20,7 +20,15 @@ const ConfirmPhoneNumberScreen = () => {
   const {phone, comfirmation} = useRoute<ConfirmRoute>().params;
 
   useEffect(() => {
-    setOptions({headerShown: false});
+    const setup = async () => {
+      setOptions({headerShown: false});
+      const isNew = await getAsyncStorage('isNew');
+      if (isNew === null) {
+        await setAsyncStorage('isNew', 1);
+      }
+    };
+
+    setup();
   }, [setOptions]);
 
   const _onChangeText = useCallback((_code: string) => {
@@ -34,12 +42,14 @@ const ConfirmPhoneNumberScreen = () => {
         code,
       );
 
-      const a = await auth().signInWithCredential(credential);
-      if (a.additionalUserInfo?.isNewUser) {
-        navigate(EScreen.SIGNUP_NAME);
+      const {additionalUserInfo} = await auth().signInWithCredential(
+        credential,
+      );
+      if (!additionalUserInfo?.isNewUser) {
+        navigate(EScreen.DRAWER);
         return;
       }
-      navigate(EScreen.DRAWER);
+      navigate(EScreen.SIGNUP_INFO);
     } catch (error) {
       console.log(error);
     }
@@ -55,6 +65,7 @@ const ConfirmPhoneNumberScreen = () => {
         onChangeText={_onChangeText}
         field="phone"
         inputMode="numeric"
+        onEndEditing={_navigateNext}
         valueStyle={st.text_medium_24}
         maxLength={6}
       />

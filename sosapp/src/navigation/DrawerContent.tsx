@@ -31,6 +31,7 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
 
   const _handleSignout = useCallback(async () => {
     await handleLogout();
+    props.navigation.reset({index: 0, routes: [{name: EScreen.SPLASH}]});
     props.navigation.navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
   }, [handleLogout, props.navigation]);
 

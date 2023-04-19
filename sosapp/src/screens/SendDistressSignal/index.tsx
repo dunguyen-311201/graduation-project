@@ -1,9 +1,8 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Button} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useDeviceLocation} from '../../hooks';
 import {firebase} from '@react-native-firebase/database';
 import {useNavigation} from '@react-navigation/native';
-import {Button} from 'react-native';
 
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums/EScreen';
@@ -26,6 +25,7 @@ const SendDistreeSignal = () => {
     // return () => {
     //   ref.off('value');
     // };
+
     setOptions({headerShown: false});
   }, [setOptions]);
 
@@ -33,7 +33,7 @@ const SendDistreeSignal = () => {
     firebase
       .app()
       .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
-      .ref('/signals')
+      .ref('/messages')
       .push({deviceLocation});
   }, [deviceLocation]);
 
