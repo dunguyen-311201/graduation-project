@@ -1,25 +1,12 @@
 var admin = require('firebase-admin');
 
-async function onUserPictureLiked(ownerId: string, userId: string) {
-  const owner = admin.firestore().collection('users').doc(ownerId).get();
+var serviceAccount = require('graduation-project-c9688-firebase-adminsdk-we9nz-42e62da048.json');
 
-  const user = admin.firestore().collection('users').doc(userId).get();
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://graduation-project-c9688-default-rtdb.firebaseio.com',
+});
 
-  console.log(owner, user);
+const message = {};
 
-  await admin.messaging().sendToDevice(
-    owner.tokens,
-    {
-      data: {
-        owner: JSON.stringify(owner),
-        user: JSON.stringify(user),
-      },
-    },
-    {
-      contentAvailable: true,
-      priority: 'high',
-    },
-  );
-}
-
-export {onUserPictureLiked};
+admin.messaging().send();

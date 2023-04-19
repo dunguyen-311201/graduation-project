@@ -16,8 +16,7 @@ import {
 import Config from 'react-native-config';
 
 import {Location} from '@types';
-import {BackIcon, ClearInputIcon, DirectionIcon, TEXT_COLOR} from '@theme';
-import {useDeviceLocation} from '@hooks';
+import {ClearInputIcon, DirectionIcon, TEXT_COLOR} from '@theme';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -31,6 +30,7 @@ type SearchProps = {
   customStyle?: StyleProp<ViewStyle>;
   isDirection?: boolean;
   field?: string;
+  origin?: Location;
   placeholder: string;
   icon?: ImageSourcePropType;
   onToDirection?: () => void;
@@ -42,18 +42,17 @@ const SearchInput = ({
   field,
   placeholder,
   icon,
+  origin,
   isDirection = false,
   onToDirection,
 }: SearchProps) => {
-  const {deviceLocation} = useDeviceLocation();
-
   const [location, setLocation] = useState<Location>();
 
   useEffect(() => {
-    if (deviceLocation) {
-      setLocation(prev => ({...prev, ...deviceLocation}));
+    if (origin) {
+      setLocation(prev => ({...prev, ...origin}));
     }
-  }, [deviceLocation]);
+  }, [origin]);
 
   const handleSearch = useCallback(
     (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
@@ -78,8 +77,6 @@ const SearchInput = ({
     setLocation({latitude: 0, longitude: 0, description: ''});
   }, []);
 
-  console.log(isDirection);
-
   return (
     <View style={[styles.container, customStyle]}>
       <View style={styles.group}>
@@ -97,6 +94,7 @@ const SearchInput = ({
           keepResultsAfterBlur={false}
           textInputProps={{
             value: location?.description || '',
+            maxLength: 25,
             onChangeText: (value: string) => {
               setLocation({
                 latitude: 0,
@@ -111,16 +109,18 @@ const SearchInput = ({
           enablePoweredByContainer={true}
           nearbyPlacesAPI="GooglePlacesSearch"
         />
-        {location?.description !== '' && (
-          <Pressable style={styles.buttonClear} onPress={handleClear}>
-            <Image source={ClearInputIcon} style={styles.iconClear} />
-          </Pressable>
-        )}
-        {!isDirection && (
-          <Pressable style={styles.buttondirection} onPress={onToDirection}>
-            <Image source={DirectionIcon} style={styles.directionIcon} />
-          </Pressable>
-        )}
+        <View style={styles.rightButton}>
+          {location?.description !== '' && (
+            <Pressable style={styles.buttonClear} onPress={handleClear}>
+              <Image source={ClearInputIcon} style={styles.iconClear} />
+            </Pressable>
+          )}
+          {!isDirection && (
+            <Pressable style={styles.buttondirection} onPress={onToDirection}>
+              <Image source={DirectionIcon} style={styles.directionIcon} />
+            </Pressable>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   group: {
     position: 'absolute',
-    zIndex: 2,
+    zIndex: 3,
     top: 0,
     left: 0,
     right: 0,
@@ -143,34 +143,38 @@ const styles = StyleSheet.create({
   buttonLogo: {
     position: 'absolute',
     top: 30,
-    left: 15,
-    zIndex: 4,
+    left: 5,
+    zIndex: 5,
   },
   iconLogo: {
     width: 20,
     height: 20,
     resizeMode: 'contain',
   },
-
-  buttonClear: {
+  rightButton: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: 80,
     position: 'absolute',
-    top: 30,
-    right: 80,
+    height: 50,
     zIndex: 4,
-    borderRadius: 10,
+    right: 20,
+    top: 10,
+  },
+  buttonClear: {
+    borderRadius: 8,
+    marginRight: 10,
   },
 
   iconClear: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: TEXT_COLOR,
   },
 
   buttondirection: {
-    position: 'absolute',
-    top: 25,
-    right: 25,
-    zIndex: 4,
     borderLeftWidth: 1,
     paddingHorizontal: 7,
   },
@@ -184,10 +188,10 @@ const styles = StyleSheet.create({
 const inputSearch = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 50,
+    left: 40,
     top: 15,
     right: 20,
-    zIndex: 3,
+    zIndex: 4,
   },
   textInput: {
     fontSize: 18,

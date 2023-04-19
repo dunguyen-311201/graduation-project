@@ -17,6 +17,7 @@ import {useDeviceLocation} from '@hooks';
 import CustomMarker from './components/CustomMarker';
 import MapViewDirections from 'react-native-maps-directions';
 import Config from 'react-native-config';
+import {BackIcon} from '@components';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -27,10 +28,11 @@ type SearchLocation = {
   timeout?: string;
 };
 
-let region: Location;
+// let region: Location;
 
 const MapScreen = () => {
-  const {setOptions} = useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
+  const {setOptions, goBack} =
+    useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
 
   const [isDirection, setIsDirection] = useState(false);
 
@@ -42,15 +44,13 @@ const MapScreen = () => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
+  console.log(locations);
+
   useEffect(() => {
     setLocations({from: deviceLocation});
   }, [deviceLocation]);
 
   const {from, to} = locations || {};
-
-  if (!region && from) {
-    region = {...from};
-  }
 
   useEffect(() => {
     const getDistance = async () => {
@@ -64,7 +64,7 @@ const MapScreen = () => {
             const {distance, duration} = data?.rows[0].elements[0];
             const d = Math.round(distance.value / 1000);
             const t = duration.text;
-            setLocations({distance: d, timeout: t});
+            setLocations(prev => ({...prev, distance: d, timeout: t}));
           })
           .catch(error => {
             console.log(error);
@@ -76,6 +76,7 @@ const MapScreen = () => {
   }, [from?.description, to?.description]);
 
   const handleSearch = useCallback((_location: Location, _field?: string) => {
+    console.log(_field);
     if (_field === 'to') {
       setLocations(prev => ({...prev, to: _location}));
     }
@@ -93,28 +94,37 @@ const MapScreen = () => {
   return (
     <View style={styles.container}>
       {!isDirection ? (
-        <SearchInput
-          onSearch={handleSearch}
-          placeholder="Search "
-          field="from"
-          onToDirection={handleToDirectionandSearch}
-          isDirection={isDirection}
-        />
+        <View style={[styles.navbar1]}>
+          <View style={styles.iconBack}>
+            <BackIcon onPress={goBack} />
+          </View>
+          <SearchInput
+            origin={from}
+            onSearch={handleSearch}
+            placeholder="Search"
+            field="from"
+            onToDirection={handleToDirectionandSearch}
+            isDirection={isDirection}
+          />
+        </View>
       ) : (
-        <View style={styles.navbar}>
+        <View style={[styles.navbar, styles.direction]}>
           <View style={styles.group}>
             <SearchInput
+              origin={from}
               icon={FromLocationIcon}
               onSearch={handleSearch}
               placeholder="From"
               field="from"
               onToDirection={handleToDirectionandSearch}
               isDirection={isDirection}
+              customStyle={styles.inputFirstItem}
             />
             <SearchInput
               icon={ToLocationIcon}
               onSearch={handleSearch}
               placeholder="Where to"
+              origin={to}
               field="to"
               onToDirection={handleToDirectionandSearch}
               isDirection={isDirection}
@@ -129,11 +139,11 @@ const MapScreen = () => {
         </View>
       )}
 
-      {region && (
+      {from && (
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={{...region, latitudeDelta: 0.009, longitudeDelta: 0.009}}>
+          region={{...from, latitudeDelta: 0.009, longitudeDelta: 0.009}}>
           {from && to && GOOGLE_MAPS_API_KEY && (
             <MapViewDirections
               origin={from}
@@ -147,12 +157,28 @@ const MapScreen = () => {
             <View>
               <CustomMarker
                 coordinate={from}
-                title="I'm here!"
+                title={to ? 'Begin' : 'Location'}
                 field="from"
                 onChangeLocation={handleChangeLocation}
               />
               <Circle
                 center={from}
+                radius={500}
+                fillColor="#42ff22"
+                strokeWidth={2}
+              />
+            </View>
+          )}
+          {to && (
+            <View>
+              <CustomMarker
+                coordinate={to}
+                title="End"
+                field="from"
+                onChangeLocation={handleChangeLocation}
+              />
+              <Circle
+                center={to}
                 radius={500}
                 fillColor="#42ff22"
                 strokeWidth={2}
@@ -176,27 +202,33 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
-
   navbar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    minHeight: 150,
+    minHeight: 80,
     width: '100%',
     position: 'absolute',
     backgroundColor: TEXT_COLOR,
     zIndex: 2,
   },
-
+  navbar1: {
+    width: '100%',
+    height: 80,
+    backgroundColor: TEXT_COLOR,
+  },
+  direction: {minHeight: 150},
+  iconBack: {position: 'absolute', top: 25, left: 10},
   group: {
     flex: 1,
   },
-
   lastItem: {
     top: '50%',
   },
-
+  inputFirstItem: {
+    zIndex: 2,
+  },
   icon: {
     width: 20,
     height: 20,

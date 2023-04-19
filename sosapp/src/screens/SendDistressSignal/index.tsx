@@ -1,25 +1,33 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useDeviceLocation} from '../../hooks';
 import {firebase} from '@react-native-firebase/database';
+import {useNavigation} from '@react-navigation/native';
 import {Button} from 'react-native';
 
+import {RootScreenNavigationProps} from '@navigation';
+import {EScreen} from '@enums/EScreen';
+import {ScreenBase} from '@components';
+
 const SendDistreeSignal = () => {
+  const {setOptions, goBack} =
+    useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
+
   const {deviceLocation} = useDeviceLocation();
 
   useEffect(() => {
-    const ref = firebase
-      .app()
-      .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
-      .ref('/signals');
-
-    ref.on('value', snapshot => {
-      console.log(snapshot.val());
-    });
-    return () => {
-      ref.off('value');
-    };
-  }, []);
+    // const ref = firebase
+    //   .app()
+    //   .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
+    //   .ref('/signals');
+    // ref.on('value', snapshot => {
+    //   console.log(snapshot.val());
+    // });
+    // return () => {
+    //   ref.off('value');
+    // };
+    setOptions({headerShown: false});
+  }, [setOptions]);
 
   const sendSignal = useCallback(async () => {
     firebase
@@ -30,10 +38,11 @@ const SendDistreeSignal = () => {
   }, [deviceLocation]);
 
   return (
-    <View>
-      <Text>SEND_DISTRESS_SIGNAL</Text>
+    <ScreenBase
+      onBack={goBack}
+      title="You have to connect to the support service">
       <Button title="Send Location" onPress={sendSignal} />
-    </View>
+    </ScreenBase>
   );
 };
 

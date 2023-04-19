@@ -20,7 +20,6 @@ export const ContextProvider = ({children}: ContextProps) => {
   useEffect(() => {
     const setup = async () => {
       const isNew = await getAsyncStorage('isNew');
-      console.log({isNew});
       setStore({isFirstAuthenticated: isNew === null});
     };
 

@@ -14,11 +14,11 @@ import {PermissionsAndroid} from 'react-native';
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
 const HomeScreen = () => {
-  const {navigate, setOptions} =
+  const {navigate, setOptions, reset, openDrawer} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   useEffect(() => {
-    // setOptions({headerShown: false});
+    setOptions({headerShown: false});
   }, [setOptions]);
 
   useEffect(() => {
@@ -69,13 +69,13 @@ const HomeScreen = () => {
 
   return (
     <ScreenBase
-      title={
-        'To find your pickup\nlocation\nautomatically, turn \non location services'
+      onOptions={openDrawer}
+      desc={
+        'Are you having problems with\nyour vehicle?\nImmediately connect to\nthe rescue service.'
       }>
       <View style={styles.options}>
         <Card icon={SOSIcon} title="Send rescue" onPress={_handleSendRescue} />
         <Card icon={GoMapIcon} title="Go to Map" onPress={_navigationMap} />
-        <Card icon={SOSIcon} title="Send" onPress={send} />
       </View>
     </ScreenBase>
   );
