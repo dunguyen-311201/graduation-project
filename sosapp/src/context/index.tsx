@@ -1,30 +1,66 @@
-import {getAsyncStorage} from '@utils/asyncStorage';
-import React, {createContext, useEffect, useState} from 'react';
+import useAuth from '@hooks/useAuth';
+import {TUser} from '@types';
+import React, {createContext, useState, useMemo} from 'react';
 
 export type ContextProps = {
-  children?: React.ReactNode;
-  isFirstAuthenticated?: boolean;
-  setIsFirstAuthenticated?: (value: boolean) => void;
+  userInfo?: TUser;
+  setUserInfo: React.Dispatch<React.SetStateAction<TUser | undefined>>;
+  signInfo: (user: TUser) => Promise<void>;
 };
 
 export const Context = createContext<ContextProps>({
-  isFirstAuthenticated: true,
-  setIsFirstAuthenticated: (value: boolean) => {
-    value;
-  },
+  setUserInfo: () => {},
+  signInfo: async () => {},
 });
 
-export const ContextProvider = ({children}: ContextProps) => {
-  const [store, setStore] = useState<ContextProps>({});
+export const ContextProvider = ({children}: {children: React.ReactNode}) => {
+  const {currentUser, signupInfo} = useAuth();
+  const [userInfo, setUserInfo] = useState<TUser>();
 
-  useEffect(() => {
-    const setup = async () => {
-      const isNew = await getAsyncStorage('isNew');
-      setStore({isFirstAuthenticated: isNew === null});
-    };
+  const store: ContextProps = useMemo(
+    () => ({
+      userInfo,
+      setUserInfo,
+      signInfo: async (user: TUser) => {
+        if (currentUser && user) {
+          const displayName = `${user.firstName} ${user.lastName}`;
+          await currentUser.updateProfile({displayName});
+          await signupInfo(user);
+        }
+      },
+    }),
+    [currentUser, signupInfo, userInfo],
+  );
 
-    setup();
-  }, []);
+  // useEffect(() => {
+  //   const setup = async () => {
+  //     setLoading(true);
+  //     if (currentUser) {
+  //       await currentUser.reload();
+  //       const _isFirst = await getAsyncStorage(FIRST_INSTALLED);
+  //       setIsFirst(_isFirst !== null);
+  //       const user = (
+  //         await firebase()
+  //           .collection('users')
+  //           .where('uid', '==', currentUser.uid)
+  //           .get()
+  //       ).docs[0]?.data();
+
+  //       if (user && user !== null) {
+  //         setUserInfo(prev => ({
+  //           ...prev,
+  //           ...user,
+  //           isAuthenticated: true,
+  //         }));
+  //         return;
+  //       }
+  //       setUserInfo(prev => ({...prev, isAuthenticated: false}));
+  //     }
+  //     setLoading(false);
+  //   };
+
+  //   setup();
+  // }, [currentUser]);
 
   return <Context.Provider value={store}>{children}</Context.Provider>;
 };

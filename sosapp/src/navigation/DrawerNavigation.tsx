@@ -3,6 +3,7 @@ import {
   DrawerContentComponentProps,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
+
 import {StyleSheet} from 'react-native';
 import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
 

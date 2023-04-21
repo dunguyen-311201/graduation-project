@@ -14,7 +14,7 @@ type PhoneInputProps = {
   phone?: string;
   onEndEditing?: () => void;
   onChangePhone: (phone: string) => void;
-  onChangeNation: (code: string) => void;
+  onChangeNation: (_nation: Nation) => void;
 };
 
 const PhoneInput = ({
@@ -26,17 +26,13 @@ const PhoneInput = ({
 }: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
 
-  const handleChangeText = useCallback(
-    (value: string) => {
-      onChangePhone(value);
-    },
-    [onChangePhone],
-  );
-
   const handleSelectNation = useCallback(
     (code: string) => {
-      onChangeNation(code);
-      setIsvisible(false);
+      const _nation = PHONES.find(item => item.code === code);
+      if (_nation) {
+        onChangeNation(_nation);
+        setIsvisible(false);
+      }
     },
     [onChangeNation],
   );
@@ -71,7 +67,7 @@ const PhoneInput = ({
       </Pressable>
       <CustomInput
         value={phone}
-        onChangeText={handleChangeText}
+        onChangeText={onChangePhone}
         field="phone"
         inputMode="numeric"
         valueStyle={st.text_medium_gray_24}

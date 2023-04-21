@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "977744512989",
-    "project_id": "sosapp-384004",
-    "storage_bucket": "sosapp-384004.appspot.com"
+    "project_number": "1009553431502",
+    "project_id": "cloudfunctions-1c323-9688a",
+    "storage_bucket": "cloudfunctions-1c323-9688a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:977744512989:android:aa2f8691b88ee150071834",
+        "mobilesdk_app_id": "1:1009553431502:android:65bd17bf1275bbca0be99f",
         "android_client_info": {
           "package_name": "com.sosapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "977744512989-28qdbqe4ja704jm8quuait7jstnc6ndt.apps.googleusercontent.com",
+          "client_id": "1009553431502-6stqnmpf4bd5cs2m505l6b5rsk0idp82.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBvF0Ec15Dwjv-DjlMnBjcAdLomiPH-UD8"
+          "current_key": "AIzaSyBxmeZ6BlzxhNBpzNp3bTcj98h1kJpwe5I"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "977744512989-28qdbqe4ja704jm8quuait7jstnc6ndt.apps.googleusercontent.com",
+              "client_id": "1009553431502-6stqnmpf4bd5cs2m505l6b5rsk0idp82.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

@@ -1,7 +1,6 @@
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 import {ScreenBase, CustomText} from '@components';
 import {ArrowRightBlueIcon} from '@theme';
@@ -10,72 +9,53 @@ import {EScreen} from '@enums';
 import {PHONES} from '@constants';
 import {Nation} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
-import useAuth from '@hooks/useAuth';
+import {useAuth} from '@hooks';
 
 const SignupByPhoneNumberScreen = () => {
-  const [phone, setPhone] = useState('');
-  const {currentUser} = useAuth();
-
-  const [comfirmation, setConfirmation] =
-    useState<FirebaseAuthTypes.ConfirmationResult>();
-
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
+  const [phone, setPhone] = useState('');
+
+  const {signupByPhoneNumber} = useAuth();
+
   useEffect(() => {
     setOptions({headerShown: false});
-    if (currentUser) {
-      if (currentUser.displayName !== null) {
-        navigate(EScreen.DRAWER);
-        return;
-      }
-      navigate(EScreen.SIGNUP_INFO);
+  }, [setOptions]);
+
+  const handleNext = useCallback(async () => {
+    const textPhone = `${nation.code}${phone}`;
+    const verificationId = await signupByPhoneNumber(textPhone);
+    if (verificationId !== null) {
+      navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+        phone: textPhone,
+        verificationId,
+      });
     }
-  }, [currentUser, navigate, setOptions]);
+  }, [nation.code, navigate, phone, signupByPhoneNumber]);
 
-  const _navigateNext = useCallback(async () => {
-    const _comfirmation = await auth().signInWithPhoneNumber(
-      `${nation.code}${phone}`,
-    );
-
-    setConfirmation(_comfirmation);
-
-    navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-      phone,
-      comfirmation: _comfirmation,
-    });
-  }, [nation.code, navigate, phone]);
-
-  const _navigateSocial = useCallback(() => {
+  const handleNavigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
   }, [navigate]);
-
-  const handleChangePhone = useCallback((_phone: string) => {
-    setPhone(_phone);
-  }, []);
-
-  const handleChangeNation = useCallback((code: string) => {
-    const na = PHONES.find(item => item.code === code);
-    if (na) {
-      setNation(na);
-    }
-  }, []);
 
   return (
     <ScreenBase
       title="Enter your mobile number"
       onBack={goBack}
-      onNext={_navigateNext}>
+      onNext={handleNext}>
       <PhoneInput
         nation={nation}
         phone={phone}
-        onEndEditing={_navigateNext}
-        onChangeNation={handleChangeNation}
-        onChangePhone={handleChangePhone}
+        onEndEditing={handleNext}
+        onChangeNation={setNation}
+        onChangePhone={setPhone}
       />
-      <TouchableOpacity style={styles.buttonToSocial} onPress={_navigateSocial}>
+      <TouchableOpacity
+        style={styles.buttonToSocial}
+        onPress={handleNavigateSocial}
+        disabled={phone.length === 9}>
         <CustomText
           text="Or connect with social"
           type="text_medium_light_blue_24"

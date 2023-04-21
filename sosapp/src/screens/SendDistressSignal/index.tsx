@@ -1,12 +1,12 @@
 import {StyleSheet, Button} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
 import {useDeviceLocation} from '../../hooks';
-import {firebase} from '@react-native-firebase/database';
 import {useNavigation} from '@react-navigation/native';
 
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums/EScreen';
 import {ScreenBase} from '@components';
+import {callAPI} from '@services';
 
 const SendDistreeSignal = () => {
   const {setOptions, goBack} =
@@ -15,26 +15,20 @@ const SendDistreeSignal = () => {
   const {deviceLocation} = useDeviceLocation();
 
   useEffect(() => {
-    // const ref = firebase
-    //   .app()
-    //   .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
-    //   .ref('/signals');
-    // ref.on('value', snapshot => {
-    //   console.log(snapshot.val());
-    // });
-    // return () => {
-    //   ref.off('value');
-    // };
-
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const sendSignal = useCallback(async () => {
-    firebase
-      .app()
-      .database('https://graduation-project-c9688-default-rtdb.firebaseio.com')
-      .ref('/messages')
-      .push({deviceLocation});
+    await callAPI({
+      route: 'MESSAGE',
+      method: 'POST',
+      data: {
+        location: deviceLocation,
+        type: 'Car has a problem',
+        describe: 'The car has a tire problem, I need a rescue team right now',
+        user: 'vMl4u3W1RbgzW5pPxqpF',
+      },
+    });
   }, [deviceLocation]);
 
   return (

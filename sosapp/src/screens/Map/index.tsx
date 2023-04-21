@@ -1,7 +1,7 @@
 import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
 import React, {useEffect, useCallback, useState} from 'react';
 import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
@@ -18,6 +18,7 @@ import CustomMarker from './components/CustomMarker';
 import MapViewDirections from 'react-native-maps-directions';
 import Config from 'react-native-config';
 import {BackIcon, CustomText} from '@components';
+import {RootParamList} from '@navigation/RootNavigation';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -28,11 +29,13 @@ type SearchLocation = {
   timeout?: string;
 };
 
-// let region: Location;
+type ConfirmRoute = RouteProp<RootParamList, EScreen.MAP>;
 
 const MapScreen = () => {
   const {setOptions, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
+
+  const {initLocation} = useRoute<ConfirmRoute>().params;
 
   const [isDirection, setIsDirection] = useState(false);
 
@@ -42,7 +45,10 @@ const MapScreen = () => {
 
   useEffect(() => {
     setOptions({headerShown: false});
-  }, [setOptions]);
+    if (initLocation) {
+      setLocations({to: initLocation, from: deviceLocation});
+    }
+  }, [deviceLocation, initLocation, setOptions]);
 
   useEffect(() => {
     setLocations({from: deviceLocation});
@@ -59,9 +65,9 @@ const MapScreen = () => {
         fetch(URL)
           .then(response => response.json())
           .then(data => {
-            const {distance, duration} = data?.rows[0].elements[0];
-            const d = Math.round(distance.value / 1000);
-            const t = duration.text;
+            const cal = data?.rows[0].elements[0];
+            const d = Math.round(cal.distance.value / 1000);
+            const t = cal.duration.text;
             setLocations(prev => ({...prev, distance: d, timeout: t}));
           })
           .catch(error => {
@@ -87,8 +93,6 @@ const MapScreen = () => {
   }, []);
 
   const handleChangeLocation = useCallback(() => {}, []);
-
-  console.log({distance});
 
   return (
     <View style={styles.container}>

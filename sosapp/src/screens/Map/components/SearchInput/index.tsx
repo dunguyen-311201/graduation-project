@@ -56,7 +56,6 @@ const SearchInput = ({
 
   const handleSearch = useCallback(
     (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
-      console.log('Search');
       const _location = detail?.geometry?.location;
       if (_location) {
         const {lat, lng} = _location;
@@ -91,7 +90,6 @@ const SearchInput = ({
           placeholder={placeholder}
           styles={inputSearch}
           fetchDetails={true}
-          onFail={er => console.log(er)}
           onPress={handleSearch}
           keepResultsAfterBlur={false}
           textInputProps={{

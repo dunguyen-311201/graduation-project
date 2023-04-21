@@ -1,4 +1,4 @@
-import React, {useContext, useMemo} from 'react';
+import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {EScreen} from '@enums/EScreen';
@@ -13,9 +13,7 @@ import {
   SignupByPhoneNumberScreen,
   SignupBySocialScreen,
 } from '@screens';
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {useAuth} from '@hooks';
-import {Context} from '@context/index';
+import {Location} from '@types';
 
 export type RootParamList = {
   [EScreen.DRAWER]: undefined;
@@ -26,34 +24,18 @@ export type RootParamList = {
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
     phone: string;
-    comfirmation: FirebaseAuthTypes.ConfirmationResult;
+    verificationId: string;
   };
-  [EScreen.MAP]: undefined;
+  [EScreen.MAP]: {initLocation?: Location};
   [EScreen.SEND_DISTRESS_SIGNAL]: undefined;
 };
 
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
-  const {isFirstAuthenticated} = useContext(Context);
-
-  const {currentUser} = useAuth();
-
-  const initRoute = useMemo(() => {
-    if (currentUser && currentUser.displayName !== null) {
-      return EScreen.DRAWER;
-    }
-
-    if (isFirstAuthenticated) {
-      return EScreen.SIGNUP_BY_PHONE_NUMBER;
-    }
-
-    return EScreen.SPLASH;
-  }, [currentUser, isFirstAuthenticated]);
-
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initRoute}>
+      <Stack.Navigator initialRouteName={EScreen.SPLASH}>
         <Stack.Screen
           name={EScreen.DRAWER}
           component={DrawerNavigation}

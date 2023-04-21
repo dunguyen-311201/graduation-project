@@ -7,4 +7,7 @@ export enum EUser {
   phoneNumber = 'phoneNumber',
   email = 'email',
   photoURL = 'photoURL',
+  token = 'token',
+  isAuthenticated = 'isAuthenticated',
+  location = 'location',
 }

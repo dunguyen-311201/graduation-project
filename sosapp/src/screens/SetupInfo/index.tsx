@@ -1,65 +1,76 @@
 import {StyleSheet, View, Switch} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import ScreenBase from '@components/ScreenBase';
 import {EScreen} from '@enums/EScreen';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, CustomText} from '@components';
-import {Styles as st} from '@utils';
-import {TUser} from '@types';
-import {EUser} from '@enums/EUser';
-import {useAuth} from '@hooks';
+import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
+import {EUser} from '@enums';
+import {USER_CACHE} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
+import {TUser} from '@types';
+import useAuth from '@hooks/useAuth';
 
 const SetupInfoScreen = () => {
-  const [user, setUser] = useState<TUser>();
-
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
 
   const [focusable, setFocusable] = useState(false);
 
-  const {updateDisplayName} = useAuth();
-
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
 
-  useEffect(() => {
-    setOptions({headerShown: false});
-  }, [setOptions]);
+  const [data, setData] = useState<TUser>();
+
+  const {currentUser} = useAuth();
+
+  const {phoneNumber, uid} = currentUser || {};
+
+  const {firstName, lastName} = data || {};
 
   useEffect(() => {
+    setOptions({headerShown: false});
     if (inputFirstRef?.current) {
       inputFirstRef?.current?.focus();
     }
-  }, []);
+  }, [setOptions]);
 
   const handleNext = useCallback(async () => {
-    await updateDisplayName(`${user?.firstName} ${user?.lastName}`);
+    let cacheUser = await getAsyncStorage<TUser>(USER_CACHE);
+
+    if (uid && phoneNumber && phoneNumber !== null) {
+      await setAsyncStorage<TUser>(USER_CACHE, {
+        ...cacheUser,
+        firstName,
+        lastName,
+        phoneNumber,
+        uid,
+      });
+    }
     navigate(EScreen.CONFIRM_POLICY);
-  }, [navigate, updateDisplayName, user?.firstName, user?.lastName]);
+  }, [firstName, lastName, navigate, phoneNumber, uid]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
-      setUser(prev => ({...prev, [field]: value}));
+      setData(prev => ({...prev, [field]: value}));
     }
   }, []);
 
   const handleEndEditing = useCallback(
     (field: string) => {
-      switch (field) {
-        case EUser.first:
-          inputLastRef?.current?.focus();
-          break;
-
-        case EUser.last:
-          handleNext();
-          break;
-
-        default:
-          break;
+      if (field === EUser.first) {
+        inputLastRef?.current?.focus();
+        return;
       }
+      handleNext();
     },
     [handleNext],
   );
@@ -70,7 +81,7 @@ const SetupInfoScreen = () => {
         <CustomInput
           field={EUser.first}
           nColumn={2}
-          value={user?.firstName}
+          value={firstName}
           titleStyle={st.text_medium_24}
           valueStyle={st.text_medium_gray_24}
           onChangeText={handleChangeText}
@@ -81,7 +92,7 @@ const SetupInfoScreen = () => {
         <CustomInput
           field={EUser.last}
           nColumn={2}
-          value={user?.lastName}
+          value={lastName}
           titleStyle={st.text_medium_24}
           valueStyle={st.text_medium_gray_24}
           onChangeText={handleChangeText}

@@ -1,40 +1,38 @@
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useContext} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {firebase} from '@react-native-firebase/firestore';
-import message from '@react-native-firebase/messaging';
 
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import useAuth from '@hooks/useAuth';
+import {getAsyncStorage, setAsyncStorage} from '@utils/asyncStorage';
+import {FIRST_INSTALLED, USER_CACHE} from '@constants';
+import {TUser} from '@types';
+import {Context} from '@context';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
 
-  const {currentUser} = useAuth();
+  const {signInfo} = useContext(Context);
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  const _onNext = useCallback(async () => {
-    if (currentUser) {
-      const token = await message().getToken();
+  const handleNext = useCallback(async () => {
+    const cacheUser = await getAsyncStorage<TUser>(USER_CACHE);
 
-      await firebase.firestore().collection('users').add({
-        deviceToken: token,
-        uid: currentUser?.uid,
-      });
-
+    if (cacheUser !== null) {
+      await signInfo(cacheUser);
+      await setAsyncStorage(FIRST_INSTALLED, 1);
       navigate(EScreen.DRAWER);
     }
-  }, [currentUser, navigate]);
+  }, [navigate, signInfo]);
 
   return (
-    <ScreenBase onBack={goBack} onNext={_onNext}>
+    <ScreenBase onBack={goBack} onNext={handleNext}>
       <View style={styles.content}>
         <View style={styles.boxProfile}>
           <Image source={ProfileIcon} />

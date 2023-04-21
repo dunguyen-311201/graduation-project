@@ -1,5 +1,5 @@
-import {StyleSheet, View, PermissionsAndroid} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
+import {StyleSheet, View, PermissionsAndroid, Alert} from 'react-native';
+import React, {useCallback, useContext, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 
@@ -7,6 +7,9 @@ import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
 import {ScreenBase, Card} from '@components';
 import {GoMapIcon, SOSIcon} from '@theme';
+import useAuth from '@hooks/useAuth';
+import {Context} from '@context';
+import {useUser} from '@hooks';
 
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
@@ -14,19 +17,39 @@ const HomeScreen = () => {
   const {navigate, setOptions, openDrawer} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
-  useEffect(() => {
-    setOptions({headerShown: false});
-  }, [setOptions]);
+  const {currentUser} = useAuth();
+
+  const {setUserInfo} = useContext(Context);
+
+  const {user} = useUser({uid: currentUser?.uid});
 
   useEffect(() => {
-    messaging()
-      .getToken()
-      .then(token => {
-        console.log(token);
-      });
+    setOptions({headerShown: false});
+    setUserInfo(user);
+  }, [setOptions, setUserInfo, user]);
+
+  useEffect(() => {
+    // PushNotification.configure({
+    //   onNotification: function (notification: any) {
+    //     console.log('NOTIFICATION:', notification);
+    //     navigate(EScreen.DRAWER);
+    //   },
+    // });
 
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log('Realtime subscription: ', remoteMessage);
+      Alert.alert('Real', '123');
+    });
+
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage.notification,
+      );
+      console.log('Notification: ', remoteMessage.data);
+      if (remoteMessage.data) {
+        navigate(EScreen.MAP, {initLocation: undefined});
+      }
     });
 
     messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -34,10 +57,10 @@ const HomeScreen = () => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [navigate]);
 
   const _navigationMap = useCallback(() => {
-    navigate(EScreen.MAP);
+    navigate(EScreen.MAP, {});
   }, [navigate]);
 
   const _handleSendRescue = useCallback(() => {

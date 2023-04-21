@@ -1,13 +1,14 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
 
 import {ScreenBase, CustomInput} from '@components';
-import {EScreen} from '@enums';
+import {EScreen, EUser} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
-
-import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
+import {setAsyncStorage, Styles as st} from '@utils';
 import {RootParamList} from '@navigation/RootNavigation';
+import useAuth from '@hooks/useAuth';
+import {TUser} from '@types';
+import {USER_CACHE} from '@constants';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -15,57 +16,51 @@ const ConfirmPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
+  const {phone, verificationId} = useRoute<ConfirmRoute>().params;
+
   const [code, setCode] = useState('');
 
-  const {phone, comfirmation} = useRoute<ConfirmRoute>().params;
+  const {handleVerification, currentUser} = useAuth();
 
   useEffect(() => {
-    const setup = async () => {
-      setOptions({headerShown: false});
-      const isNew = await getAsyncStorage('isNew');
-      if (isNew === null) {
-        await setAsyncStorage('isNew', 1);
-      }
-    };
+    setOptions({headerShown: false});
+    if (currentUser) {
+      navigate(EScreen.SIGNUP_INFO);
+    }
+  }, [currentUser, navigate, setOptions]);
 
-    setup();
-  }, [setOptions]);
+  const handleNext = useCallback(async () => {
+    const {user, additionalUserInfo} = await handleVerification(
+      verificationId,
+      code,
+    );
 
-  const _onChangeText = useCallback((_code: string) => {
-    setCode(_code);
-  }, []);
+    const {uid, phoneNumber, displayName} = user;
 
-  const _navigateNext = useCallback(async () => {
-    try {
-      const credential = auth.PhoneAuthProvider.credential(
-        comfirmation.verificationId,
-        code,
-      );
-
-      const {additionalUserInfo} = await auth().signInWithCredential(
-        credential,
-      );
-      if (!additionalUserInfo?.isNewUser) {
+    if (uid && phoneNumber !== null) {
+      await setAsyncStorage<TUser>(USER_CACHE, {
+        [EUser.uid]: uid,
+        [EUser.phoneNumber]: phoneNumber,
+      });
+      if (!additionalUserInfo?.isNewUser && displayName !== null) {
         navigate(EScreen.DRAWER);
         return;
       }
       navigate(EScreen.SIGNUP_INFO);
-    } catch (error) {
-      console.log(error);
     }
-  }, [code, comfirmation, navigate]);
+  }, [code, handleVerification, navigate, verificationId]);
 
   return (
     <ScreenBase
       desc={'Enter the 6-digit code sent to you at\n' + phone}
       onBack={goBack}
-      onNext={_navigateNext}>
+      onNext={handleNext}>
       <CustomInput
         value={code}
-        onChangeText={_onChangeText}
+        onChangeText={setCode}
         field="phone"
         inputMode="numeric"
-        onEndEditing={_navigateNext}
+        onEndEditing={handleNext}
         valueStyle={st.text_medium_24}
         maxLength={6}
       />

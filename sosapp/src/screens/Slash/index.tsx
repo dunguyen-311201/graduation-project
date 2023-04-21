@@ -1,30 +1,60 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
+import firebase from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 
-import {CustomButton, CustomLinearGradient, CustomText} from '@components';
-import {ArrowRightIcon, CheckShieldIcon} from '@theme/icon';
-import Shadow from '@components/Shadow';
+import {
+  CustomButton,
+  CustomLinearGradient,
+  Shadow,
+  CustomText,
+} from '@components';
+import {ArrowRightIcon, CheckShieldIcon} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
-import {useAuth} from '@hooks';
+import {getAsyncStorage} from '@utils/asyncStorage';
+import {FIRST_INSTALLED} from '@constants/cache';
 
-type SplashProps = {
-  isStart?: boolean;
-};
-
-function SplashScreen({isStart = true}: SplashProps) {
+function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
-
-  const {currentUser} = useAuth();
-
-  console.log(21, {currentUser});
+  const [loading, setLoading] = useState(true);
+  const [isFirst, setIsFirst] = useState(true);
 
   useEffect(() => {
-    if (currentUser) {
-      navigate(EScreen.DRAWER);
+    const init = async () => {
+      try {
+        setLoading(true);
+        const _isFirst = await getAsyncStorage(FIRST_INSTALLED);
+        setIsFirst(_isFirst !== null);
+        const cu = auth().currentUser;
+        if (cu !== null) {
+          await cu.reload();
+          const user = (
+            await firebase()
+              .collection('users')
+              .where('uid', '==', cu.uid)
+              .get()
+          ).docs[0]?.data();
+          if (user && user !== null) {
+            navigate(EScreen.DRAWER);
+            return;
+          }
+        }
+        navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
+      } catch (error) {
+        setIsFirst(true);
+      }
+      setLoading(false);
+    };
+    init();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (loading) {
+      navigate(EScreen.SPLASH);
     }
-  }, [currentUser, navigate]);
+  }, [loading, navigate]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
@@ -38,7 +68,7 @@ function SplashScreen({isStart = true}: SplashProps) {
             <CustomText text="SOS" type="text_large_white" />
           </Shadow>
 
-          {isStart && (
+          {!isFirst && (
             <CustomButton type="outline" customStyle={styles.topButtom}>
               <CustomText text="Move with safety" type="text_regular_white" />
               <Image source={CheckShieldIcon} />
@@ -46,7 +76,7 @@ function SplashScreen({isStart = true}: SplashProps) {
           )}
         </View>
 
-        {isStart && (
+        {!isFirst && (
           <CustomButton type="primary" onPress={_navigateNext}>
             <CustomText text="Get Started" type="text_large_7_white" />
             <Image source={ArrowRightIcon} style={styles.img} />
