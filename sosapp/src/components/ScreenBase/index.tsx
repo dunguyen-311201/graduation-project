@@ -46,11 +46,7 @@ const ScreenBase = ({
         )}
         {children}
       </View>
-      <View>
-        {onNext && (
-          <CustomButton onPress={onNext} type="default" label="Next" />
-        )}
-      </View>
+      <View>{onNext && <CustomButton onPress={onNext} label="Next" />}</View>
     </View>
   );
 };

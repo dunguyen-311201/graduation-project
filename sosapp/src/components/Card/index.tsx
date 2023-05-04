@@ -1,9 +1,9 @@
-import {Image, StyleSheet, Text, Pressable} from 'react-native';
+import {Image, StyleSheet, Pressable} from 'react-native';
 import React, {memo} from 'react';
 import {LIGHT_BLUE_COLOR, WHITE_COLOR} from '@theme/color';
 import {ImageSourcePropType} from 'react-native';
 
-import {Styles as st} from '@utils';
+import CustomText from '../common/Text';
 
 export type CardProps = {
   title: string;
@@ -15,8 +15,13 @@ const Card = ({title, icon, description, onPress}: CardProps) => {
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <Image source={icon} style={styles.icon} />
-      <Text style={[st.text_medium_light_blue_18, styles.title]}>{title}</Text>
-      {description && <Text>{description}</Text>}
+      <CustomText
+        text={title}
+        customStyle={styles.title}
+        type="text_medium_18"
+        color="blue"
+      />
+      {description && <CustomText text={description} />}
     </Pressable>
   );
 };

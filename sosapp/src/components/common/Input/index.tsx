@@ -26,6 +26,9 @@ type CustomInputProps = {
   maxLength?: number;
   nColumn?: number;
   placeholder?: string;
+  flex?: 'row' | 'column';
+  numberOfLines?: number;
+  multiline?: boolean;
   onEndEditing?: (feild: string) => void;
 };
 const CustomInput: React.ForwardRefRenderFunction<
@@ -44,9 +47,12 @@ const CustomInput: React.ForwardRefRenderFunction<
     marginLeft,
     onChangeText,
     placeholder,
+    flex = 'row',
     onBlur,
     onFocus,
     nColumn,
+    multiline,
+    numberOfLines,
     onEndEditing,
   } = props;
 
@@ -73,8 +79,10 @@ const CustomInput: React.ForwardRefRenderFunction<
     <View
       style={[
         styles.inputgroup,
+
         {
           marginLeft,
+          ...(flex && {...styles[flex]}),
           ...(nColumn && {width: `${100 / (nColumn + nColumn * 0.1)}%`}),
         },
       ]}>
@@ -90,6 +98,8 @@ const CustomInput: React.ForwardRefRenderFunction<
         maxLength={maxLength}
         placeholder={placeholder}
         onEndEditing={_onEndEditing}
+        numberOfLines={numberOfLines}
+        multiline={multiline}
       />
       {errorMessage && <CustomText text={errorMessage} />}
     </View>
@@ -100,11 +110,17 @@ export default memo(forwardRef(CustomInput));
 
 const styles = StyleSheet.create({
   inputgroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
     borderBottomColor: TEXT_COLOR,
     borderBottomWidth: 1,
-    width: '78%',
+    width: '100%',
+    marginBottom: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  column: {
+    flexDirection: 'column',
   },
   input: {
     width: '100%',

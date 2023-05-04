@@ -1,71 +1,28 @@
 import {
   StyleProp,
   StyleSheet,
-  Text,
+  Image,
   TouchableOpacity,
   ViewStyle,
+  ImageSourcePropType,
 } from 'react-native';
 import React, {memo} from 'react';
 
 import {EButton} from '@enums';
 import Shadow from '../../Shadow';
 import {Styles as st} from '@utils';
+import CustomText from '../Text';
 
 type ButtonProps = {
   label?: string;
   children?: React.ReactNode;
   type?: keyof typeof EButton;
+  icon?: ImageSourcePropType;
   customStyle?: StyleProp<ViewStyle>;
   paddingVertical?: number;
   paddingHorizontal?: number;
   onPress?: () => void;
 };
-
-const CustomButton = ({
-  children,
-  label = '',
-  type = 'default',
-  customStyle,
-  paddingHorizontal,
-  paddingVertical,
-  onPress,
-}: ButtonProps) => {
-  if (label) {
-    if (type === 'primary') {
-      type = 'default';
-    }
-
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        style={[
-          styles['button-container'],
-          styles[EButton[type]],
-          customStyle,
-        ]}>
-        <Text
-          style={[styles[EButton[type]], {paddingHorizontal, paddingVertical}]}>
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles['button-container'], styles[EButton[type]], customStyle]}>
-      {type !== 'primary' ? (
-        children
-      ) : (
-        <Shadow customStyle={styles.button} paddingVertical={16}>
-          {children}
-        </Shadow>
-      )}
-    </TouchableOpacity>
-  );
-};
-
-export default memo(CustomButton);
 
 const styles = StyleSheet.create({
   ['button-container']: {
@@ -85,11 +42,13 @@ const styles = StyleSheet.create({
   },
   [EButton.outline]: {
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'transparent',
     borderColor: '#EDF6FF',
     borderWidth: 1.7,
     borderRadius: 17,
-    paddingVertical: 14,
+    paddingVertical: 7,
     paddingHorizontal: 20,
   },
   [EButton.primary]: {
@@ -98,4 +57,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  arrowRightIcon: {marginLeft: 20},
 });
+
+const CustomButton = ({
+  label = '',
+  type = 'default',
+  icon,
+  customStyle,
+  onPress,
+}: ButtonProps) => {
+  let Button;
+  const style = styles[EButton[type]];
+  switch (type) {
+    case 'outline':
+      Button = (
+        <TouchableOpacity style={[style, customStyle]} onPress={onPress}>
+          <CustomText text={label} type="text_large_20" />
+          {icon && <Image source={icon} />}
+        </TouchableOpacity>
+      );
+      break;
+    case 'primary':
+      Button = (
+        <TouchableOpacity onPress={onPress} style={style}>
+          <Shadow customStyle={styles.button} paddingVertical={16}>
+            <CustomText text={label} type="text_xLarge" />
+            {icon && <Image source={icon} style={styles.arrowRightIcon} />}
+          </Shadow>
+        </TouchableOpacity>
+      );
+      break;
+
+    default:
+      Button = (
+        <TouchableOpacity style={style} onPress={onPress}>
+          <CustomText text={label} type="text_xLarge" />
+        </TouchableOpacity>
+      );
+      break;
+  }
+
+  return Button;
+};
+
+export default memo(CustomButton);

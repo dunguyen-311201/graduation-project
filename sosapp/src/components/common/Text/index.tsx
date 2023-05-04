@@ -1,18 +1,33 @@
-import {Text, TextStyle} from 'react-native';
+import {Text, TextStyle, GestureResponderEvent} from 'react-native';
 import React, {memo} from 'react';
 
-import {Styles} from '@utils';
+import {colors, styles} from '@utils';
 
 type CustomTextProps = {
   text: string;
   children?: React.ReactNode | string;
-  type?: keyof typeof Styles;
+  type?: keyof typeof styles;
+  color?: keyof typeof colors;
   customStyle?: TextStyle;
+  onPress?: ((event: GestureResponderEvent) => void) | undefined;
 };
 
-const CustomText = ({text, type, children, customStyle}: CustomTextProps) => {
+const CustomText = ({
+  text,
+  type,
+  children,
+  customStyle,
+  onPress,
+  color,
+}: CustomTextProps) => {
   return (
-    <Text style={{...(type && Styles[type]), ...customStyle}}>
+    <Text
+      style={{
+        ...(type && styles[type]),
+        ...customStyle,
+        ...(color && colors[color]),
+      }}
+      onPress={onPress}>
       {text}
       {children}
     </Text>
