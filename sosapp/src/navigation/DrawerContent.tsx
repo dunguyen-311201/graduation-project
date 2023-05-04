@@ -10,9 +10,10 @@ import {CustomButton, CustomText} from '@components';
 
 import {useAuth} from '@hooks';
 import {EScreen} from '@enums/EScreen';
+import {handleLogout} from '@utils';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {currentUser, handleLogout} = useAuth();
+  const {currentUser} = useAuth();
 
   const [icon, displayName] = useMemo(() => {
     let _icon = ProfileIcon,
@@ -33,7 +34,7 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
     await handleLogout();
     props.navigation.reset({index: 0, routes: [{name: EScreen.SPLASH}]});
     props.navigation.navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-  }, [handleLogout, props.navigation]);
+  }, [props.navigation]);
 
   return (
     <View style={styles.container}>

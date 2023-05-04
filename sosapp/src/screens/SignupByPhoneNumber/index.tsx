@@ -1,5 +1,5 @@
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {ScreenBase, CustomText} from '@components';
@@ -9,7 +9,7 @@ import {EScreen} from '@enums';
 import {PHONES} from '@constants';
 import {Nation} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
-import {useAuth} from '@hooks';
+import {signupByPhoneNumber} from '@utils';
 
 const SignupByPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
@@ -18,8 +18,6 @@ const SignupByPhoneNumberScreen = () => {
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
   const [phone, setPhone] = useState('');
-
-  const {signupByPhoneNumber} = useAuth();
 
   useEffect(() => {
     setOptions({headerShown: false});
@@ -34,7 +32,7 @@ const SignupByPhoneNumberScreen = () => {
         verificationId,
       });
     }
-  }, [nation.code, navigate, phone, signupByPhoneNumber]);
+  }, [nation.code, navigate, phone]);
 
   const handleNavigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
@@ -58,7 +56,8 @@ const SignupByPhoneNumberScreen = () => {
         disabled={phone.length === 9}>
         <CustomText
           text="Or connect with social"
-          type="text_medium_light_blue_24"
+          type="text_medium_24"
+          color="blue"
         />
         <Image source={ArrowRightBlueIcon} style={styles.iconSocial} />
       </TouchableOpacity>

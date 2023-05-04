@@ -1,14 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 import {ScreenBase, CustomInput} from '@components';
-import {EScreen, EUser} from '@enums';
+import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
-import {setAsyncStorage, Styles as st} from '@utils';
+import {handleUpdateInfo, handleVerification, Styles as st} from '@utils';
 import {RootParamList} from '@navigation/RootNavigation';
-import useAuth from '@hooks/useAuth';
-import {TUser} from '@types';
-import {USER_CACHE} from '@constants';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -16,39 +14,32 @@ const ConfirmPhoneNumberScreen = () => {
   const {setOptions, navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
-  const {phone, verificationId} = useRoute<ConfirmRoute>().params;
+  const {phone, verificationId} = useRoute<ConfirmRoute>().params || {};
 
   const [code, setCode] = useState('');
 
-  const {handleVerification, currentUser} = useAuth();
-
   useEffect(() => {
     setOptions({headerShown: false});
-    if (currentUser) {
-      navigate(EScreen.SIGNUP_INFO);
-    }
-  }, [currentUser, navigate, setOptions]);
+  }, [setOptions]);
 
   const handleNext = useCallback(async () => {
-    const {user, additionalUserInfo} = await handleVerification(
-      verificationId,
-      code,
-    );
-
-    const {uid, phoneNumber, displayName} = user;
-
-    if (uid && phoneNumber !== null) {
-      await setAsyncStorage<TUser>(USER_CACHE, {
-        [EUser.uid]: uid,
-        [EUser.phoneNumber]: phoneNumber,
-      });
-      if (!additionalUserInfo?.isNewUser && displayName !== null) {
-        navigate(EScreen.DRAWER);
+    const userCredential = await handleVerification(verificationId, code);
+    if (userCredential !== null) {
+      const {additionalUserInfo, user} = userCredential;
+      if (additionalUserInfo && additionalUserInfo.isNewUser) {
+        navigate(EScreen.SIGNUP_INFO);
         return;
       }
-      navigate(EScreen.SIGNUP_INFO);
+
+      if (additionalUserInfo === undefined) {
+        return;
+      }
+
+      const token = await messaging().getToken();
+      await handleUpdateInfo({token, uid: user.uid});
+      navigate(EScreen.DRAWER);
     }
-  }, [code, handleVerification, navigate, verificationId]);
+  }, [code, navigate, verificationId]);
 
   return (
     <ScreenBase

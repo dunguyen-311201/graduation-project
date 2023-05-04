@@ -133,3 +133,90 @@ export const Styles = {
     ...BaseStyles.text_medium_27,
   },
 };
+
+enum TextType {
+  'text fw-600 fs-64' = 'text_large',
+  'text fw-500 fs-30' = 'text_medium_30',
+  'text fw-500 fs-24' = 'text_medium_24',
+  'text fw-500 fs-20' = 'text_medium_20',
+  'text fw-400 fs-24' = 'text_regular_24',
+  'text fw-400 fs-20' = 'text_regular_20',
+  'text fw-500 fs-16' = 'text_medium_16',
+  'text fw-500 fs-14' = 'text_medium_14',
+}
+
+export const styles = StyleSheet.create({
+  text_large_64: {
+    fontSize: 64,
+    fontWeight: '600',
+    fontFamily: 'Open Sans',
+    color: TEXT_COLOR,
+  },
+  text_large_20: {
+    fontSize: 20,
+    fontWeight: '600',
+    fontFamily: 'Open Sans',
+    color: TEXT_COLOR,
+  },
+  text_xLarge: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+    textAlign: 'center',
+  },
+  text_medium_30: {
+    fontSize: 30,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+  },
+  text_medium_24: {
+    fontSize: 24,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+  },
+  text_medium_20: {
+    fontSize: 20,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+  },
+  text_regular_24: {
+    fontSize: 24,
+    fontWeight: '400',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+  },
+  text_regular_20: {
+    fontSize: 20,
+    fontWeight: '400',
+    fontFamily: 'Roboto',
+    color: TEXT_COLOR,
+  },
+  text_medium_16: {
+    fontSize: 16,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: GRAY_COLOR,
+  },
+  text_medium_18: {
+    fontSize: 18,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: GRAY_COLOR,
+  },
+  text_medium_14: {
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: GRAY_COLOR,
+  },
+});
+
+export const colors = StyleSheet.create({
+  blue: {
+    color: LIGHT_BLUE_COLOR,
+  },
+});

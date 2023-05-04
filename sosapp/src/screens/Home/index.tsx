@@ -1,5 +1,5 @@
 import {StyleSheet, View, PermissionsAndroid, Alert} from 'react-native';
-import React, {useCallback, useContext, useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 
@@ -7,9 +7,6 @@ import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
 import {ScreenBase, Card} from '@components';
 import {GoMapIcon, SOSIcon} from '@theme';
-import useAuth from '@hooks/useAuth';
-import {Context} from '@context';
-import {useUser} from '@hooks';
 
 PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
@@ -17,18 +14,18 @@ const HomeScreen = () => {
   const {navigate, setOptions, openDrawer} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
-  const {currentUser} = useAuth();
-
-  const {setUserInfo} = useContext(Context);
-
-  const {user} = useUser({uid: currentUser?.uid});
-
   useEffect(() => {
     setOptions({headerShown: false});
-    setUserInfo(user);
-  }, [setOptions, setUserInfo, user]);
+  }, [setOptions]);
 
   useEffect(() => {
+    // const a = async () => {
+    //   const infoSetUp = await getAsyncStorage<TUser>(USER_CACHE);
+
+    //   console.log(infoSetUp);
+    // };
+
+    // a();
     // PushNotification.configure({
     //   onNotification: function (notification: any) {
     //     console.log('NOTIFICATION:', notification);

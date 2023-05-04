@@ -15,7 +15,7 @@ const useDeviceLocation = () => {
   useEffect(() => {
     Geolocation.getCurrentPosition(info => {
       const {latitude, longitude} = info.coords;
-      setLocation({latitude, longitude});
+      setLocation({latitude, longitude, description: 'Current location'});
     });
   }, []);
 

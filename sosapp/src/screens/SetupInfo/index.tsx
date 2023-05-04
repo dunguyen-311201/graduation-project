@@ -1,23 +1,15 @@
 import {StyleSheet, View, Switch} from 'react-native';
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
-import ScreenBase from '@components/ScreenBase';
-import {EScreen} from '@enums/EScreen';
+import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
-import {CustomInput, CustomText} from '@components';
-import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
+import {CustomInput, CustomText, ScreenBase} from '@components';
+import {setAsyncStorage, Styles as st} from '@utils';
 import {EUser} from '@enums';
 import {USER_CACHE} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
 import {TUser} from '@types';
-import useAuth from '@hooks/useAuth';
 
 const SetupInfoScreen = () => {
   const {setOptions, navigate, goBack} =
@@ -30,10 +22,6 @@ const SetupInfoScreen = () => {
 
   const [data, setData] = useState<TUser>();
 
-  const {currentUser} = useAuth();
-
-  const {phoneNumber, uid} = currentUser || {};
-
   const {firstName, lastName} = data || {};
 
   useEffect(() => {
@@ -44,19 +32,14 @@ const SetupInfoScreen = () => {
   }, [setOptions]);
 
   const handleNext = useCallback(async () => {
-    let cacheUser = await getAsyncStorage<TUser>(USER_CACHE);
-
-    if (uid && phoneNumber && phoneNumber !== null) {
+    if (firstName && lastName) {
       await setAsyncStorage<TUser>(USER_CACHE, {
-        ...cacheUser,
         firstName,
         lastName,
-        phoneNumber,
-        uid,
       });
+      navigate(EScreen.CONFIRM_POLICY);
     }
-    navigate(EScreen.CONFIRM_POLICY);
-  }, [firstName, lastName, navigate, phoneNumber, uid]);
+  }, [firstName, lastName, navigate]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -104,7 +87,8 @@ const SetupInfoScreen = () => {
       <View style={styles.group}>
         <CustomText
           text="You want to turn on join the rescue"
-          type="text_medium_light_blue_18"
+          type="text_medium_18"
+          color="blue"
         />
         <Switch
           value={focusable}
