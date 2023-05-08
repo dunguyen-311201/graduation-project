@@ -19,7 +19,6 @@ const useAuth = () => {
 
   return {
     currentUser,
-    setCurrentUser,
   };
 };
 

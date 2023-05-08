@@ -10,4 +10,5 @@ export enum EUser {
   token = 'token',
   isAuthenticated = 'isAuthenticated',
   location = 'location',
+  lastLogin = 'lastLogin',
 }

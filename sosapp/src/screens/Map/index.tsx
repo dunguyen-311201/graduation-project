@@ -1,5 +1,6 @@
+import Config from 'react-native-config';
 import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
-import React, {useEffect, useCallback, useState} from 'react';
+import React, {useEffect, useCallback, useState, useContext} from 'react';
 import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
@@ -12,13 +13,11 @@ import {
   ClearInputIcon,
   TEXT_COLOR,
 } from '@theme';
-import SearchInput from './components/SearchInput';
-import {useDeviceLocation} from '@hooks';
-import CustomMarker from './components/CustomMarker';
+import {CustomMarker} from './components';
 import MapViewDirections from 'react-native-maps-directions';
-import Config from 'react-native-config';
-import {BackIcon, CustomText} from '@components';
+import {BackIcon, CustomText, SearchInput} from '@components';
 import {RootParamList} from '@navigation/RootNavigation';
+import {Context} from '@context';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -39,20 +38,36 @@ const MapScreen = () => {
 
   const [isDirection, setIsDirection] = useState(false);
 
-  const {deviceLocation} = useDeviceLocation();
+  const [locations, setLocations] = useState<SearchLocation>({
+    from: initLocation,
+  });
 
-  const [locations, setLocations] = useState<SearchLocation>();
+  const {deviceLocation} = useContext(Context);
 
   useEffect(() => {
     setOptions({headerShown: false});
-    if (initLocation) {
-      setLocations({to: initLocation, from: deviceLocation});
+    if (initLocation === undefined) {
+      setLocations({from: deviceLocation});
     }
   }, [deviceLocation, initLocation, setOptions]);
 
-  useEffect(() => {
-    setLocations({from: deviceLocation});
-  }, [deviceLocation]);
+  // const onPlacesChange = useCallback(() => {
+  //   console.log({initLocation});
+  //   if (initLocation) {
+  //     const {latitude, longitude} = initLocation;
+  //     fetch(
+  //       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&key=${GOOGLE_MAPS_API_KEY}`,
+  //     )
+  //       .then(response => response.json())
+  //       .then(data => {
+  //         // setPlaces(data.results);
+  //         console.log(69, data.results);
+  //       })
+  //       .catch(error => {
+  //         console.log(error);
+  //       });
+  //   }
+  // }, [initLocation]);
 
   const {from, to, distance, timeout} = locations || {};
 
@@ -97,18 +112,20 @@ const MapScreen = () => {
   return (
     <View style={styles.container}>
       {!isDirection ? (
-        <View style={[styles.navbar, styles.single]}>
+        <View style={styles.navbar}>
           <View style={styles.iconBack}>
             <BackIcon onPress={goBack} />
           </View>
-          <SearchInput
-            origin={from}
-            onSearch={handleSearch}
-            placeholder="Search"
-            field="from"
-            onToDirection={handleToDirectionandSearch}
-            isDirection={isDirection}
-          />
+          <View style={styles.single}>
+            <SearchInput
+              origin={from}
+              onSearch={handleSearch}
+              placeholder="Search"
+              field="from"
+              onToDirection={handleToDirectionandSearch}
+              isDirection={isDirection}
+            />
+          </View>
         </View>
       ) : (
         <View style={[styles.navbar, styles.direction]}>
@@ -121,7 +138,6 @@ const MapScreen = () => {
               field="from"
               onToDirection={handleToDirectionandSearch}
               isDirection={isDirection}
-              customStyle={styles.inputFirstItem}
             />
             <SearchInput
               icon={ToLocationIcon}
@@ -138,14 +154,9 @@ const MapScreen = () => {
             <Pressable onPress={handleToDirectionandSearch}>
               <Image source={ClearInputIcon} style={styles.icon} />
             </Pressable>
-            {timeout && (
-              <CustomText text={timeout} type="text_small_light_blue_5_14" />
-            )}
+            {timeout && <CustomText text={timeout} type="text_regular_20" />}
             {distance && (
-              <CustomText
-                text={distance + ' km'}
-                type="text_small_light_blue_5_14"
-              />
+              <CustomText text={distance + ' km'} type="text_regular_20" />
             )}
           </View>
         </View>
@@ -208,41 +219,43 @@ export default MapScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
   },
   map: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
   navbar: {
+    zIndex: 2,
+    position: 'absolute',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    minHeight: 80,
-    width: '100%',
-    position: 'absolute',
     backgroundColor: TEXT_COLOR,
-    zIndex: 2,
-  },
-  single: {
     width: '100%',
     height: 80,
+  },
+  single: {
+    flex: 1,
     flexDirection: 'column',
     position: 'absolute',
+    right: 40,
+    left: 40,
     backgroundColor: TEXT_COLOR,
+    zIndex: 3,
   },
-  direction: {minHeight: 150},
-  iconBack: {position: 'absolute', top: 30, left: 10},
+  direction: {minHeight: 150, paddingLeft: 40},
+  iconBack: {
+    position: 'absolute',
+    top: 30,
+    left: 10,
+    zIndex: 4,
+  },
   group: {
     flex: 1,
   },
   lastItem: {
     top: '50%',
   },
-  inputFirstItem: {
-    zIndex: 2,
-  },
+
   icon: {
     width: 20,
     height: 20,

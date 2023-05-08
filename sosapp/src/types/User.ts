@@ -17,4 +17,5 @@ export interface TUser {
   [EUser.token]?: string;
   [EUser.isAuthenticated]?: boolean;
   [EUser.location]?: Location;
+  [EUser.lastLogin]?: number;
 }

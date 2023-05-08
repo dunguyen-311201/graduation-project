@@ -92,6 +92,7 @@ const SearchInput = ({
           fetchDetails={true}
           onPress={handleSearch}
           keepResultsAfterBlur={false}
+          onFail={error => console.log(error)}
           textInputProps={{
             value: location?.description || '',
             maxLength: 25,
@@ -130,12 +131,16 @@ export default memo(SearchInput);
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    zIndex: 1,
+    position: 'absolute',
+    zIndex: 3,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 75,
   },
   group: {
     position: 'absolute',
-    zIndex: 3,
+    zIndex: 4,
     top: 0,
     left: 0,
     right: 0,
@@ -143,8 +148,8 @@ const styles = StyleSheet.create({
   buttonLogo: {
     position: 'absolute',
     top: 30,
-    left: 5,
-    zIndex: 5,
+    left: -30,
+    zIndex: 6,
   },
   iconLogo: {
     width: 20,
@@ -158,7 +163,7 @@ const styles = StyleSheet.create({
     width: 80,
     position: 'absolute',
     height: 50,
-    zIndex: 4,
+    zIndex: 5,
     right: 20,
     top: 10,
   },
@@ -188,10 +193,10 @@ const styles = StyleSheet.create({
 const inputSearch = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 40,
+    left: 0,
     top: 15,
-    right: 20,
-    zIndex: 4,
+    right: 15,
+    zIndex: 5,
   },
   textInput: {
     fontSize: 18,

@@ -1,35 +1,27 @@
-import {Image, Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View, ViewStyle, StyleProp} from 'react-native';
 import React, {memo} from 'react';
-import BackIcon from '../Back';
+
 import {CustomButton, CustomText} from '../common';
-import {MenuIcon} from '@theme/icon';
+import {BACKGROUND_COLOR, WHITE_COLOR} from '@theme';
 
 type ScreenBaseProps = {
   title?: string;
   desc?: string;
-  onBack?: () => void;
-  onOptions?: () => void;
   children?: React.ReactNode;
   onNext?: () => void;
+  customStyle?: StyleProp<ViewStyle>;
 };
 
 const ScreenBase = ({
   title,
-  onBack,
-  onOptions,
   children,
   desc,
   onNext,
+  customStyle,
 }: ScreenBaseProps) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, customStyle]}>
       <View>
-        {onBack && <BackIcon onPress={onBack} />}
-        {onOptions && (
-          <Pressable onPress={onOptions}>
-            <Image source={MenuIcon} />
-          </Pressable>
-        )}
         {title && (
           <CustomText
             text={title}
@@ -55,15 +47,33 @@ export default memo(ScreenBase);
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: BACKGROUND_COLOR,
     justifyContent: 'space-between',
-    paddingTop: 36,
     paddingHorizontal: 32,
     paddingBottom: 62,
+    // position: 'absolute'
+    zIndex: 2,
+    flex: 1,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
   header: {
     marginBottom: 20,
     marginTop: 15,
+  },
+  message: {
+    backgroundColor: WHITE_COLOR,
+    width: '80%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignSelf: 'center',
+    marginTop: 5,
+    borderRadius: 10,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
 });

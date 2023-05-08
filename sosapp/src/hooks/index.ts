@@ -1,4 +1,4 @@
 import useAuth from './useAuth';
-import useDeviceLocation from './useDeviceLocation';
+import useMessage from './useMessage';
 
-export {useAuth, useDeviceLocation};
+export {useAuth, useMessage};

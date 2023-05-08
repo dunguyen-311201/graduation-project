@@ -2,11 +2,20 @@ import auth from '@react-native-firebase/auth';
 import firebase from '@react-native-firebase/firestore';
 
 import {TUser} from '@types';
+import Config from 'react-native-config';
+const ENV = Config.ENV;
 
 const signupByPhoneNumber = async (phone: string) => {
   const confirmation = await auth().signInWithPhoneNumber(phone);
+  // if (ENV !== 'production') {
+  //   auth().settings().
+  // }
   const verificationId = confirmation.verificationId;
   return verificationId;
+};
+
+const getCurrentUser = () => {
+  return auth().currentUser;
 };
 
 const handleVerification = async (verificationId: string, code: string) => {
@@ -22,13 +31,6 @@ const handleVerification = async (verificationId: string, code: string) => {
 
 const signupInfo = async (user: TUser) => {
   await firebase().collection('users').doc(user.uid).set(user);
-};
-
-const reload = async () => {
-  let _currentUser = await auth().currentUser;
-  if (_currentUser !== null) {
-    await _currentUser.reload();
-  }
 };
 
 const checkSignup = async (uid: string) => {
@@ -62,8 +64,8 @@ export {
   handleUpdateInfo,
   handleVerification,
   signupByPhoneNumber,
-  reload,
   handleUpdateProfile,
   signupInfo,
   checkSignup,
+  getCurrentUser,
 };

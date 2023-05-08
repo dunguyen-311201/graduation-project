@@ -1,7 +1,7 @@
-import {FlatList, StyleSheet, Text, View, Pressable} from 'react-native';
+import {FlatList, StyleSheet, View, Pressable} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import CustomText from '../Text';
-import {DARK_GRAY_COLOR, WHITE_COLOR} from '@theme/color';
+import {BACKGROUND_COLOR, WHITE_COLOR} from '@theme/color';
 
 type DropDownProps = {
   data: string[];
@@ -25,46 +25,50 @@ const DropDown = ({data, initValue, onSelect, field}: DropDownProps) => {
     [field, onSelect],
   );
 
-  const renderItem = useCallback(({item}: {item: string}) => {
-    const handlePress = () => {
-      console.log(item);
-      handleSelect(item);
-    };
+  const renderItem = useCallback(
+    ({item}: {item: string}) => {
+      const handlePress = () => {
+        console.log(item);
+        handleSelect(item);
+      };
 
-    return (
-      <Pressable onPress={handlePress}>
-        <CustomText
-          text={item}
-          type="text_medium_18"
-          color="blue"
-          customStyle={styles.dropDownItem}
-        />
-      </Pressable>
-    );
-  }, []);
+      return (
+        <Pressable onPress={handlePress}>
+          <CustomText
+            text={item}
+            type="text_medium_20"
+            customStyle={styles.dropDownItem}
+          />
+        </Pressable>
+      );
+    },
+    [handleSelect],
+  );
 
   const keyExtractor = useCallback((item: string) => item, []);
 
   return (
-    <View style={styles.dropDown}>
-      <CustomText text="Type" type="text_medium_20" />
-      <View style={styles.lable}>
-        <CustomText
-          text={initValue}
-          onPress={handleDropdown}
-          type="text_medium_18"
-          customStyle={styles.dropDownItem}
-        />
-
-        {isVisiable && (
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            style={styles.list}
+    <View
+      style={{
+        ...styles.dropDown,
+        ...(isVisiable && {...styles.openList, height: data.length * 40}),
+      }}>
+      {!isVisiable && (
+        <Pressable onPress={handleDropdown} style={styles.dropDownItem}>
+          <CustomText
+            text={initValue || 'Select type emergency'}
+            type="text_medium_20"
           />
-        )}
-      </View>
+        </Pressable>
+      )}
+      {isVisiable && (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          style={{...styles.list, ...(isVisiable && {})}}
+        />
+      )}
     </View>
   );
 };
@@ -73,32 +77,23 @@ export default DropDown;
 
 const styles = StyleSheet.create({
   dropDown: {
-    marginBottom: 10,
+    height: 50,
     width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomColor: WHITE_COLOR,
-    borderBottomWidth: 1,
-    paddingBottom: 10,
-  },
-  lable: {
-    position: 'relative',
+    position: 'absolute',
     zIndex: 2,
-    flex: 1,
-    marginLeft: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: WHITE_COLOR,
+    marginTop: 20,
   },
   list: {
-    position: 'absolute',
-    width: '100%',
-    height: 100,
-    overflow: 'scroll',
-    zIndex: 3,
+    backgroundColor: BACKGROUND_COLOR,
   },
   dropDownItem: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    backgroundColor: DARK_GRAY_COLOR,
-    marginBottom: 1,
-    borderRadius: 8,
+  },
+  openList: {
+    overflow: 'scroll',
   },
 });

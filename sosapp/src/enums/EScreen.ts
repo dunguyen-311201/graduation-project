@@ -12,4 +12,6 @@ export enum EScreen {
   SEND_DISTRESS_SIGNAL = 'send-distress-signal-screen',
   DRAWER = 'drawer-screen',
   HELP = 'help-screen',
+  DETAIL_MESSAGE = 'detail-message-screen',
+  SIGNUP_RESCUE_SERVICE = 'signup-rescue-service-screen',
 }

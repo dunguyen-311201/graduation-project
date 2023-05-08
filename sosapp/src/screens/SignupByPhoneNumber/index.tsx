@@ -1,5 +1,5 @@
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {ScreenBase, CustomText} from '@components';
@@ -12,16 +12,12 @@ import {RootScreenNavigationProps} from '@navigation';
 import {signupByPhoneNumber} from '@utils';
 
 const SignupByPhoneNumberScreen = () => {
-  const {setOptions, navigate, goBack} =
+  const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
   const [phone, setPhone] = useState('');
-
-  useEffect(() => {
-    setOptions({headerShown: false});
-  }, [setOptions]);
 
   const handleNext = useCallback(async () => {
     const textPhone = `${nation.code}${phone}`;
@@ -38,17 +34,23 @@ const SignupByPhoneNumberScreen = () => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
   }, [navigate]);
 
+  const handleChangePhone = useCallback((value: string) => {
+    const formattedValue = value.replace(/[^0-9]/g, '');
+    let formattedPhoneNumber = formattedValue.replace(
+      /(\d{3})(\d{3})(\d{3})/,
+      '$1 $2 $3',
+    );
+    setPhone(formattedPhoneNumber);
+  }, []);
+
   return (
-    <ScreenBase
-      title="Enter your mobile number"
-      onBack={goBack}
-      onNext={handleNext}>
+    <ScreenBase title="Enter your phone number" onNext={handleNext}>
       <PhoneInput
         nation={nation}
         phone={phone}
         onEndEditing={handleNext}
         onChangeNation={setNation}
-        onChangePhone={setPhone}
+        onChangePhone={handleChangePhone}
       />
       <TouchableOpacity
         style={styles.buttonToSocial}

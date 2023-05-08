@@ -5,6 +5,7 @@ const BLACK_COLOR = '#000000';
 const TEXT_COLOR = '#EDF6FF';
 const DARK_GRAY_COLOR = '#979797';
 const GRAY_COLOR = '#DADADA';
+const BACKGROUND_COLOR = '#1A1A1A';
 
 export {
   TEXT_COLOR,
@@ -13,5 +14,6 @@ export {
   WHITE_COLOR,
   BLACK_COLOR,
   DARK_GRAY_COLOR,
+  BACKGROUND_COLOR,
   GRAY_COLOR,
 };

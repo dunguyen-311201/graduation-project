@@ -219,4 +219,5 @@ export const colors = StyleSheet.create({
   blue: {
     color: LIGHT_BLUE_COLOR,
   },
+  black: {color: BLACK_COLOR},
 });

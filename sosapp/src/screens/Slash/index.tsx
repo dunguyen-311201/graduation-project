@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import {
   CustomButton,
@@ -8,13 +9,12 @@ import {
   CustomText,
 } from '@components';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme';
-import {useNavigation} from '@react-navigation/native';
 import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
 import {getAsyncStorage} from '@utils/asyncStorage';
 import {FIRST_INSTALLED} from '@constants';
 import {useAuth} from '@hooks';
-import {checkSignup} from '@utils/auth';
+import {checkSignup} from '@utils';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
@@ -27,20 +27,19 @@ function SplashScreen() {
       const _isNew = await getAsyncStorage(FIRST_INSTALLED);
       setIsNew(_isNew === null);
 
-      if (
-        currentUser &&
-        currentUser !== null &&
-        (await checkSignup(currentUser.uid))
-      ) {
-        navigate(EScreen.DRAWER);
-        return;
+      // if (currentUser !== null && (await checkSignup(currentUser.uid))) {
+      //   navigate(EScreen.DRAWER);
+      //   return;
+      // }
+      if (currentUser === null) {
+        navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
       }
-      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
+
+      navigate(EScreen.CONFIRM_PHONE_NUMBER);
     };
-    // navigate(EScreen.SEND_DISTRESS_SIGNAL);
 
     setup();
-  }, [navigate]);
+  }, [currentUser, navigate]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

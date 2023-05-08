@@ -21,7 +21,7 @@ const NationSelect = ({nation, onSelect}: NationSelectProps) => {
         <Image source={{uri: nation.url}} style={styles.flag} />
         <CustomText text={nation.name} type="text_medium_24" />
       </View>
-      <CustomText text={nation.code} type="text_medium_gray_24" />
+      <CustomText text={nation.code} type="text_medium_24" />
     </Pressable>
   );
 };

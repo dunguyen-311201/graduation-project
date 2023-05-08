@@ -4,7 +4,7 @@ import {CustomInput} from '@components/common';
 import {PHONES} from '../../../constants';
 import {Nation} from '@types';
 import {WHITE_COLOR} from '@theme/color';
-import {DropDownIcon} from '@theme/icon';
+import {DropDownIcon} from '@theme/image';
 import NationSelect from './NationSelect';
 
 import {Styles as st} from '@utils';
@@ -65,16 +65,15 @@ const PhoneInput = ({
         <Image source={{uri: nation?.url}} style={styles.flag} />
         <Image source={DropDownIcon} style={styles.dropDown} />
       </Pressable>
+
       <CustomInput
         value={phone}
         onChangeText={onChangePhone}
         field="phone"
         inputMode="numeric"
-        valueStyle={st.text_medium_gray_24}
         title={nation?.code}
         onEndEditing={onEndEditing}
-        maxLength={9}
-        titleStyle={st.text_medium_24}
+        maxLength={11}
       />
     </View>
   );
@@ -84,10 +83,9 @@ export default memo(PhoneInput);
 
 const styles = StyleSheet.create({
   phoneinput: {
-    width: '100%',
     position: 'relative',
     flexDirection: 'row',
-    zIndex: 1,
+    zIndex: 2,
     marginTop: 20,
   },
 
@@ -98,7 +96,7 @@ const styles = StyleSheet.create({
     top: 50,
     left: 0,
     right: 0,
-    zIndex: 2,
+    zIndex: 3,
   },
   flagSelect: {
     flexDirection: 'row',

@@ -57,6 +57,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  [EButton.secondary]: {
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   arrowRightIcon: {marginLeft: 20},
 });
 
@@ -70,10 +75,15 @@ const CustomButton = ({
   let Button;
   const style = styles[EButton[type]];
   switch (type) {
+    case 'secondary':
     case 'outline':
       Button = (
         <TouchableOpacity style={[style, customStyle]} onPress={onPress}>
-          <CustomText text={label} type="text_large_20" />
+          <CustomText
+            text={label}
+            type="text_large_20"
+            {...(type === 'secondary' && {color: 'blue'})}
+          />
           {icon && <Image source={icon} />}
         </TouchableOpacity>
       );

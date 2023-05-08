@@ -5,10 +5,11 @@ import {
   TextInput,
   TextStyle,
   View,
+  ViewStyle,
 } from 'react-native';
 import React, {forwardRef, memo, useCallback} from 'react';
 import CustomText from '../Text';
-import {TEXT_COLOR} from '@theme';
+import {DARK_GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
 
 type CustomInputProps = {
   title?: string;
@@ -22,14 +23,12 @@ type CustomInputProps = {
   onChangeText?: (value: string, field?: string) => void;
   onBlur?: (field?: string) => void;
   onFocus?: (field?: string) => void;
-  marginLeft?: number;
   maxLength?: number;
   nColumn?: number;
   placeholder?: string;
-  flex?: 'row' | 'column';
-  numberOfLines?: number;
-  multiline?: boolean;
   onEndEditing?: (feild: string) => void;
+  customStyle?: StyleProp<ViewStyle>;
+  border?: boolean;
 };
 const CustomInput: React.ForwardRefRenderFunction<
   TextInput,
@@ -43,17 +42,15 @@ const CustomInput: React.ForwardRefRenderFunction<
     inputMode = 'text',
     titleStyle,
     valueStyle,
-    maxLength,
-    marginLeft,
+    maxLength = 30,
     onChangeText,
     placeholder,
-    flex = 'row',
     onBlur,
     onFocus,
-    nColumn,
-    multiline,
-    numberOfLines,
     onEndEditing,
+    customStyle,
+    nColumn = 1,
+    border,
   } = props;
 
   const _onChangeText = useCallback(
@@ -79,27 +76,33 @@ const CustomInput: React.ForwardRefRenderFunction<
     <View
       style={[
         styles.inputgroup,
-
         {
-          marginLeft,
-          ...(flex && {...styles[flex]}),
-          ...(nColumn && {width: `${100 / (nColumn + nColumn * 0.1)}%`}),
+          ...{width: `${100 / (nColumn + nColumn * 0.1)}%`},
+          ...(!border && styles.inputBorder),
         },
+        customStyle,
       ]}>
-      {title && <CustomText text={title} customStyle={titleStyle} />}
+      {title && (
+        <CustomText
+          text={title}
+          type="text_regular_20"
+          customStyle={{...styles.title, ...titleStyle}}
+        />
+      )}
       <TextInput
         value={value}
         ref={ref}
-        style={[styles.input, valueStyle]}
+        style={[styles.input, valueStyle, {...(border && styles.border)}]}
         onChangeText={_onChangeText}
         onBlur={_onBlur}
         onFocus={_onFocus}
         inputMode={inputMode}
         maxLength={maxLength}
+        selectTextOnFocus
         placeholder={placeholder}
+        placeholderTextColor={WHITE_COLOR}
         onEndEditing={_onEndEditing}
-        numberOfLines={numberOfLines}
-        multiline={multiline}
+        keyboardType="phone-pad"
       />
       {errorMessage && <CustomText text={errorMessage} />}
     </View>
@@ -110,19 +113,29 @@ export default memo(forwardRef(CustomInput));
 
 const styles = StyleSheet.create({
   inputgroup: {
-    borderBottomColor: TEXT_COLOR,
-    borderBottomWidth: 1,
-    width: '100%',
     marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    // width: '100%',
   },
+  inputBorder: {borderBottomColor: TEXT_COLOR, borderBottomWidth: 1},
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  column: {
-    flexDirection: 'column',
+  title: {
+    marginRight: 10,
+  },
+  border: {
+    borderColor: TEXT_COLOR,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
   },
   input: {
-    width: '100%',
+    color: DARK_GRAY_COLOR,
+    fontSize: 20,
+    fontWeight: '400',
+    // flex: 1,
   },
 });

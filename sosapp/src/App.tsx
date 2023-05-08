@@ -6,6 +6,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {RootNavigation} from './navigation';
 import {ContextProvider} from './context';
+import {WHITE_COLOR} from './theme';
 
 function App() {
   return (
@@ -21,4 +22,19 @@ export default App;
 
 // export {StorybookUIRoot as default};
 
-const styles = StyleSheet.create({container: {flex: 1}});
+const styles = StyleSheet.create({
+  container: {flex: 1},
+  message: {
+    backgroundColor: WHITE_COLOR,
+    width: '80%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignSelf: 'center',
+    marginTop: 5,
+    borderRadius: 10,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+});

@@ -5,7 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, CustomText, ScreenBase} from '@components';
-import {setAsyncStorage, Styles as st} from '@utils';
+import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
 import {EUser} from '@enums';
 import {USER_CACHE} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
@@ -33,9 +33,15 @@ const SetupInfoScreen = () => {
 
   const handleNext = useCallback(async () => {
     if (firstName && lastName) {
+      const caseUser = await getAsyncStorage<TUser>(USER_CACHE);
+      let _location;
+      if (caseUser !== null) {
+        _location = caseUser.location;
+      }
       await setAsyncStorage<TUser>(USER_CACHE, {
         firstName,
         lastName,
+        location: _location,
       });
       navigate(EScreen.CONFIRM_POLICY);
     }
@@ -59,7 +65,7 @@ const SetupInfoScreen = () => {
   );
 
   return (
-    <ScreenBase desc="What's your name?" onBack={goBack} onNext={handleNext}>
+    <ScreenBase desc="What's your name?" onNext={handleNext}>
       <View style={styles.group}>
         <CustomInput
           field={EUser.first}

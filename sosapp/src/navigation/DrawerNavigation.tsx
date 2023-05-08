@@ -9,6 +9,7 @@ import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
 
 import DrawerContent from './DrawerContent';
 import {EScreen} from '@enums';
+import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
 
 export type DrawerParamList = {
   [EScreen.SETTINGS]: undefined;
@@ -26,7 +27,20 @@ const DrawerNavigation = () => {
   );
 
   return (
-    <Drawer.Navigator drawerContent={renderContent}>
+    <Drawer.Navigator
+      drawerContent={renderContent}
+      screenOptions={{
+        headerTitleStyle: {
+          color: WHITE_COLOR,
+          fontWeight: '500',
+          fontSize: 22,
+        },
+        headerTintColor: DARK_GRAY_COLOR,
+        title: '',
+        headerStyle: {
+          backgroundColor: BACKGROUND_COLOR,
+        },
+      }}>
       <Drawer.Screen
         name={EScreen.HOME}
         options={{

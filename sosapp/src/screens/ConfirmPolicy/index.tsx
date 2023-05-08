@@ -35,7 +35,13 @@ const ConfirmPolicyScreen = () => {
     if (currentUser && infoSetUp !== null) {
       const {phoneNumber, uid} = currentUser;
       if (phoneNumber !== null) {
-        await signupInfo({...infoSetUp, phoneNumber, uid, token});
+        await signupInfo({
+          ...infoSetUp,
+          phoneNumber,
+          uid,
+          token,
+          lastLogin: Date.now(),
+        });
         await handleUpdateProfile(
           `${infoSetUp.firstName} ${infoSetUp.lastName}`,
         );

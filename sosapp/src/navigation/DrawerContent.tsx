@@ -5,11 +5,11 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {Image, StyleSheet, View} from 'react-native';
+
 import {ProfileIcon} from '@theme';
 import {CustomButton, CustomText} from '@components';
-
 import {useAuth} from '@hooks';
-import {EScreen} from '@enums/EScreen';
+import {EScreen} from '@enums';
 import {handleLogout} from '@utils';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
@@ -47,7 +47,7 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
             <CustomText
               text={displayName}
               customStyle={styles.name}
-              type="text_medium_light_blue_18"
+              type="text_medium_18"
             />
           </View>
         </View>

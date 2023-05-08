@@ -1,45 +1,55 @@
-import {StyleSheet, View, TextInput} from 'react-native';
-import React, {useCallback, useEffect, useReducer, useState} from 'react';
-import {useAuth, useDeviceLocation} from '../../hooks';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {View, StyleSheet} from 'react-native';
 
 import {RootScreenNavigationProps} from '@navigation';
-import {EScreen} from '@enums/EScreen';
-import {CustomInput, ScreenBase, CustomButton, DropDown} from '@components';
+import {useAuth} from '@hooks';
+import {EScreen, EUser} from '@enums';
+import {ScreenBase, DropDown, Textreae, CustomInput} from '@components';
 import {callAPI} from '@services';
-import {TUser} from '@types';
-import {GRAY_COLOR, TEXT_COLOR} from '@theme';
-import {Styles as st, getUserById} from '@utils';
-import {EUser} from '@enums';
+import {getUserById} from '@utils';
+import {TMessage} from '@types';
+import {Context} from '@context';
+import {BACKGROUND_COLOR} from '@theme';
 
-type TMessage = {
-  describe: string;
-  type: string;
-} & TUser;
+const types = ['Traffic accident', 'Vehicle breakdown'];
 
-const types = ['A', 'B', 'C', 'D', 'E', 'F'];
+type MessageType = {phoneNumber: string} & TMessage;
 
 const SendDistreeSignal = () => {
-  const {setOptions, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
+  const {setOptions} =
+    useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
 
-  const {deviceLocation} = useDeviceLocation();
-
-  const [message, setMessage] = useState<TMessage>({
-    describe: '',
-    type: types[0],
-    location: deviceLocation,
-  });
+  const {deviceLocation} = useContext(Context);
 
   const {currentUser} = useAuth();
 
+  const [message, setMessage] = useState<MessageType>({
+    description: '',
+    type: types[0],
+    location: deviceLocation,
+    uid: '',
+    phoneNumber: '',
+  });
+
   useEffect(() => {
-    setOptions({headerShown: false});
-    setMessage(prev => ({
-      ...prev,
-      location: deviceLocation,
-    }));
-  }, [deviceLocation, setOptions]);
+    setOptions({
+      title: 'Send a distress signal',
+    });
+
+    if (currentUser !== null) {
+      const {uid, phoneNumber} = currentUser;
+
+      if (uid && phoneNumber !== null) {
+        setMessage(prev => ({
+          ...prev,
+          location: deviceLocation,
+          phoneNumber,
+          uid,
+        }));
+      }
+    }
+  }, [currentUser, deviceLocation, setOptions]);
 
   useEffect(() => {
     const setFormData = async () => {
@@ -55,7 +65,7 @@ const SendDistreeSignal = () => {
     };
 
     setFormData();
-  }, []);
+  }, [currentUser]);
 
   const sendSignal = useCallback(async () => {
     await callAPI({
@@ -75,71 +85,36 @@ const SendDistreeSignal = () => {
     console.log(field);
   }, []);
 
-  console.log(message);
-
   return (
     <ScreenBase
-      onBack={goBack}
       onNext={sendSignal}
       title="You have to connect to the support service">
-      {/* <View style={styles.group}>
-        <CustomInput
-          field={EUser.first}
-          nColumn={2}
-          value={message.firstName}
-          titleStyle={st.text_medium_24}
-          valueStyle={st.text_medium_gray_24}
-          onChangeText={handleChangeText}
-          title="Firt"
-          onEndEditing={handleEndEditing}
-        />
-        <CustomInput
-          field={EUser.first}
-          nColumn={2}
-          value={message.lastName}
-          titleStyle={st.text_medium_24}
-          valueStyle={st.text_medium_gray_24}
-          onChangeText={handleChangeText}
-          title="Last"
-          onEndEditing={handleEndEditing}
-        />
-      </View> */}
       <CustomInput
         field={EUser.phoneNumber}
         value={message.phoneNumber}
-        titleStyle={st.text_medium_24}
-        valueStyle={st.text_medium_gray_24}
         onChangeText={handleChangeText}
         title="Phone"
         onEndEditing={handleEndEditing}
+        border
       />
       <CustomInput
         field={EUser.location}
         value={message.location?.description}
-        titleStyle={st.text_medium_24}
-        valueStyle={st.text_medium_gray_24}
         onChangeText={handleChangeText}
         title="Location"
         onEndEditing={handleEndEditing}
+        border
       />
-      <CustomInput
-        flex="column"
-        field="describe"
-        value={message.describe}
-        titleStyle={st.text_medium_24}
-        valueStyle={st.text_medium_gray_24}
-        onChangeText={handleChangeText}
-        title="Describe"
-        onEndEditing={handleEndEditing}
-        numberOfLines={2}
-        multiline
-      />
-      <DropDown
-        data={types}
-        initValue={message.type}
-        onSelect={handleChangeText}
-        field="type"
-      />
+
+      <View style={styles.formMessage}>
+        <DropDown
+          data={types}
+          initValue={message.type}
+          onSelect={handleChangeText}
+          field="type"
+        />
+        <Textreae />
+      </View>
     </ScreenBase>
   );
 };
@@ -147,62 +122,18 @@ const SendDistreeSignal = () => {
 export default SendDistreeSignal;
 
 const styles = StyleSheet.create({
-  group: {
+  content: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    backgroundColor: BACKGROUND_COLOR,
+    height: 100,
   },
-  container: {
-    width: '100%',
-    height: 400,
-    backgroundColor: '#FFFFFF',
+  info: {
+    justifyContent: 'space-between',
   },
-  text_large: {
-    fontSize: 64,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-    color: TEXT_COLOR,
-  },
-  text_medium_30: {
-    fontSize: 30,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_24: {
-    fontSize: 24,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_20: {
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_24: {
-    fontSize: 24,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_20: {
-    fontSize: 20,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_small_16: {
-    fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_small_14: {
-    fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
+  formMessage: {
+    paddingTop: 70,
+    position: 'relative',
+    zIndex: 1,
   },
 });

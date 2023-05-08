@@ -24,8 +24,10 @@ const callAPI = async ({data, method, route}: API) => {
         break;
     }
     const res = await fetch(url, options);
-    return {data: res.json(), status: res.status};
+    const _data = await res.json();
+    return {data: _data, status: res.status};
   } catch (error) {
+    console.log(error);
     return {data: null, status: 400, message: error};
   }
 };
