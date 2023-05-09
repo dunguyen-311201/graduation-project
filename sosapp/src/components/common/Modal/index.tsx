@@ -1,40 +1,46 @@
 import {StyleSheet, Modal, View} from 'react-native';
-import React, {useCallback, useContext} from 'react';
+import React from 'react';
 
 import {WHITE_COLOR} from '@theme';
-import {Context} from '@context';
-import {CustomButton, CustomText} from '@components';
+import CustomButton from '../Button';
+import CustomText from '../Text';
 
-type CustomModalProps = {children: React.ReactNode};
+type CustomModalProps = {
+  isVisible: boolean;
+  title: string;
+  description: string;
+  onClose: () => void;
+  onOk: () => void;
+};
 
-const CustomModal = ({children}: CustomModalProps) => {
-  const {isVisibleNotification, setIsVisibleNotification} = useContext(Context);
-
-  const handleCloseModal = useCallback(() => {
-    setIsVisibleNotification(false);
-  }, [setIsVisibleNotification]);
-
+const CustomModal = ({
+  isVisible,
+  description,
+  title,
+  onClose,
+  onOk,
+}: CustomModalProps) => {
   return (
     <Modal
       animationType="slide"
-      visible={isVisibleNotification}
-      // transparent={true}
-      onRequestClose={() => {
-        setIsVisibleNotification(!isVisibleNotification);
-      }}>
-      {children}
-      {/* <View style={styles.message}>
-        <CustomText text="Title" type="text_large_20" color="black" />
-        <CustomText text="Details" type="text_medium_14" color="black" />
-      </View>
-    </View> */}
-      <View style={styles.actions}>
-        <CustomButton label="OK" type="secondary" />
-        <CustomButton
-          label="Cancel"
-          type="secondary"
-          onPress={handleCloseModal}
-        />
+      visible={isVisible}
+      transparent={true}
+      onRequestClose={onClose}>
+      <View style={styles.container}>
+        <View style={styles.message}>
+          <View>
+            <CustomText text={title} type="text_large_20" color="black" />
+            <CustomText
+              text={description}
+              type="text_medium_14"
+              color="black"
+            />
+          </View>
+          <View style={styles.actions}>
+            <CustomButton label="OK" type="secondary" onPress={onOk} />
+            <CustomButton label="Cancel" type="secondary" onPress={onClose} />
+          </View>
+        </View>
       </View>
     </Modal>
   );
@@ -43,6 +49,10 @@ const CustomModal = ({children}: CustomModalProps) => {
 export default CustomModal;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
   message: {
     backgroundColor: WHITE_COLOR,
     width: '80%',

@@ -3,7 +3,17 @@ import {StyleSheet, View, TextInput} from 'react-native';
 
 import {GRAY_COLOR, WHITE_COLOR} from '@theme';
 
-const Textarea = () => {
+type TextareaProps = {
+  value: string;
+  onChangeText: (value: string, field?: string) => void;
+  field: string;
+};
+
+const Textarea = ({field, onChangeText, value}: TextareaProps) => {
+  const handleTextChange = (text: string) => {
+    onChangeText(text, field);
+  };
+
   return (
     <View>
       <TextInput
@@ -13,6 +23,8 @@ const Textarea = () => {
         placeholder="Type more infomation"
         placeholderTextColor={WHITE_COLOR}
         clearTextOnFocus
+        value={value}
+        onChangeText={handleTextChange}
       />
     </View>
   );

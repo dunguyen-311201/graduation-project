@@ -1,46 +1,55 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {View, StyleSheet} from 'react-native';
 
 import {RootScreenNavigationProps} from '@navigation';
 import {useAuth} from '@hooks';
 import {EScreen, EUser} from '@enums';
-import {ScreenBase, DropDown, Textreae, CustomInput} from '@components';
+import {
+  ScreenBase,
+  DropDown,
+  Textreae,
+  CustomInput,
+  Loading,
+} from '@components';
 import {callAPI} from '@services';
-import {getUserById} from '@utils';
-import {TMessage} from '@types';
-import {Context} from '@context';
+import {getAsyncStorage} from '@utils';
+import {Location, TMessage} from '@types';
 import {BACKGROUND_COLOR} from '@theme';
+import {CURRENT_LOCATION} from '@constants/cache';
 
 const types = ['Traffic accident', 'Vehicle breakdown'];
 
 type MessageType = {phoneNumber: string} & TMessage;
 
 const SendDistreeSignal = () => {
-  const {setOptions} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
 
-  const {deviceLocation} = useContext(Context);
+  const [loading, setLoading] = useState(false);
 
   const {currentUser} = useAuth();
 
   const [message, setMessage] = useState<MessageType>({
     description: '',
     type: types[0],
-    location: deviceLocation,
     uid: '',
     phoneNumber: '',
   });
 
   useEffect(() => {
     setOptions({
-      title: 'Send a distress signal',
+      title: 'Send A Distress Signal',
     });
 
-    if (currentUser !== null) {
-      const {uid, phoneNumber} = currentUser;
+    const setup = async () => {
+      if (currentUser) {
+        const deviceLocation = await getAsyncStorage<Location>(
+          CURRENT_LOCATION,
+        );
 
-      if (uid && phoneNumber !== null) {
+        const {phoneNumber, uid} = currentUser;
+
         setMessage(prev => ({
           ...prev,
           location: deviceLocation,
@@ -48,32 +57,30 @@ const SendDistreeSignal = () => {
           uid,
         }));
       }
-    }
-  }, [currentUser, deviceLocation, setOptions]);
-
-  useEffect(() => {
-    const setFormData = async () => {
-      if (currentUser) {
-        const user = await getUserById(currentUser.uid);
-        if (user) {
-          setMessage(prev => ({
-            ...user,
-            ...prev,
-          }));
-        }
-      }
     };
 
-    setFormData();
-  }, [currentUser]);
+    setup();
+  }, [setOptions, currentUser]);
 
   const sendSignal = useCallback(async () => {
-    await callAPI({
-      route: 'MESSAGE',
-      method: 'POST',
-      data: message,
-    });
-  }, [message]);
+    setLoading(true);
+
+    try {
+      const {description, uid, type, location} = message;
+      const data = await callAPI({
+        route: 'MESSAGE',
+        method: 'POST',
+        data: {description, uid, type, location},
+      });
+
+      console.log(86, data);
+    } catch (error) {
+      console.log('Send Message Error', error);
+    }
+
+    setLoading(false);
+    navigate(EScreen.DETAIL_MESSAGE, {uid: ''});
+  }, [message, navigate]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -89,6 +96,7 @@ const SendDistreeSignal = () => {
     <ScreenBase
       onNext={sendSignal}
       title="You have to connect to the support service">
+      {loading && <Loading />}
       <CustomInput
         field={EUser.phoneNumber}
         value={message.phoneNumber}
@@ -113,7 +121,11 @@ const SendDistreeSignal = () => {
           onSelect={handleChangeText}
           field="type"
         />
-        <Textreae />
+        <Textreae
+          value={message.description}
+          field="description"
+          onChangeText={handleChangeText}
+        />
       </View>
     </ScreenBase>
   );

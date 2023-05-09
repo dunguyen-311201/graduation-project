@@ -1,21 +1,19 @@
-import {StyleSheet, View, Switch} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
-import {CustomInput, CustomText, ScreenBase} from '@components';
-import {getAsyncStorage, setAsyncStorage, Styles as st} from '@utils';
+import {CustomInput, ScreenBase} from '@components';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
 import {EUser} from '@enums';
 import {USER_CACHE} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
 import {TUser} from '@types';
 
 const SetupInfoScreen = () => {
-  const {setOptions, navigate, goBack} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
-
-  const [focusable, setFocusable] = useState(false);
 
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
@@ -25,7 +23,8 @@ const SetupInfoScreen = () => {
   const {firstName, lastName} = data || {};
 
   useEffect(() => {
-    setOptions({headerShown: false});
+    setOptions({headerShown: true});
+
     if (inputFirstRef?.current) {
       inputFirstRef?.current?.focus();
     }
@@ -34,14 +33,11 @@ const SetupInfoScreen = () => {
   const handleNext = useCallback(async () => {
     if (firstName && lastName) {
       const caseUser = await getAsyncStorage<TUser>(USER_CACHE);
-      let _location;
-      if (caseUser !== null) {
-        _location = caseUser.location;
-      }
+
       await setAsyncStorage<TUser>(USER_CACHE, {
         firstName,
         lastName,
-        location: _location,
+        ...caseUser,
       });
       navigate(EScreen.CONFIRM_POLICY);
     }
@@ -69,36 +65,21 @@ const SetupInfoScreen = () => {
       <View style={styles.group}>
         <CustomInput
           field={EUser.first}
-          nColumn={2}
           value={firstName}
-          titleStyle={st.text_medium_24}
-          valueStyle={st.text_medium_gray_24}
           onChangeText={handleChangeText}
-          title="Firt"
+          placeholder="First"
           ref={inputFirstRef}
+          customStyle={styles.input}
           onEndEditing={handleEndEditing}
         />
         <CustomInput
           field={EUser.last}
-          nColumn={2}
           value={lastName}
-          titleStyle={st.text_medium_24}
-          valueStyle={st.text_medium_gray_24}
           onChangeText={handleChangeText}
-          title="Last"
           ref={inputLastRef}
+          placeholder="Last"
           onEndEditing={handleEndEditing}
-        />
-      </View>
-      <View style={styles.group}>
-        <CustomText
-          text="You want to turn on join the rescue"
-          type="text_medium_18"
-          color="blue"
-        />
-        <Switch
-          value={focusable}
-          onValueChange={() => setFocusable(prev => !prev)}
+          customStyle={styles.input}
         />
       </View>
     </ScreenBase>
@@ -112,5 +93,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+  input: {
+    width: '45%',
   },
 });

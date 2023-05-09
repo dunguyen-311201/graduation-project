@@ -2,7 +2,7 @@ import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
-import {ScreenBase, CustomText} from '@components';
+import {ScreenBase, CustomText, Loading} from '@components';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
 import {EScreen} from '@enums';
@@ -15,19 +15,28 @@ const SignupByPhoneNumberScreen = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
+  const [loading, setLoading] = useState(false);
+
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
   const [phone, setPhone] = useState('');
 
   const handleNext = useCallback(async () => {
-    const textPhone = `${nation.code}${phone}`;
-    const verificationId = await signupByPhoneNumber(textPhone);
-    if (verificationId !== null) {
-      navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-        phone: textPhone,
-        verificationId,
-      });
+    setLoading(true);
+    try {
+      const textPhone = `${nation.code}${phone}`;
+      const verificationId = await signupByPhoneNumber(textPhone);
+
+      if (verificationId !== null) {
+        navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+          phone: textPhone,
+          verificationId,
+        });
+      }
+    } catch (error) {
+      console.log('Valid phone number error: ' + error);
     }
+    setLoading(false);
   }, [nation.code, navigate, phone]);
 
   const handleNavigateSocial = useCallback(() => {
@@ -45,6 +54,7 @@ const SignupByPhoneNumberScreen = () => {
 
   return (
     <ScreenBase title="Enter your phone number" onNext={handleNext}>
+      {loading && <Loading />}
       <PhoneInput
         nation={nation}
         phone={phone}

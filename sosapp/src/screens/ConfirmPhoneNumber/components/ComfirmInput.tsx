@@ -44,7 +44,7 @@ const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
         maxLength={1}
         field={index + ''}
         value={item}
-        nColumn={6}
+        customStyle={styles.input}
         inputMode="numeric"
         onChangeText={handleInputChangeText}
         valueStyle={styles.text}
@@ -87,5 +87,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
     fontWeight: '600',
+  },
+  input: {
+    width: 25,
   },
 });

@@ -1,13 +1,18 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
 
-import {ScreenBase, CustomInput} from '@components';
 import {EScreen} from '@enums';
-import {RootScreenNavigationProps} from '@navigation';
-import {handleUpdateInfo, handleVerification, Styles as st} from '@utils';
-import {RootParamList} from '@navigation/RootNavigation';
+import {Loading, ScreenBase} from '@components';
+import {FIRST_INSTALLED} from '@constants';
 import ComfirmInput from './components/ComfirmInput';
+import {RootScreenNavigationProps} from '@navigation';
+import {RootParamList} from '@navigation/RootNavigation';
+import {
+  getDeviceToken,
+  handleUpdateInfo,
+  handleVerification,
+  setAsyncStorage,
+} from '@utils';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -18,31 +23,40 @@ const ConfirmPhoneNumberScreen = () => {
   const {phone, verificationId} = useRoute<ConfirmRoute>().params || {};
 
   const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleNext = useCallback(async () => {
-    const userCredential = await handleVerification(verificationId, code);
-    if (userCredential !== null) {
-      const {additionalUserInfo, user} = userCredential;
+    setLoading(true);
+    try {
+      const userCredential = await handleVerification(verificationId, code);
+      if (userCredential !== null) {
+        const {additionalUserInfo, user} = userCredential;
 
-      if (additionalUserInfo === undefined) {
-        return;
+        if (additionalUserInfo === undefined) {
+          return;
+        }
+
+        if (additionalUserInfo && additionalUserInfo.isNewUser) {
+          navigate(EScreen.SIGNUP_RESCUE_SERVICE);
+          return;
+        }
+
+        const token = await getDeviceToken();
+        await handleUpdateInfo({token, uid: user.uid, lastLogin: Date.now()});
+        await setAsyncStorage(FIRST_INSTALLED, 1);
+        navigate(EScreen.DRAWER);
       }
-
-      if (additionalUserInfo && additionalUserInfo.isNewUser) {
-        navigate(EScreen.SIGNUP_RESCUE_SERVICE);
-        return;
-      }
-
-      const token = await messaging().getToken();
-      await handleUpdateInfo({token, uid: user.uid});
-      navigate(EScreen.DRAWER);
+    } catch (error) {
+      console.log('Comfirm error: ' + error);
     }
+    setLoading(false);
   }, [code, navigate, verificationId]);
 
   return (
     <ScreenBase
       desc={'Enter the 6-digit code sent to you at\n' + phone}
       onNext={handleNext}>
+      {loading && <Loading />}
       <ComfirmInput code={code} onChange={setCode} />
     </ScreenBase>
   );

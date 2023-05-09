@@ -11,4 +11,5 @@ export enum EUser {
   isAuthenticated = 'isAuthenticated',
   location = 'location',
   lastLogin = 'lastLogin',
+  isRescue = 'isRescue',
 }

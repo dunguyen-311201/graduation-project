@@ -5,6 +5,7 @@ import ScreenBase from './ScreenBase';
 import Card from './Card';
 import Social from './Social';
 import Shadow from './Shadow';
+import Loading from './Loading';
 
 export * from './common';
 export {
@@ -15,4 +16,5 @@ export {
   Shadow,
   Social,
   SearchInput,
+  Loading,
 };

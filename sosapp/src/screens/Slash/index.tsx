@@ -18,24 +18,27 @@ import {checkSignup} from '@utils';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
-  const [isNew, setIsNew] = useState(true);
+  const [isNew, setIsNew] = useState(false);
 
   const {currentUser} = useAuth();
 
   useEffect(() => {
     const setup = async () => {
       const _isNew = await getAsyncStorage(FIRST_INSTALLED);
-      setIsNew(_isNew === null);
 
-      // if (currentUser !== null && (await checkSignup(currentUser.uid))) {
-      //   navigate(EScreen.DRAWER);
-      //   return;
-      // }
+      if (_isNew === null) {
+        setIsNew(true);
+        return;
+      }
+
+      if (currentUser !== null && (await checkSignup(currentUser.uid))) {
+        navigate(EScreen.DRAWER);
+        return;
+      }
+
       if (currentUser === null) {
         navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
       }
-
-      navigate(EScreen.CONFIRM_PHONE_NUMBER);
     };
 
     setup();

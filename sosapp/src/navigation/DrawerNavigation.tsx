@@ -1,15 +1,30 @@
-import React, {useCallback} from 'react';
 import {
   DrawerContentComponentProps,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
+import React, {useCallback, useState, useEffect} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
-import {StyleSheet} from 'react-native';
-import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
-
-import DrawerContent from './DrawerContent';
 import {EScreen} from '@enums';
+import {PermissionsAndroid, Platform, StyleSheet} from 'react-native';
+import DrawerContent from './DrawerContent';
+import {
+  getAsyncStorage,
+  getLocationDetails,
+  setAsyncStorage,
+  subcribeNotifyAppOpen,
+} from '@utils';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
+import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
+import {RootScreenNavigationProps} from '.';
+import {CustomModal} from '@components';
+import {useMessage} from '@hooks';
+import {CURRENT_LOCATION} from '@constants/cache';
+import Geolocation from '@react-native-community/geolocation';
+import {Location} from '@types';
+
+PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
 export type DrawerParamList = {
   [EScreen.SETTINGS]: undefined;
@@ -21,59 +36,157 @@ export type DrawerParamList = {
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = () => {
+  const {navigate} =
+    useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
+
+  const [location, setLocation] = useState<Location>();
+
+  const [uid, setUid] = useState<string>();
+  const {message} = useMessage(uid);
+
+  useEffect(() => {
+    const handlePushNotification = async (_uid: string) => {
+      setUid(_uid);
+    };
+
+    const setupLocation = async () => {};
+
+    const handleAsyncStorage = async () => {
+      // const current = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      if (location === undefined) {
+        Geolocation.getCurrentPosition(
+          position => {
+            const {latitude, longitude} = position.coords;
+
+            setLocation({
+              latitude,
+              longitude,
+            });
+          },
+          error => {
+            console.log(error);
+          },
+          {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+        );
+        return;
+      }
+      const data = await getLocationDetails(location);
+      console.log(82, data);
+      await setAsyncStorage(CURRENT_LOCATION, location);
+    };
+
+    const requestLocationPermission = async () => {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message:
+              'This app needs access to your location to show your current position on the map',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          await setupLocation();
+        } else {
+          console.log('Location permission denied');
+        }
+      } else {
+        await setupLocation();
+      }
+    };
+
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage?.data) {
+          navigate(EScreen.DETAIL_MESSAGE, {uid: remoteMessage.data.id});
+        }
+      });
+
+    requestLocationPermission();
+    handleAsyncStorage();
+
+    return subcribeNotifyAppOpen(handlePushNotification);
+  }, [location, navigate]);
+
   const renderContent = useCallback(
     (props: DrawerContentComponentProps) => <DrawerContent {...props} />,
     [],
   );
 
+  const handleClose = useCallback(() => {
+    setUid(undefined);
+  }, []);
+
+  const handleNotify = useCallback(() => {
+    if (uid) {
+      navigate(EScreen.DETAIL_MESSAGE, {uid});
+      setUid(undefined);
+    }
+  }, [navigate, uid]);
+
   return (
-    <Drawer.Navigator
-      drawerContent={renderContent}
-      screenOptions={{
-        headerTitleStyle: {
-          color: WHITE_COLOR,
-          fontWeight: '500',
-          fontSize: 22,
-        },
-        headerTintColor: DARK_GRAY_COLOR,
-        title: '',
-        headerStyle: {
-          backgroundColor: BACKGROUND_COLOR,
-        },
-      }}>
-      <Drawer.Screen
-        name={EScreen.HOME}
-        options={{
-          title: EScreen.HOME.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={HomeScreen}
-      />
-      <Drawer.Screen
-        name={EScreen.SETTINGS}
-        options={{
-          title: EScreen.SETTINGS.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={SettingsScreen}
-      />
-      <Drawer.Screen
-        name={EScreen.MESSAGES}
-        options={{
-          title: EScreen.MESSAGES.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={MessagesScreen}
-      />
-      <Drawer.Screen
-        name={EScreen.HELP}
-        options={{
-          title: EScreen.HELP.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={MessagesScreen}
-      />
-    </Drawer.Navigator>
+    <>
+      {message && (
+        <CustomModal
+          title={message.type}
+          description={message.description}
+          isVisible={true}
+          onClose={handleClose}
+          onOk={handleNotify}
+        />
+      )}
+      <Drawer.Navigator
+        drawerContent={renderContent}
+        screenOptions={{
+          headerTitleStyle: {
+            color: WHITE_COLOR,
+            fontWeight: '500',
+            fontSize: 22,
+          },
+          headerTintColor: DARK_GRAY_COLOR,
+          title: '',
+          headerStyle: {
+            backgroundColor: BACKGROUND_COLOR,
+          },
+        }}>
+        <Drawer.Screen
+          name={EScreen.HOME}
+          options={{
+            title: EScreen.HOME.split('-')[0],
+            drawerLabelStyle: {...styles.title},
+          }}
+          component={HomeScreen}
+        />
+        <Drawer.Screen
+          name={EScreen.SETTINGS}
+          options={{
+            title: EScreen.SETTINGS.split('-')[0],
+            drawerLabelStyle: {...styles.title},
+          }}
+          component={SettingsScreen}
+        />
+        <Drawer.Screen
+          name={EScreen.MESSAGES}
+          options={{
+            title: EScreen.MESSAGES.split('-')[0],
+            drawerLabelStyle: {...styles.title},
+          }}
+          component={MessagesScreen}
+        />
+        <Drawer.Screen
+          name={EScreen.HELP}
+          options={{
+            title: EScreen.HELP.split('-')[0],
+            drawerLabelStyle: {...styles.title},
+          }}
+          component={MessagesScreen}
+        />
+      </Drawer.Navigator>
+    </>
   );
 };
 

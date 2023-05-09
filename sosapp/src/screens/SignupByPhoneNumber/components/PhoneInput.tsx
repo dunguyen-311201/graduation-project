@@ -7,8 +7,6 @@ import {WHITE_COLOR} from '@theme/color';
 import {DropDownIcon} from '@theme/image';
 import NationSelect from './NationSelect';
 
-import {Styles as st} from '@utils';
-
 type PhoneInputProps = {
   nation: Nation;
   phone?: string;
@@ -74,6 +72,7 @@ const PhoneInput = ({
         title={nation?.code}
         onEndEditing={onEndEditing}
         maxLength={11}
+        customStyle={styles.input}
       />
     </View>
   );
@@ -98,6 +97,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 3,
   },
+  input: {width: 250},
   flagSelect: {
     flexDirection: 'row',
     alignItems: 'center',

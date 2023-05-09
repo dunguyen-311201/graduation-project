@@ -1,14 +1,14 @@
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
 
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
-import {CustomText, ScreenBase} from '@components';
+import {CustomText, Loading, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
 import {
   getAsyncStorage,
+  getDeviceToken,
   handleUpdateProfile,
   setAsyncStorage,
   signupInfo,
@@ -18,9 +18,9 @@ import {TUser} from '@types';
 import {useAuth} from '@hooks';
 
 const ConfirmPolicyScreen = () => {
-  const {setOptions, navigate, goBack} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
-
+  const [loading, setLoading] = useState(false);
   const {currentUser} = useAuth();
 
   useEffect(() => {
@@ -28,38 +28,45 @@ const ConfirmPolicyScreen = () => {
   }, [setOptions]);
 
   const handleNext = useCallback(async () => {
-    const infoSetUp = await getAsyncStorage<TUser>(USER_CACHE);
+    setLoading(true);
+    try {
+      const infoSetUp = await getAsyncStorage<TUser>(USER_CACHE);
 
-    const token = await messaging().getToken();
+      if (currentUser && infoSetUp !== null) {
+        const {phoneNumber, uid} = currentUser;
+        const token = await getDeviceToken();
 
-    if (currentUser && infoSetUp !== null) {
-      const {phoneNumber, uid} = currentUser;
-      if (phoneNumber !== null) {
-        await signupInfo({
-          ...infoSetUp,
-          phoneNumber,
-          uid,
-          token,
-          lastLogin: Date.now(),
-        });
-        await handleUpdateProfile(
-          `${infoSetUp.firstName} ${infoSetUp.lastName}`,
-        );
-        await setAsyncStorage(USER_CACHE, null);
+        if (phoneNumber !== null) {
+          await signupInfo({
+            ...infoSetUp,
+            phoneNumber,
+            token,
+            uid,
+            lastLogin: Date.now(),
+          });
+          await handleUpdateProfile(
+            `${infoSetUp.firstName} ${infoSetUp.lastName}`,
+          );
+          await setAsyncStorage(USER_CACHE, null);
+        }
       }
+
+      const isFirst = await getAsyncStorage(FIRST_INSTALLED);
+
+      if (isFirst === null) {
+        await setAsyncStorage(FIRST_INSTALLED, 1);
+      }
+
+      navigate(EScreen.DRAWER);
+    } catch (error) {
+      console.log('Sign up Info failed: ', error);
     }
-
-    const isFirst = await getAsyncStorage(FIRST_INSTALLED);
-
-    if (isFirst === null) {
-      await setAsyncStorage(FIRST_INSTALLED, 1);
-    }
-
-    navigate(EScreen.DRAWER);
+    setLoading(false);
   }, [currentUser, navigate]);
 
   return (
-    <ScreenBase onBack={goBack} onNext={handleNext}>
+    <ScreenBase onNext={handleNext}>
+      {loading && <Loading />}
       <View style={styles.content}>
         <View style={styles.boxProfile}>
           <Image source={ProfileIcon} />

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, {forwardRef, memo, useCallback} from 'react';
 import CustomText from '../Text';
-import {DARK_GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
+import {DARK_GRAY_COLOR, GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
 
 type CustomInputProps = {
   title?: string;
@@ -24,10 +24,9 @@ type CustomInputProps = {
   onBlur?: (field?: string) => void;
   onFocus?: (field?: string) => void;
   maxLength?: number;
-  nColumn?: number;
   placeholder?: string;
   onEndEditing?: (feild: string) => void;
-  customStyle?: StyleProp<ViewStyle>;
+  customStyle?: ViewStyle;
   border?: boolean;
 };
 const CustomInput: React.ForwardRefRenderFunction<
@@ -49,7 +48,6 @@ const CustomInput: React.ForwardRefRenderFunction<
     onFocus,
     onEndEditing,
     customStyle,
-    nColumn = 1,
     border,
   } = props;
 
@@ -74,14 +72,11 @@ const CustomInput: React.ForwardRefRenderFunction<
 
   return (
     <View
-      style={[
-        styles.inputgroup,
-        {
-          ...{width: `${100 / (nColumn + nColumn * 0.1)}%`},
-          ...(!border && styles.inputBorder),
-        },
-        customStyle,
-      ]}>
+      style={{
+        ...styles.inputgroup,
+        ...(!border && styles.inputBorder),
+        ...customStyle,
+      }}>
       {title && (
         <CustomText
           text={title}
@@ -100,7 +95,7 @@ const CustomInput: React.ForwardRefRenderFunction<
         maxLength={maxLength}
         selectTextOnFocus
         placeholder={placeholder}
-        placeholderTextColor={WHITE_COLOR}
+        placeholderTextColor={DARK_GRAY_COLOR}
         onEndEditing={_onEndEditing}
         keyboardType="phone-pad"
       />
@@ -116,9 +111,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    // width: '100%',
+    width: '100%',
   },
-  inputBorder: {borderBottomColor: TEXT_COLOR, borderBottomWidth: 1},
+  inputBorder: {borderBottomColor: GRAY_COLOR, borderBottomWidth: 1},
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -136,6 +131,6 @@ const styles = StyleSheet.create({
     color: DARK_GRAY_COLOR,
     fontSize: 20,
     fontWeight: '400',
-    // flex: 1,
+    flex: 1,
   },
 });

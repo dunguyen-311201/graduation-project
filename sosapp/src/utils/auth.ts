@@ -56,7 +56,12 @@ const handleUpdateInfo = async (user: TUser) => {
 };
 
 const handleLogout = async () => {
-  await auth().signOut();
+  const currentUser = getCurrentUser();
+  if (currentUser !== null) {
+    const uid = currentUser.uid;
+    await handleUpdateInfo({lastLogin: null, uid});
+    await auth().signOut();
+  }
 };
 
 export {

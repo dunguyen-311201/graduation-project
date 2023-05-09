@@ -1,6 +1,6 @@
 import Config from 'react-native-config';
 import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
-import React, {useEffect, useCallback, useState, useContext} from 'react';
+import React, {useEffect, useCallback, useState} from 'react';
 import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
@@ -17,7 +17,8 @@ import {CustomMarker} from './components';
 import MapViewDirections from 'react-native-maps-directions';
 import {BackIcon, CustomText, SearchInput} from '@components';
 import {RootParamList} from '@navigation/RootNavigation';
-import {Context} from '@context';
+import {getAsyncStorage} from '@utils/asyncStorage';
+import {CURRENT_LOCATION} from '@constants/cache';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -42,32 +43,18 @@ const MapScreen = () => {
     from: initLocation,
   });
 
-  const {deviceLocation} = useContext(Context);
-
   useEffect(() => {
     setOptions({headerShown: false});
-    if (initLocation === undefined) {
-      setLocations({from: deviceLocation});
-    }
-  }, [deviceLocation, initLocation, setOptions]);
 
-  // const onPlacesChange = useCallback(() => {
-  //   console.log({initLocation});
-  //   if (initLocation) {
-  //     const {latitude, longitude} = initLocation;
-  //     fetch(
-  //       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=1500&key=${GOOGLE_MAPS_API_KEY}`,
-  //     )
-  //       .then(response => response.json())
-  //       .then(data => {
-  //         // setPlaces(data.results);
-  //         console.log(69, data.results);
-  //       })
-  //       .catch(error => {
-  //         console.log(error);
-  //       });
-  //   }
-  // }, [initLocation]);
+    const setup = async () => {
+      const deviceLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      if (initLocation === undefined && deviceLocation !== null) {
+        setLocations({from: deviceLocation});
+      }
+    };
+
+    setup();
+  }, [initLocation, setOptions]);
 
   const {from, to, distance, timeout} = locations || {};
 

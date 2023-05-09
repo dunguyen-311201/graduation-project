@@ -14,6 +14,7 @@ const ToLocationIcon = require('../assets/images/location-pin.png');
 const ClearInputIcon = require('../assets/images/edit-clear-symbolic.png');
 const DirectionIcon = require('../assets/images/directions.png');
 const MapImage = require('../assets/images/map.png');
+const LoadingIcon = require('../assets/images/loading.png');
 
 export {
   CheckShieldIcon,
@@ -32,4 +33,5 @@ export {
   ClearInputIcon,
   DirectionIcon,
   MapImage,
+  LoadingIcon,
 };

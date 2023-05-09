@@ -17,6 +17,7 @@ import {
 } from '@screens';
 import {Location} from '@types';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
+import {Loading} from '@components';
 import {Context} from '@context';
 
 export type RootParamList = {
@@ -38,12 +39,14 @@ export type RootParamList = {
 
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
-  const {initRoute} = useContext(Context);
+
+  const {loading} = useContext(Context);
 
   return (
     <NavigationContainer>
+      {loading && <Loading />}
       <Stack.Navigator
-        initialRouteName={initRoute}
+        initialRouteName={EScreen.SPLASH}
         screenOptions={{
           headerTitleStyle: {
             color: WHITE_COLOR,

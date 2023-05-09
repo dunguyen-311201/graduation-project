@@ -9,6 +9,19 @@ import {ContextProvider} from './context';
 import {WHITE_COLOR} from './theme';
 
 function App() {
+  // messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //   console.log('Message handled in the background!', remoteMessage);
+  // });
+
+  // messaging().onNotificationOpenedApp(remoteMessage => {
+  //   console.log(
+  //     'Notification caused app to open from background state:',
+  //     remoteMessage,
+  //   );
+  //   console.log({isVisibleNotification});
+  //   setIsVisibleNotification(true);
+  // });
+
   return (
     <ContextProvider>
       <SafeAreaView style={styles.container}>

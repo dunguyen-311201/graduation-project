@@ -1,10 +1,7 @@
-import {StyleSheet, View, PermissionsAndroid, Image} from 'react-native';
-import React, {useCallback, useContext, useEffect} from 'react';
+import {View, Image, StyleSheet} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
 
-import {RootScreenNavigationProps} from '@navigation';
-import {EScreen} from '@enums';
 import {
   ScreenBase,
   Card,
@@ -12,68 +9,32 @@ import {
   CustomButton,
   SearchInput,
 } from '@components';
-import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
-import {Context} from '@context';
+import {EScreen} from '@enums';
 import {MenuButton} from './components';
-// import {useMessage} from '@hooks';
-
-PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+import {RootScreenNavigationProps} from '@navigation';
+import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
+import {getUser, handleOffLocation, handleOnLocation} from '@utils/user';
 
 const HomeScreen = () => {
   const {navigate, openDrawer, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
-  // const {message} = useMessage('');
-
-  const {
-    setInitRoute,
-    initRoute,
-    setIsVisibleNotification,
-    isVisibleNotification,
-  } = useContext(Context);
+  const [onLocation, setOnLocation] = useState(false);
 
   useEffect(() => {
     setOptions({headerShown: false});
 
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Realtime subscription: ', remoteMessage);
-      navigate(EScreen.MAP, {});
-    });
+    const setup = async () => {
+      const user = await getUser();
+      if (user?.location !== null) {
+        setOnLocation(true);
+        return;
+      }
+      setOnLocation(false);
+    };
 
-    // messaging().setBackgroundMessageHandler(async remoteMessage => {
-    //   console.log('Message handled in the background!', remoteMessage);
-    // });
-
-    // messaging().onNotificationOpenedApp(remoteMessage => {
-    //   console.log(
-    //     'Notification caused app to open from background state:',
-    //     remoteMessage,
-    //   );
-    //   console.log({isVisibleNotification});
-    //   setIsVisibleNotification(true);
-    // });
-
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            'Notification caused app to open from quit state:',
-            remoteMessage.data,
-          );
-          navigate(EScreen.MAP, {});
-        }
-      });
-
-    return unsubscribe;
-  }, [
-    initRoute,
-    isVisibleNotification,
-    navigate,
-    setInitRoute,
-    setIsVisibleNotification,
-    setOptions,
-  ]);
+    setup();
+  }, [setOptions]);
 
   const handleMap = useCallback(() => {
     navigate(EScreen.MAP, {});
@@ -82,6 +43,16 @@ const HomeScreen = () => {
   const handleSendRescue = useCallback(() => {
     navigate(EScreen.SEND_DISTRESS_SIGNAL);
   }, [navigate]);
+
+  const handleLocation = useCallback(async () => {
+    if (onLocation) {
+      handleOffLocation();
+      setOnLocation(false);
+      return;
+    }
+    handleOnLocation();
+    setOnLocation(true);
+  }, [onLocation]);
 
   return (
     <ScreenBase customStyle={styles.container}>
@@ -94,7 +65,11 @@ const HomeScreen = () => {
           type="text_medium_30"
           customStyle={styles.title}
         />
-        <CustomButton label="Turn on location" type="outline" />
+        <CustomButton
+          label={`Turn ${onLocation ? 'off' : 'on'} location`}
+          type="outline"
+          onPress={handleLocation}
+        />
       </View>
       <View style={styles.options}>
         <Card icon={SOSIcon} title="Rescue" onPress={handleSendRescue} />
