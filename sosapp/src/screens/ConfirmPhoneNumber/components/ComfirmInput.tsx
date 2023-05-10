@@ -1,5 +1,5 @@
 import {FlatList, StyleSheet, View, TextInput} from 'react-native';
-import React, {useCallback, useRef} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {CustomInput} from '@components/common';
 
 type ComfirmInputProps = {
@@ -13,6 +13,10 @@ const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
     .map((_, index) => code[index] || '');
 
   const inputsRef = useRef<TextInput[]>([]);
+
+  useEffect(() => {
+    inputsRef.current[0].focus();
+  }, []);
 
   const handleInputChangeText = useCallback(
     (value: string, field?: string) => {
@@ -43,6 +47,7 @@ const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
       <CustomInput
         maxLength={1}
         field={index + ''}
+        flex="row"
         value={item}
         customStyle={styles.input}
         inputMode="numeric"
@@ -81,7 +86,7 @@ export default ComfirmInput;
 
 const styles = StyleSheet.create({
   separator: {
-    width: 30,
+    width: 25,
   },
   text: {
     textAlign: 'center',
@@ -89,6 +94,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    width: 25,
+    width: 30,
   },
 });

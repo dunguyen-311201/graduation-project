@@ -37,7 +37,7 @@ const CustomModal = ({
             />
           </View>
           <View style={styles.actions}>
-            <CustomButton label="OK" type="secondary" onPress={onOk} />
+            <CustomButton label="Comfirm" type="secondary" onPress={onOk} />
             <CustomButton label="Cancel" type="secondary" onPress={onClose} />
           </View>
         </View>
@@ -57,12 +57,13 @@ const styles = StyleSheet.create({
     backgroundColor: WHITE_COLOR,
     width: '80%',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignSelf: 'center',
-    marginTop: 5,
+    marginTop: 20,
     borderRadius: 10,
   },
   actions: {
+    marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
   },

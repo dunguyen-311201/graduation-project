@@ -1,15 +1,28 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, ScreenBase} from '@components';
-import {getAsyncStorage, setAsyncStorage} from '@utils';
+import {
+  getDeviceToken,
+  handleUpdateProfile,
+  setAsyncStorage,
+  signupInfo,
+} from '@utils';
 import {EUser} from '@enums';
-import {USER_CACHE} from '@constants';
+import {FIRST_INSTALLED} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
 import {TUser} from '@types';
+import useAuth from '@hooks/useAuth';
+import {Context} from '@context/index';
 
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
@@ -18,6 +31,10 @@ const SetupInfoScreen = () => {
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
 
+  const {currentUser} = useAuth();
+
+  const {setLoading} = useContext(Context);
+
   const [data, setData] = useState<TUser>();
 
   const {firstName, lastName} = data || {};
@@ -25,23 +42,35 @@ const SetupInfoScreen = () => {
   useEffect(() => {
     setOptions({headerShown: true});
 
+    if (currentUser !== null) {
+      const {uid, phoneNumber} = currentUser;
+      setData({uid, phoneNumber});
+    }
+
     if (inputFirstRef?.current) {
       inputFirstRef?.current?.focus();
     }
-  }, [setOptions]);
+  }, [setOptions, currentUser]);
 
   const handleNext = useCallback(async () => {
-    if (firstName && lastName) {
-      const caseUser = await getAsyncStorage<TUser>(USER_CACHE);
-
-      await setAsyncStorage<TUser>(USER_CACHE, {
-        firstName,
-        lastName,
-        ...caseUser,
-      });
-      navigate(EScreen.CONFIRM_POLICY);
+    setLoading(true);
+    try {
+      if (firstName && lastName) {
+        const token = await getDeviceToken();
+        await signupInfo({
+          ...data,
+          token,
+          lastLogin: Date.now(),
+        });
+        await handleUpdateProfile(`${firstName} ${lastName}`);
+        await setAsyncStorage(FIRST_INSTALLED, 1);
+      }
+    } catch (error) {
+      console.log('Sign up Info failed: ', error);
     }
-  }, [firstName, lastName, navigate]);
+    setLoading(false);
+    navigate(EScreen.CONFIRM_POLICY);
+  }, [data, firstName, lastName, navigate, setLoading]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {

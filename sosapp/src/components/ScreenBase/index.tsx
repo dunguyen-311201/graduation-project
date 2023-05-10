@@ -1,4 +1,11 @@
-import {StyleSheet, View, ViewStyle, StyleProp} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Platform,
+  ViewStyle,
+  KeyboardAvoidingView,
+  StyleProp,
+} from 'react-native';
 import React, {memo} from 'react';
 
 import {CustomButton, CustomText} from '../common';
@@ -10,6 +17,7 @@ type ScreenBaseProps = {
   children?: React.ReactNode;
   onNext?: () => void;
   customStyle?: StyleProp<ViewStyle>;
+  padding?: boolean;
 };
 
 const ScreenBase = ({
@@ -18,10 +26,13 @@ const ScreenBase = ({
   desc,
   onNext,
   customStyle,
+  padding = false,
 }: ScreenBaseProps) => {
   return (
-    <View style={[styles.container, customStyle]}>
-      <View>
+    <View style={[styles.container, {...(!padding && styles.padding)}]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={[styles.keyboard, customStyle]}>
         {title && (
           <CustomText
             text={title}
@@ -36,9 +47,10 @@ const ScreenBase = ({
             type="text_medium_24"
           />
         )}
+
         {children}
-      </View>
-      <View>{onNext && <CustomButton onPress={onNext} label="Next" />}</View>
+      </KeyboardAvoidingView>
+      {onNext && <CustomButton onPress={onNext} label="Next" />}
     </View>
   );
 };
@@ -49,15 +61,14 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: BACKGROUND_COLOR,
     justifyContent: 'space-between',
-    paddingHorizontal: 32,
-    paddingBottom: 62,
-    // position: 'absolute'
-    zIndex: 2,
     flex: 1,
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
+    paddingBottom: 62,
+  },
+  padding: {
+    paddingHorizontal: 32,
+  },
+  keyboard: {
+    flex: 1,
   },
   header: {
     marginBottom: 20,
@@ -71,9 +82,5 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 5,
     borderRadius: 10,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
   },
 });

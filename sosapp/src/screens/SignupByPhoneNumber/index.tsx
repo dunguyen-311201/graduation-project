@@ -1,15 +1,15 @@
-import {Image, StyleSheet, TouchableOpacity} from 'react-native';
-import React, {useCallback, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 
-import {ScreenBase, CustomText, Loading} from '@components';
+import {Nation} from '@types';
+import {EScreen} from '@enums';
+import {PHONE, PHONES} from '@constants';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
-import {EScreen} from '@enums';
-import {PHONES} from '@constants';
-import {Nation} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
-import {signupByPhoneNumber} from '@utils';
+import {ScreenBase, CustomText, Loading} from '@components';
+import {getAsyncStorage, setAsyncStorage, signupByPhoneNumber} from '@utils';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate} =
@@ -21,6 +21,17 @@ const SignupByPhoneNumberScreen = () => {
 
   const [phone, setPhone] = useState('');
 
+  useEffect(() => {
+    const setup = async () => {
+      const _phone = await getAsyncStorage<string>(PHONE);
+      if (_phone !== null) {
+        setPhone(_phone);
+      }
+    };
+
+    setup();
+  }, []);
+
   const handleNext = useCallback(async () => {
     setLoading(true);
     try {
@@ -28,6 +39,7 @@ const SignupByPhoneNumberScreen = () => {
       const verificationId = await signupByPhoneNumber(textPhone);
 
       if (verificationId !== null) {
+        await setAsyncStorage(PHONE, phone);
         navigate(EScreen.CONFIRM_PHONE_NUMBER, {
           phone: textPhone,
           verificationId,

@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {SafeAreaView, StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
   CustomButton,
@@ -8,13 +8,12 @@ import {
   Shadow,
   CustomText,
 } from '@components';
-import {ArrowRightIcon, CheckShieldIcon} from '@theme';
-import {RootScreenNavigationProps} from '@navigation';
 import {EScreen} from '@enums';
-import {getAsyncStorage} from '@utils/asyncStorage';
-import {FIRST_INSTALLED} from '@constants';
 import {useAuth} from '@hooks';
-import {checkSignup} from '@utils';
+import {FIRST_INSTALLED} from '@constants';
+import {getAsyncStorage, checkSignup} from '@utils';
+import {RootScreenNavigationProps} from '@navigation';
+import {ArrowRightIcon, CheckShieldIcon} from '@theme';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
@@ -42,6 +41,7 @@ function SplashScreen() {
     };
 
     setup();
+    // navigate(EScreen.DETAIL_MESSAGE);
   }, [currentUser, navigate]);
 
   const _navigateNext = useCallback(() => {

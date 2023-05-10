@@ -15,6 +15,7 @@ const ClearInputIcon = require('../assets/images/edit-clear-symbolic.png');
 const DirectionIcon = require('../assets/images/directions.png');
 const MapImage = require('../assets/images/map.png');
 const LoadingIcon = require('../assets/images/loading.png');
+const ResetIcon = require('../assets/images/reset.png');
 
 export {
   CheckShieldIcon,
@@ -34,4 +35,5 @@ export {
   DirectionIcon,
   MapImage,
   LoadingIcon,
+  ResetIcon,
 };

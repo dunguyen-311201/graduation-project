@@ -16,7 +16,7 @@ type CustomTextProps = {
 
 const CustomText = ({
   text,
-  type,
+  type = 'text_medium_20',
   children,
   customStyle,
   onPress,
@@ -26,6 +26,7 @@ const CustomText = ({
   return (
     <Text
       style={{
+        ..._styles.text,
         ...(type && styles[type]),
         ...(color && colors[color]),
         ...(border && _styles.border),
@@ -41,6 +42,10 @@ const CustomText = ({
 export default memo(CustomText);
 
 const _styles = StyleSheet.create({
+  text: {
+    textTransform: 'capitalize',
+    minHeight: 20,
+  },
   border: {
     borderColor: WHITE_COLOR,
     borderWidth: 1,

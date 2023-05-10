@@ -1,10 +1,10 @@
 import {StyleSheet} from 'react-native';
 import React, {useCallback, useEffect} from 'react';
+import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 
-import {RootScreenNavigationProps} from '@navigation';
+import {EScreen} from '@enums';
 import {ScreenBase, Social} from '@components';
-import {EScreen} from '@enums/EScreen';
 import {FacebookIcon, GoogleIcon} from '@theme';
 
 const SignupBySocialScreen = () => {

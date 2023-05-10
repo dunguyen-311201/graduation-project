@@ -1,22 +1,16 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {View, StyleSheet} from 'react-native';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
-import {RootScreenNavigationProps} from '@navigation';
 import {useAuth} from '@hooks';
-import {EScreen, EUser} from '@enums';
-import {
-  ScreenBase,
-  DropDown,
-  Textreae,
-  CustomInput,
-  Loading,
-} from '@components';
+import {Context} from '@context';
 import {callAPI} from '@services';
+import {EScreen, EUser} from '@enums';
 import {getAsyncStorage} from '@utils';
 import {Location, TMessage} from '@types';
-import {BACKGROUND_COLOR} from '@theme';
-import {CURRENT_LOCATION} from '@constants/cache';
+import {CURRENT_LOCATION} from '@constants';
+import {RootScreenNavigationProps} from '@navigation';
+import {ScreenBase, DropDown, Textreae, CustomInput} from '@components';
 
 const types = ['Traffic accident', 'Vehicle breakdown'];
 
@@ -26,14 +20,14 @@ const SendDistreeSignal = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
 
-  const [loading, setLoading] = useState(false);
+  const {setLoading} = useContext(Context);
 
   const {currentUser} = useAuth();
 
   const [message, setMessage] = useState<MessageType>({
     description: '',
     type: types[0],
-    uid: '',
+    userId: '',
     phoneNumber: '',
   });
 
@@ -43,20 +37,22 @@ const SendDistreeSignal = () => {
     });
 
     const setup = async () => {
-      if (currentUser) {
-        const deviceLocation = await getAsyncStorage<Location>(
-          CURRENT_LOCATION,
-        );
-
-        const {phoneNumber, uid} = currentUser;
-
-        setMessage(prev => ({
-          ...prev,
-          location: deviceLocation,
-          phoneNumber,
-          uid,
-        }));
+      if (currentUser === null) {
+        return;
       }
+      const {phoneNumber, uid} = currentUser;
+
+      const deviceLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+
+      if (phoneNumber === null || deviceLocation === null) {
+        return;
+      }
+      setMessage(prev => ({
+        ...prev,
+        location: deviceLocation,
+        userId: uid,
+        phoneNumber,
+      }));
     };
 
     setup();
@@ -66,11 +62,10 @@ const SendDistreeSignal = () => {
     setLoading(true);
 
     try {
-      const {description, uid, type, location} = message;
       const data = await callAPI({
         route: 'MESSAGE',
         method: 'POST',
-        data: {description, uid, type, location},
+        data: message,
       });
 
       console.log(86, data);
@@ -80,7 +75,7 @@ const SendDistreeSignal = () => {
 
     setLoading(false);
     navigate(EScreen.DETAIL_MESSAGE, {uid: ''});
-  }, [message, navigate]);
+  }, [message, navigate, setLoading]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -92,11 +87,12 @@ const SendDistreeSignal = () => {
     console.log(field);
   }, []);
 
+  console.log(message);
+
   return (
     <ScreenBase
       onNext={sendSignal}
       title="You have to connect to the support service">
-      {loading && <Loading />}
       <CustomInput
         field={EUser.phoneNumber}
         value={message.phoneNumber}
@@ -107,45 +103,34 @@ const SendDistreeSignal = () => {
       />
       <CustomInput
         field={EUser.location}
-        value={message.location?.description}
+        value={
+          message.location?.description?.more ||
+          message.location?.description?.district ||
+          ''
+        }
         onChangeText={handleChangeText}
         title="Location"
         onEndEditing={handleEndEditing}
         border
       />
 
-      <View style={styles.formMessage}>
-        <DropDown
-          data={types}
-          initValue={message.type}
-          onSelect={handleChangeText}
-          field="type"
-        />
-        <Textreae
-          value={message.description}
-          field="description"
-          onChangeText={handleChangeText}
-        />
-      </View>
+      <DropDown
+        data={types}
+        initValue={message.type}
+        onSelect={handleChangeText}
+        field="type"
+        title="Type"
+      />
+      <Textreae
+        title="Description"
+        value={message.description}
+        field="description"
+        onChangeText={handleChangeText}
+      />
     </ScreenBase>
   );
 };
 
 export default SendDistreeSignal;
 
-const styles = StyleSheet.create({
-  content: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: BACKGROUND_COLOR,
-    height: 100,
-  },
-  info: {
-    justifyContent: 'space-between',
-  },
-  formMessage: {
-    paddingTop: 70,
-    position: 'relative',
-    zIndex: 1,
-  },
-});
+const styles = StyleSheet.create({});

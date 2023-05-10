@@ -1,5 +1,6 @@
 export enum EUser {
   first = 'firstName',
+  name = 'name',
   last = 'lastName',
   uid = 'uid',
   role = 'role',
@@ -12,4 +13,5 @@ export enum EUser {
   location = 'location',
   lastLogin = 'lastLogin',
   isRescue = 'isRescue',
+  address = 'address',
 }

@@ -13,5 +13,4 @@ export enum EScreen {
   DRAWER = 'drawer-screen',
   HELP = 'help-screen',
   DETAIL_MESSAGE = 'detail-message-screen',
-  SIGNUP_RESCUE_SERVICE = 'signup-rescue-service-screen',
 }

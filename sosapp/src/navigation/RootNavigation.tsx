@@ -13,11 +13,10 @@ import {
   SignupByPhoneNumberScreen,
   SignupBySocialScreen,
   DetailMessageScreen,
-  SignupRescueServiceScreen,
 } from '@screens';
 import {Location} from '@types';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
-import {Loading} from '@components';
+import {Loading, CustomText} from '@components';
 import {Context} from '@context';
 
 export type RootParamList = {
@@ -25,16 +24,15 @@ export type RootParamList = {
   [EScreen.SPLASH]: undefined;
   [EScreen.SIGNUP_BY_PHONE_NUMBER]: undefined;
   [EScreen.SIGNUP_BY_SOCIAL]: undefined;
-  [EScreen.SIGNUP_INFO]: {isRescue: boolean};
+  [EScreen.SIGNUP_INFO]: undefined;
   [EScreen.CONFIRM_POLICY]: undefined;
   [EScreen.CONFIRM_PHONE_NUMBER]: {
     phone: string;
     verificationId: string;
   };
-  [EScreen.MAP]: {initLocation?: Location};
+  [EScreen.MAP]: {initLocation?: Location | null};
   [EScreen.SEND_DISTRESS_SIGNAL]: undefined;
   [EScreen.DETAIL_MESSAGE]: {uid: string};
-  [EScreen.SIGNUP_RESCUE_SERVICE]: undefined;
 };
 
 const RootNavigation = () => {
@@ -68,11 +66,6 @@ const RootNavigation = () => {
         <Stack.Screen
           name={EScreen.SPLASH}
           component={SplashScreen}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name={EScreen.SIGNUP_RESCUE_SERVICE}
-          component={SignupRescueServiceScreen}
           options={{headerShown: false}}
         />
         <Stack.Screen

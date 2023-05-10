@@ -12,7 +12,10 @@ const useMessage = (uid?: string) => {
         if (data) {
           setMessage({
             description: data.description,
+            location: data.location,
+            status: data.status,
             type: data.type,
+            userId: data.userId,
             uid: data.uid,
           });
         }

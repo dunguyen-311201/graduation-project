@@ -9,18 +9,18 @@ import {
 } from 'react-native';
 import React, {forwardRef, memo, useCallback} from 'react';
 import CustomText from '../Text';
-import {DARK_GRAY_COLOR, GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
+import {DARK_GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
 
 type CustomInputProps = {
   title?: string;
-  field?: string;
+  field: string;
   value?: string;
   inputMode?: InputModeOptions;
   errorMessage?: string;
   titleStyle?: TextStyle;
   errorMessageStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
-  onChangeText?: (value: string, field?: string) => void;
+  onChangeText?: (value: string, field: string) => void;
   onBlur?: (field?: string) => void;
   onFocus?: (field?: string) => void;
   maxLength?: number;
@@ -28,6 +28,7 @@ type CustomInputProps = {
   onEndEditing?: (feild: string) => void;
   customStyle?: ViewStyle;
   border?: boolean;
+  flex?: 'row' | 'column';
 };
 const CustomInput: React.ForwardRefRenderFunction<
   TextInput,
@@ -49,6 +50,7 @@ const CustomInput: React.ForwardRefRenderFunction<
     onEndEditing,
     customStyle,
     border,
+    flex = 'column',
   } = props;
 
   const _onChangeText = useCallback(
@@ -67,27 +69,35 @@ const CustomInput: React.ForwardRefRenderFunction<
   }, [onBlur, field]);
 
   const _onEndEditing = useCallback(() => {
-    onEndEditing && field && onEndEditing(field);
+    onEndEditing && onEndEditing(field);
   }, [onEndEditing, field]);
 
   return (
     <View
       style={{
         ...styles.inputgroup,
-        ...(!border && styles.inputBorder),
         ...customStyle,
+        ...(flex === 'row' && styles.row),
       }}>
       {title && (
         <CustomText
           text={title}
-          type="text_regular_20"
-          customStyle={{...styles.title, ...titleStyle}}
+          type={flex === 'row' ? 'text_medium_20' : 'text_medium_14'}
+          customStyle={{
+            ...styles.title,
+            ...titleStyle,
+          }}
         />
       )}
       <TextInput
         value={value}
         ref={ref}
-        style={[styles.input, valueStyle, {...(border && styles.border)}]}
+        style={[
+          styles.input,
+          valueStyle,
+          {...(flex === 'column' && styles.column)},
+          {...(border && styles.border)},
+        ]}
         onChangeText={_onChangeText}
         onBlur={_onBlur}
         onFocus={_onFocus}
@@ -109,14 +119,7 @@ export default memo(forwardRef(CustomInput));
 const styles = StyleSheet.create({
   inputgroup: {
     marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  inputBorder: {borderBottomColor: GRAY_COLOR, borderBottomWidth: 1},
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    minHeight: 80,
   },
   title: {
     marginRight: 10,
@@ -132,5 +135,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '400',
     flex: 1,
+  },
+  column: {
+    borderColor: WHITE_COLOR,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 8,
+    color: WHITE_COLOR,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomColor: WHITE_COLOR,
+    borderBottomWidth: 1,
   },
 });

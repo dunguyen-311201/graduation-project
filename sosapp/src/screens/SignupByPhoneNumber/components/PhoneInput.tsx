@@ -66,6 +66,7 @@ const PhoneInput = ({
 
       <CustomInput
         value={phone}
+        flex="row"
         onChangeText={onChangePhone}
         field="phone"
         inputMode="numeric"

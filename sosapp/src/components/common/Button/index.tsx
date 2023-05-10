@@ -90,7 +90,7 @@ const CustomButton = ({
       break;
     case 'primary':
       Button = (
-        <TouchableOpacity onPress={onPress} style={style}>
+        <TouchableOpacity onPress={onPress} style={[style, customStyle]}>
           <Shadow customStyle={styles.button} paddingVertical={16}>
             <CustomText text={label} type="text_xLarge" />
             {icon && <Image source={icon} style={styles.arrowRightIcon} />}
@@ -101,7 +101,7 @@ const CustomButton = ({
 
     default:
       Button = (
-        <TouchableOpacity style={style} onPress={onPress}>
+        <TouchableOpacity style={[style, customStyle]} onPress={onPress}>
           <CustomText text={label} type="text_xLarge" />
         </TouchableOpacity>
       );

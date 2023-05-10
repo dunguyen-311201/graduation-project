@@ -1,6 +1,6 @@
 import {View, Image, StyleSheet} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
   ScreenBase,
@@ -13,7 +13,8 @@ import {EScreen} from '@enums';
 import {MenuButton} from './components';
 import {RootScreenNavigationProps} from '@navigation';
 import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
-import {getUser, handleOffLocation, handleOnLocation} from '@utils/user';
+import {getUserByID, handleOffLocation, handleOnLocation} from '@utils/user';
+import {useAuth} from '@hooks';
 
 const HomeScreen = () => {
   const {navigate, openDrawer, setOptions} =
@@ -21,20 +22,24 @@ const HomeScreen = () => {
 
   const [onLocation, setOnLocation] = useState(false);
 
+  const {currentUser} = useAuth();
+
   useEffect(() => {
     setOptions({headerShown: false});
 
     const setup = async () => {
-      const user = await getUser();
-      if (user?.location !== null) {
-        setOnLocation(true);
-        return;
+      if (currentUser !== null) {
+        const user = await getUserByID(currentUser.uid);
+        if (user?.location && user?.location !== null) {
+          setOnLocation(true);
+          return;
+        }
       }
       setOnLocation(false);
     };
 
     setup();
-  }, [setOptions]);
+  }, [currentUser, setOptions]);
 
   const handleMap = useCallback(() => {
     navigate(EScreen.MAP, {});
@@ -50,12 +55,13 @@ const HomeScreen = () => {
       setOnLocation(false);
       return;
     }
+
     handleOnLocation();
     setOnLocation(true);
   }, [onLocation]);
 
   return (
-    <ScreenBase customStyle={styles.container}>
+    <ScreenBase customStyle={styles.container} padding>
       <View style={styles.homeHeader}>
         <MenuButton onPress={openDrawer} marginTop={32} />
         <CustomText

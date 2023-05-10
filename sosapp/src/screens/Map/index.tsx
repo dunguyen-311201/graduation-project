@@ -1,22 +1,23 @@
 import Config from 'react-native-config';
-import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
+import MapViewDirections from 'react-native-maps-directions';
 import React, {useEffect, useCallback, useState} from 'react';
 import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
 
-import {RootScreenNavigationProps} from '@navigation';
-import {EScreen} from '@enums';
-import {Location} from '@types';
 import {
   FromLocationIcon,
   ToLocationIcon,
   ClearInputIcon,
   TEXT_COLOR,
+  WHITE_COLOR,
 } from '@theme';
+import {EScreen} from '@enums';
+import {Location} from '@types';
 import {CustomMarker} from './components';
-import MapViewDirections from 'react-native-maps-directions';
-import {BackIcon, CustomText, SearchInput} from '@components';
+import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
+import {BackIcon, CustomText, SearchInput} from '@components';
 import {getAsyncStorage} from '@utils/asyncStorage';
 import {CURRENT_LOCATION} from '@constants/cache';
 
@@ -39,56 +40,60 @@ const MapScreen = () => {
 
   const [isDirection, setIsDirection] = useState(false);
 
-  const [locations, setLocations] = useState<SearchLocation>({
-    from: initLocation,
-  });
+  const [locations, setLocations] = useState<SearchLocation>();
 
   useEffect(() => {
     setOptions({headerShown: false});
 
     const setup = async () => {
       const deviceLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
-      if (initLocation === undefined && deviceLocation !== null) {
+
+      if (deviceLocation !== null) {
         setLocations({from: deviceLocation});
       }
     };
 
     setup();
-  }, [initLocation, setOptions]);
+
+    if (initLocation) {
+      setLocations({to: initLocation});
+    }
+  }, [setOptions, initLocation]);
 
   const {from, to, distance, timeout} = locations || {};
 
   useEffect(() => {
-    const getDistance = async () => {
-      const [des1, des2] = [from?.description, to?.description];
+    const fetchDistanceAndTime = async () => {
+      if (to && from) {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${from.latitude},${from.longitude}&destinations=${to.latitude},${to.longitude}&key=${GOOGLE_MAPS_API_KEY}`,
+        );
 
-      if (des1 && des2) {
-        const URL = `https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${from?.description}&origins=${to?.description}&units=imperial&key=${GOOGLE_MAPS_API_KEY}`;
-        fetch(URL)
-          .then(response => response.json())
-          .then(data => {
-            const cal = data?.rows[0].elements[0];
-            const d = Math.round(cal.distance.value / 1000);
-            const t = cal.duration.text;
-            setLocations(prev => ({...prev, distance: d, timeout: t}));
-          })
-          .catch(error => {
-            console.log(error);
-          });
+        const data = await response.json();
+
+        console.log(74, data.rows[0]);
+
+        const d = data.rows[0].elements[0].distance.text;
+        const t = data.rows[0].elements[0].duration.text;
+
+        setLocations(prev => ({...prev, distance: d, timeout: t}));
       }
     };
 
-    getDistance();
-  }, [from?.description, to?.description]);
+    fetchDistanceAndTime();
+  }, [from, to]);
 
-  const handleSearch = useCallback((_location: Location, _field?: string) => {
-    if (_field === 'to') {
-      setLocations(prev => ({...prev, to: _location}));
-    }
-    if (_field === 'from') {
-      setLocations(prev => ({...prev, from: _location}));
-    }
-  }, []);
+  const handleSearch = useCallback(
+    async (_location: Location, _field?: string) => {
+      if (_field === 'to') {
+        setLocations(prev => ({...prev, to: _location}));
+      }
+      if (_field === 'from') {
+        setLocations(prev => ({...prev, from: _location}));
+      }
+    },
+    [],
+  );
 
   const handleToDirectionandSearch = useCallback(() => {
     setIsDirection(prev => !prev);
@@ -125,6 +130,7 @@ const MapScreen = () => {
               field="from"
               onToDirection={handleToDirectionandSearch}
               isDirection={isDirection}
+              zIndex={3}
             />
             <SearchInput
               icon={ToLocationIcon}
@@ -135,25 +141,26 @@ const MapScreen = () => {
               onToDirection={handleToDirectionandSearch}
               isDirection={isDirection}
               customStyle={styles.lastItem}
+              zIndex={2}
             />
           </View>
-          <View style={styles.distanceInfo}>
+          <View style={styles.navRight}>
             <Pressable onPress={handleToDirectionandSearch}>
               <Image source={ClearInputIcon} style={styles.icon} />
             </Pressable>
-            {timeout && <CustomText text={timeout} type="text_regular_20" />}
-            {distance && (
-              <CustomText text={distance + ' km'} type="text_regular_20" />
-            )}
           </View>
         </View>
       )}
 
-      {from && (
+      {locations?.from && (
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          region={{...from, latitudeDelta: 0.009, longitudeDelta: 0.009}}>
+          region={{
+            ...locations?.from,
+            latitudeDelta: 0.009,
+            longitudeDelta: 0.009,
+          }}>
           {from && to && GOOGLE_MAPS_API_KEY && (
             <MapViewDirections
               origin={from}
@@ -163,16 +170,16 @@ const MapScreen = () => {
               strokeColor="#3A4C11"
             />
           )}
-          {from && (
+          {locations?.from && (
             <View>
               <CustomMarker
-                coordinate={from}
+                coordinate={locations?.from}
                 title={to ? 'Begin' : 'Location'}
                 field="from"
                 onChangeLocation={handleChangeLocation}
               />
               <Circle
-                center={from}
+                center={locations?.from}
                 radius={500}
                 fillColor="#42ff22"
                 strokeWidth={2}
@@ -197,6 +204,24 @@ const MapScreen = () => {
           )}
         </MapView>
       )}
+      {locations?.distance && (
+        <View style={styles.distanceInfo}>
+          {timeout && (
+            <CustomText
+              text={`Time: ${timeout}`}
+              type="text_medium_16"
+              color="blue"
+            />
+          )}
+          {distance && (
+            <CustomText
+              text={`Distance: ${distance} km`}
+              type="text_medium_16"
+              color="blue"
+            />
+          )}
+        </View>
+      )}
     </View>
   );
 };
@@ -219,6 +244,9 @@ const styles = StyleSheet.create({
     backgroundColor: TEXT_COLOR,
     width: '100%',
     height: 80,
+  },
+  navRight: {
+    paddingTop: 20,
   },
   single: {
     flex: 1,
@@ -250,9 +278,17 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   distanceInfo: {
-    height: '100%',
-    maxWidth: 80,
+    position: 'absolute',
+    zIndex: 2,
+    backgroundColor: WHITE_COLOR,
+    borderRadius: 10,
+    flexDirection: 'row',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    height: 50,
     justifyContent: 'space-between',
-    paddingVertical: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
 });

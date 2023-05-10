@@ -1,16 +1,25 @@
 import {FlatList, StyleSheet, View, Pressable} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import CustomText from '../Text';
-import {BACKGROUND_COLOR, WHITE_COLOR} from '@theme/color';
+import {BLACK_COLOR, WHITE_COLOR} from '@theme';
 
 type DropDownProps = {
   data: string[];
   initValue: string;
   onSelect: (value: string, field: string) => void;
   field: string;
+  zIndex?: number;
+  title: string;
 };
 
-const DropDown = ({data, initValue, onSelect, field}: DropDownProps) => {
+const DropDown = ({
+  data,
+  initValue,
+  onSelect,
+  field,
+  zIndex,
+  title,
+}: DropDownProps) => {
   const [isVisiable, setIsVisiable] = useState<boolean>(false);
 
   const handleDropdown = useCallback(() => {
@@ -28,7 +37,6 @@ const DropDown = ({data, initValue, onSelect, field}: DropDownProps) => {
   const renderItem = useCallback(
     ({item}: {item: string}) => {
       const handlePress = () => {
-        console.log(item);
         handleSelect(item);
       };
 
@@ -48,28 +56,29 @@ const DropDown = ({data, initValue, onSelect, field}: DropDownProps) => {
   const keyExtractor = useCallback((item: string) => item, []);
 
   return (
-    <View
-      style={{
-        ...styles.dropDown,
-        ...(isVisiable && {...styles.openList, height: data.length * 40}),
-      }}>
-      {!isVisiable && (
-        <Pressable onPress={handleDropdown} style={styles.dropDownItem}>
-          <CustomText
-            text={initValue || 'Select type emergency'}
-            type="text_medium_20"
-          />
-        </Pressable>
-      )}
-      {isVisiable && (
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          style={{...styles.list, ...(isVisiable && {})}}
-        />
-      )}
-    </View>
+    <>
+      <View
+        style={{
+          ...styles.dropDown,
+          ...(zIndex && {zIndex}),
+        }}>
+        <CustomText text={title} type="text_medium_16" />
+        <View style={styles.control}>
+          <Pressable onPress={handleDropdown} style={styles.dropDownItem}>
+            <CustomText text={initValue || 'Select type'} />
+          </Pressable>
+
+          {isVisiable && (
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={keyExtractor}
+              style={styles.list}
+            />
+          )}
+        </View>
+      </View>
+    </>
   );
 };
 
@@ -77,23 +86,34 @@ export default DropDown;
 
 const styles = StyleSheet.create({
   dropDown: {
-    height: 50,
-    width: '100%',
+    marginTop: 10,
+    height: 72,
+    position: 'relative',
+    zIndex: 1,
+  },
+  control: {
     position: 'absolute',
     zIndex: 2,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: WHITE_COLOR,
-    marginTop: 20,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
   list: {
-    backgroundColor: BACKGROUND_COLOR,
+    backgroundColor: BLACK_COLOR,
+    overflow: 'hidden',
+    position: 'absolute',
+    zIndex: 3,
+    top: '100%',
+    right: 0,
+    left: 0,
+    borderRadius: 10,
   },
   dropDownItem: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  openList: {
-    overflow: 'scroll',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    height: 40,
   },
 });

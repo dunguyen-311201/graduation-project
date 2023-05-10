@@ -34,6 +34,7 @@ type SearchProps = {
   placeholder: string;
   icon?: ImageSourcePropType;
   onToDirection?: () => void;
+  zIndex?: number;
 };
 
 const SearchInput = ({
@@ -45,40 +46,40 @@ const SearchInput = ({
   origin,
   isDirection = false,
   onToDirection,
+  zIndex,
 }: SearchProps) => {
   const [location, setLocation] = useState<Location>();
 
   useEffect(() => {
     if (origin) {
-      setLocation(prev => ({...prev, ...origin}));
+      setLocation(origin);
     }
   }, [origin]);
 
   const handleSearch = useCallback(
-    (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+    async (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
       const _location = detail?.geometry?.location;
       if (_location) {
         const {lat, lng} = _location;
 
-        const currentLocation = {
+        const currentLocation: Location = {
           latitude: lat,
           longitude: lng,
-          description: detail?.formatted_address,
+          description: {more: detail?.formatted_address},
         };
 
-        onSearch(currentLocation, field);
-        setLocation(undefined);
+        await onSearch(currentLocation, field);
       }
     },
     [field, onSearch],
   );
 
   const handleClear = useCallback(() => {
-    setLocation({latitude: 0, longitude: 0, description: ''});
+    setLocation(undefined);
   }, []);
 
   return (
-    <View style={[styles.container, customStyle]}>
+    <View style={[styles.container, customStyle, {...(zIndex && {zIndex})}]}>
       <View style={styles.group}>
         {isDirection && icon !== undefined && (
           <Pressable style={styles.buttonLogo}>
@@ -94,14 +95,17 @@ const SearchInput = ({
           keepResultsAfterBlur={false}
           onFail={error => console.log(error)}
           textInputProps={{
-            value: location?.description || '',
+            value:
+              location?.description?.more ||
+              location?.description?.district ||
+              '',
             maxLength: 25,
             onChangeText: (value: string) => {
               setLocation({
                 latitude: 0,
                 longitude: 0,
                 ...location,
-                description: value,
+                description: {more: value},
               });
             },
           }}
@@ -111,7 +115,7 @@ const SearchInput = ({
           nearbyPlacesAPI="GooglePlacesSearch"
         />
         <View style={styles.rightButton}>
-          {location?.description !== '' && (
+          {location?.description?.district !== '' && (
             <Pressable style={styles.buttonClear} onPress={handleClear}>
               <Image source={ClearInputIcon} style={styles.iconClear} />
             </Pressable>
