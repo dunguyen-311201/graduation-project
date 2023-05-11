@@ -25,14 +25,12 @@ const DetailMessage = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.DETAIL_MESSAGE>>();
 
-  const {uid} = useRoute<ConfirmRoute>().params || {
-    uid: 'c00428c1-bd5a-4f51-b5f4-04ef0a85ae48',
-  };
+  const {uid} = useRoute<ConfirmRoute>().params || {};
 
   const {message} = useMessage(uid);
 
   const [messageData, setMessageData] = useState<TMessage>();
-  const [userData, setUserData] = useState<TUser>();
+  const [userData, setUserData] = useState<TUser>({phoneNumber: ''});
 
   useEffect(() => {
     setOptions({title: 'Detail Message'});
@@ -106,7 +104,7 @@ const DetailMessage = () => {
           />
           <CustomInput
             field="location"
-            value={messageData.location?.description}
+            value={messageData.location?.description?.more}
             title="Location"
           />
           <CustomText

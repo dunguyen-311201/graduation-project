@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {
   CustomButton,
@@ -9,40 +9,39 @@ import {
   CustomText,
 } from '@components';
 import {EScreen} from '@enums';
-import {useAuth} from '@hooks';
 import {FIRST_INSTALLED} from '@constants';
-import {getAsyncStorage, checkSignup} from '@utils';
+import {getAsyncStorage} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme';
+import {Context} from '@context/index';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
+
   const [isNew, setIsNew] = useState(false);
 
-  const {currentUser} = useAuth();
-
+  const {isAuthenticated, isCompleted, onCompleted} = useContext(Context);
   useEffect(() => {
     const setup = async () => {
-      const _isNew = await getAsyncStorage(FIRST_INSTALLED);
+      const isFirst = await getAsyncStorage(FIRST_INSTALLED);
 
-      if (_isNew === null) {
+      if (!isFirst) {
         setIsNew(true);
         return;
       }
 
-      if (currentUser !== null && (await checkSignup(currentUser.uid))) {
+      if (isAuthenticated) {
         navigate(EScreen.DRAWER);
         return;
       }
-
-      if (currentUser === null) {
-        navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-      }
+      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
+      onCompleted(false);
     };
 
-    setup();
-    // navigate(EScreen.DETAIL_MESSAGE);
-  }, [currentUser, navigate]);
+    if (isCompleted) {
+      setup();
+    }
+  }, [isAuthenticated, isCompleted, navigate, onCompleted]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

@@ -14,12 +14,12 @@ const getUserByID = async (uid: string) => {
 
 const handleOnLocation = async () => {
   const currentUser = auth().currentUser;
-  const deviceLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+  const location = await getAsyncStorage<Location>(CURRENT_LOCATION);
 
   if (currentUser !== null) {
     await firebase()
       .doc('users/' + currentUser.uid)
-      .update({deviceLocation});
+      .update({location});
   }
 };
 

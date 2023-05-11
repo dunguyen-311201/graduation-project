@@ -43,7 +43,6 @@ export default memo(CustomText);
 
 const _styles = StyleSheet.create({
   text: {
-    textTransform: 'capitalize',
     minHeight: 20,
   },
   border: {

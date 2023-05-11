@@ -74,6 +74,7 @@ const PhoneInput = ({
         onEndEditing={onEndEditing}
         maxLength={11}
         customStyle={styles.input}
+        valueStyle={styles.valueStyle}
       />
     </View>
   );
@@ -110,5 +111,8 @@ const styles = StyleSheet.create({
   },
   dropDown: {
     marginLeft: 5,
+  },
+  valueStyle: {
+    fontSize: 24,
   },
 });

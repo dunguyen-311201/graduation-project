@@ -1,16 +1,10 @@
 import {StyleSheet, View} from 'react-native';
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
-import {CustomInput, ScreenBase} from '@components';
+import {CustomInput, Loading, ScreenBase} from '@components';
 import {
   getDeviceToken,
   handleUpdateProfile,
@@ -22,7 +16,6 @@ import {FIRST_INSTALLED} from '@constants';
 import {TextInput} from 'react-native-gesture-handler';
 import {TUser} from '@types';
 import useAuth from '@hooks/useAuth';
-import {Context} from '@context/index';
 
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
@@ -33,16 +26,15 @@ const SetupInfoScreen = () => {
 
   const {currentUser} = useAuth();
 
-  const {setLoading} = useContext(Context);
-
   const [data, setData] = useState<TUser>();
+  const [loading, setLoading] = useState(false);
 
   const {firstName, lastName} = data || {};
 
   useEffect(() => {
     setOptions({headerShown: true});
 
-    if (currentUser !== null) {
+    if (currentUser) {
       const {uid, phoneNumber} = currentUser;
       setData({uid, phoneNumber});
     }
@@ -70,7 +62,7 @@ const SetupInfoScreen = () => {
     }
     setLoading(false);
     navigate(EScreen.CONFIRM_POLICY);
-  }, [data, firstName, lastName, navigate, setLoading]);
+  }, [data, firstName, lastName, navigate]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -90,28 +82,31 @@ const SetupInfoScreen = () => {
   );
 
   return (
-    <ScreenBase desc="What's your name?" onNext={handleNext}>
-      <View style={styles.group}>
-        <CustomInput
-          field={EUser.first}
-          value={firstName}
-          onChangeText={handleChangeText}
-          placeholder="First"
-          ref={inputFirstRef}
-          customStyle={styles.input}
-          onEndEditing={handleEndEditing}
-        />
-        <CustomInput
-          field={EUser.last}
-          value={lastName}
-          onChangeText={handleChangeText}
-          ref={inputLastRef}
-          placeholder="Last"
-          onEndEditing={handleEndEditing}
-          customStyle={styles.input}
-        />
-      </View>
-    </ScreenBase>
+    <>
+      {loading && <Loading />}
+      <ScreenBase desc="What's your name?" onNext={handleNext}>
+        <View style={styles.group}>
+          <CustomInput
+            field={EUser.first}
+            value={firstName}
+            onChangeText={handleChangeText}
+            title="First"
+            ref={inputFirstRef}
+            customStyle={styles.input}
+            onEndEditing={handleEndEditing}
+          />
+          <CustomInput
+            field={EUser.last}
+            value={lastName}
+            onChangeText={handleChangeText}
+            ref={inputLastRef}
+            title="Last"
+            onEndEditing={handleEndEditing}
+            customStyle={styles.input}
+          />
+        </View>
+      </ScreenBase>
+    </>
   );
 };
 

@@ -1,9 +1,8 @@
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {useAuth} from '@hooks';
-import {Context} from '@context';
 import {callAPI} from '@services';
 import {EScreen, EUser} from '@enums';
 import {getAsyncStorage} from '@utils';
@@ -12,15 +11,19 @@ import {CURRENT_LOCATION} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase, DropDown, Textreae, CustomInput} from '@components';
 
-const types = ['Traffic accident', 'Vehicle breakdown'];
+const types = [
+  'Rescue request',
+  'Traffic incident report',
+  'Road issue report',
+  'Replacement vehicle request',
+  'Emergency support request',
+];
 
 type MessageType = {phoneNumber: string} & TMessage;
 
 const SendDistreeSignal = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
-
-  const {setLoading} = useContext(Context);
 
   const {currentUser} = useAuth();
 
@@ -59,23 +62,19 @@ const SendDistreeSignal = () => {
   }, [setOptions, currentUser]);
 
   const sendSignal = useCallback(async () => {
-    setLoading(true);
-
     try {
-      const data = await callAPI({
+      const {data, status} = await callAPI({
         route: 'MESSAGE',
         method: 'POST',
         data: message,
       });
-
-      console.log(86, data);
+      console.log('Send Message status code: ', status);
+      // navigate(EScreen.DETAIL_MESSAGE, {uid: data.uid});
+      navigate(EScreen.MAP, {});
     } catch (error) {
       console.log('Send Message Error', error);
     }
-
-    setLoading(false);
-    navigate(EScreen.DETAIL_MESSAGE, {uid: ''});
-  }, [message, navigate, setLoading]);
+  }, [message, navigate]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -86,8 +85,6 @@ const SendDistreeSignal = () => {
   const handleEndEditing = useCallback((field: string) => {
     console.log(field);
   }, []);
-
-  console.log(message);
 
   return (
     <ScreenBase

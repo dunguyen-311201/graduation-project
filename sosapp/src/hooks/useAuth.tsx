@@ -9,7 +9,7 @@ const useAuth = () => {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(user => {
-      if (user) {
+      if (user && user.displayName) {
         setCurrentUser(user);
       }
     });

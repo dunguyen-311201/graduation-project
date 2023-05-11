@@ -82,7 +82,7 @@ const CustomInput: React.ForwardRefRenderFunction<
       {title && (
         <CustomText
           text={title}
-          type={flex === 'row' ? 'text_medium_20' : 'text_medium_14'}
+          type={flex === 'row' ? 'text_medium_24' : 'text_medium_14'}
           customStyle={{
             ...styles.title,
             ...titleStyle,
@@ -119,7 +119,6 @@ export default memo(forwardRef(CustomInput));
 const styles = StyleSheet.create({
   inputgroup: {
     marginBottom: 10,
-    minHeight: 80,
   },
   title: {
     marginRight: 10,
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     color: DARK_GRAY_COLOR,
     fontSize: 20,
     fontWeight: '400',
-    flex: 1,
+    // flex: 1,
   },
   column: {
     borderColor: WHITE_COLOR,

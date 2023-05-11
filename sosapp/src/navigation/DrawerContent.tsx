@@ -1,32 +1,25 @@
-import React, {
-  useCallback,
-  useMemo,
-  useContext,
-  useState,
-  useEffect,
-} from 'react';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer';
-import {Image, StyleSheet, View, Pressable} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
+import React, {useContext, useMemo, useState, useEffect} from 'react';
 
-import {ProfileIcon, ResetIcon} from '@theme';
-import {CustomButton, CustomText} from '@components';
 import {useAuth} from '@hooks';
-import {EScreen} from '@enums';
-import {getAsyncStorage, handleLogout} from '@utils';
 import {Location} from '@types';
-import {CURRENT_LOCATION} from '@constants/cache';
 import {Context} from '@context';
+import {ProfileIcon} from '@theme';
+import {CURRENT_LOCATION} from '@constants';
+import {getAsyncStorage, handleLogout} from '@utils';
+import {CustomButton, CustomText} from '@components';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const {currentUser} = useAuth();
 
-  const {resetLocation, isReload} = useContext(Context);
-
   const [location, setLocation] = useState<Location>();
+
+  const {onAuthenticated} = useContext(Context);
 
   const [icon, displayName] = useMemo(() => {
     let _icon = ProfileIcon,
@@ -54,11 +47,10 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
     setup();
   }, []);
 
-  const _handleSignout = useCallback(async () => {
+  const _handleLogout = async () => {
     await handleLogout();
-    props.navigation.reset({index: 0, routes: [{name: EScreen.SPLASH}]});
-    props.navigation.navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-  }, [props.navigation]);
+    onAuthenticated(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -86,16 +78,13 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
               type="text_medium_14"
             />
             <CustomText
-              text={location?.description?.district || ''}
+              text={location?.description?.city || ''}
               color="blue"
               type="text_medium_14"
             />
           </View>
-          <Pressable onPress={resetLocation} disabled={isReload}>
-            <Image source={ResetIcon} style={styles.iconReset} />
-          </Pressable>
         </View>
-        <CustomButton label="Sign out" onPress={_handleSignout} />
+        <CustomButton label="Sign out" onPress={_handleLogout} />
       </View>
     </View>
   );
@@ -142,7 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   iconReset: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
   },
 });

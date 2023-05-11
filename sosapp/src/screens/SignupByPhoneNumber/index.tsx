@@ -33,22 +33,23 @@ const SignupByPhoneNumberScreen = () => {
   }, []);
 
   const handleNext = useCallback(async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const textPhone = `${nation.code}${phone}`;
       const verificationId = await signupByPhoneNumber(textPhone);
 
       if (verificationId !== null) {
         await setAsyncStorage(PHONE, phone);
+        setLoading(false);
         navigate(EScreen.CONFIRM_PHONE_NUMBER, {
           phone: textPhone,
           verificationId,
         });
       }
     } catch (error) {
+      setLoading(false);
       console.log('Valid phone number error: ' + error);
     }
-    setLoading(false);
   }, [nation.code, navigate, phone]);
 
   const handleNavigateSocial = useCallback(() => {

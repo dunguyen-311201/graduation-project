@@ -19,7 +19,7 @@ export interface TUser {
   [EUser.role]?: Roles;
   [EUser.uid]?: string;
   [EUser.email]?: string;
-  [EUser.phoneNumber]?: string | null;
+  [EUser.phoneNumber]?: string;
   [EUser.photoURL]?: string;
   [EUser.token]?: string | null;
   [EUser.isAuthenticated]?: boolean;

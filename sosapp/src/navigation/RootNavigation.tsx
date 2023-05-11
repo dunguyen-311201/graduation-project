@@ -1,5 +1,5 @@
-import React, {useContext} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import React, {useContext, useEffect} from 'react';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {EScreen} from '@enums';
 import DrawerNavigation from './DrawerNavigation';
@@ -16,7 +16,6 @@ import {
 } from '@screens';
 import {Location} from '@types';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
-import {Loading, CustomText} from '@components';
 import {Context} from '@context';
 
 export type RootParamList = {
@@ -38,11 +37,10 @@ export type RootParamList = {
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
-  const {loading} = useContext(Context);
+  const {isAuthenticated} = useContext(Context);
 
   return (
     <NavigationContainer>
-      {loading && <Loading />}
       <Stack.Navigator
         initialRouteName={EScreen.SPLASH}
         screenOptions={{
@@ -58,43 +56,54 @@ const RootNavigation = () => {
           },
         }}>
         <Stack.Screen
-          name={EScreen.DRAWER}
-          component={DrawerNavigation}
-          options={{headerShown: false}}
-        />
-
-        <Stack.Screen
           name={EScreen.SPLASH}
           component={SplashScreen}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name={EScreen.SIGNUP_BY_PHONE_NUMBER}
-          component={SignupByPhoneNumberScreen}
-        />
+        {isAuthenticated && (
+          <>
+            <Stack.Screen
+              name={EScreen.DRAWER}
+              component={DrawerNavigation}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.DETAIL_MESSAGE}
+              component={DetailMessageScreen}
+            />
+            <Stack.Screen name={EScreen.MAP} component={MapScreen} />
+            <Stack.Screen
+              name={EScreen.SEND_DISTRESS_SIGNAL}
+              component={SendDistreeSignal}
+            />
+          </>
+        )}
 
-        <Stack.Screen
-          name={EScreen.SIGNUP_BY_SOCIAL}
-          component={SignupBySocialScreen}
-        />
-        <Stack.Screen
-          name={EScreen.CONFIRM_PHONE_NUMBER}
-          component={ConfirmPhoneNumberScreen}
-        />
-        <Stack.Screen name={EScreen.SIGNUP_INFO} component={SetupInfoScreen} />
-        <Stack.Screen
-          name={EScreen.CONFIRM_POLICY}
-          component={ConfirmPolicyScreen}
-        />
-        <Stack.Screen
-          name={EScreen.DETAIL_MESSAGE}
-          component={DetailMessageScreen}
-        />
-        <Stack.Screen name={EScreen.MAP} component={MapScreen} />
-        <Stack.Screen
-          name={EScreen.SEND_DISTRESS_SIGNAL}
-          component={SendDistreeSignal}
-        />
+        {!isAuthenticated && (
+          <>
+            <Stack.Screen
+              name={EScreen.SIGNUP_BY_PHONE_NUMBER}
+              component={SignupByPhoneNumberScreen}
+            />
+
+            <Stack.Screen
+              name={EScreen.SIGNUP_BY_SOCIAL}
+              component={SignupBySocialScreen}
+            />
+            <Stack.Screen
+              name={EScreen.CONFIRM_PHONE_NUMBER}
+              component={ConfirmPhoneNumberScreen}
+            />
+            <Stack.Screen
+              name={EScreen.SIGNUP_INFO}
+              component={SetupInfoScreen}
+            />
+            <Stack.Screen
+              name={EScreen.CONFIRM_POLICY}
+              component={ConfirmPolicyScreen}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

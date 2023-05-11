@@ -38,6 +38,8 @@ const MapScreen = () => {
 
   const {initLocation} = useRoute<ConfirmRoute>().params;
 
+  console.log({initLocation});
+
   const [isDirection, setIsDirection] = useState(false);
 
   const [locations, setLocations] = useState<SearchLocation>();
@@ -48,16 +50,16 @@ const MapScreen = () => {
     const setup = async () => {
       const deviceLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
 
-      if (deviceLocation !== null) {
+      if (deviceLocation) {
+        if (initLocation) {
+          setLocations({to: initLocation, from: deviceLocation});
+          return;
+        }
         setLocations({from: deviceLocation});
       }
     };
 
     setup();
-
-    if (initLocation) {
-      setLocations({to: initLocation});
-    }
   }, [setOptions, initLocation]);
 
   const {from, to, distance, timeout} = locations || {};
@@ -70,8 +72,6 @@ const MapScreen = () => {
         );
 
         const data = await response.json();
-
-        console.log(74, data.rows[0]);
 
         const d = data.rows[0].elements[0].distance.text;
         const t = data.rows[0].elements[0].duration.text;

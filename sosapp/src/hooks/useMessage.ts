@@ -1,6 +1,6 @@
 import {TMessage} from '@types';
 import {useState, useEffect} from 'react';
-import firebase from '@react-native-firebase/firestore';
+import database from '@react-native-firebase/database';
 
 const useMessage = (uid?: string) => {
   const [message, setMessage] = useState<TMessage>();
@@ -8,17 +8,15 @@ const useMessage = (uid?: string) => {
   useEffect(() => {
     const fethMessage = async () => {
       if (uid) {
-        const data = (await firebase().doc(`messages/${uid}`).get()).data();
-        if (data) {
-          setMessage({
-            description: data.description,
-            location: data.location,
-            status: data.status,
-            type: data.type,
-            userId: data.userId,
-            uid: data.uid,
+        database()
+          .ref('/messages/' + uid)
+          .on('value', snapshot => {
+            const data = snapshot.val();
+            if (data) {
+              setMessage({...data});
+            }
           });
-        }
+
         return;
       }
 

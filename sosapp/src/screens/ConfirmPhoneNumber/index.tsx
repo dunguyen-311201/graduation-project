@@ -2,7 +2,7 @@ import React, {useCallback, useContext, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
-import {ScreenBase} from '@components';
+import {Loading, ScreenBase} from '@components';
 import ComfirmInput from './components/ComfirmInput';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
@@ -12,8 +12,8 @@ import {
   handleVerification,
   setAsyncStorage,
 } from '@utils';
-import {Context} from '@context';
 import {FIRST_INSTALLED} from '@constants';
+import {Context} from '@context/index';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -24,11 +24,12 @@ const ConfirmPhoneNumberScreen = () => {
   const {phone, verificationId} = useRoute<ConfirmRoute>().params || {};
 
   const [code, setCode] = useState('');
-  const {setLoading} = useContext(Context);
+  const [loading, setLoading] = useState(false);
+
+  const {onAuthenticated} = useContext(Context);
 
   const handleNext = useCallback(async () => {
     setLoading(true);
-
     try {
       const userCredential = await handleVerification(verificationId, code);
       if (userCredential !== null) {
@@ -36,15 +37,17 @@ const ConfirmPhoneNumberScreen = () => {
         if (additionalUserInfo === undefined) {
           return;
         }
-
         if (additionalUserInfo && additionalUserInfo.isNewUser) {
           setLoading(false);
           navigate(EScreen.SIGNUP_INFO);
           return;
         }
-
         const token = await getDeviceToken();
-        await handleUpdateInfo({token, uid: user.uid, lastLogin: Date.now()});
+        await handleUpdateInfo({
+          uid: user.uid,
+          token,
+          lastLogin: Date.now(),
+        });
         await setAsyncStorage(FIRST_INSTALLED, 1);
       }
     } catch (error) {
@@ -52,15 +55,18 @@ const ConfirmPhoneNumberScreen = () => {
     }
     setLoading(false);
 
-    navigate(EScreen.DRAWER);
-  }, [code, navigate, setLoading, verificationId]);
+    onAuthenticated(true);
+  }, [code, navigate, onAuthenticated, verificationId]);
 
   return (
-    <ScreenBase
-      desc={'Enter the 6-digit code sent to you at\n' + phone}
-      onNext={handleNext}>
-      <ComfirmInput code={code} onChange={setCode} />
-    </ScreenBase>
+    <>
+      {loading && <Loading />}
+      <ScreenBase
+        desc={'Enter the 6-digit code sent to you at\n' + phone}
+        onNext={handleNext}>
+        <ComfirmInput code={code} onChange={setCode} />
+      </ScreenBase>
+    </>
   );
 };
 
