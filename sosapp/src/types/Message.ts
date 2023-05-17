@@ -7,4 +7,7 @@ export type TMessage = {
   uid?: string;
   userId: string;
   location?: Location | null;
+  onView?: () => void;
+  onQuit?: () => void;
+  serviceId?: string;
 };

@@ -3,10 +3,10 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useContext, useEffect} from 'react';
 
 import {EScreen} from '@enums';
+import {Context} from '@context';
 import {ProfileIcon} from '@theme';
 import {CustomText, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {Context} from '@context';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions} =
@@ -18,9 +18,9 @@ const ConfirmPolicyScreen = () => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
-  const handleNext = useCallback(async () => {
+  const handleNext = useCallback(() => {
     onAuthenticated(true);
-  }, [onAuthenticated]);
+  }, []);
 
   return (
     <ScreenBase onNext={handleNext}>

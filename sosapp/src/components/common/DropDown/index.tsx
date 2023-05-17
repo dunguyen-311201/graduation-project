@@ -5,7 +5,7 @@ import {BLACK_COLOR, WHITE_COLOR} from '@theme';
 
 type DropDownProps = {
   data: string[];
-  initValue: string;
+  initValue?: string;
   onSelect: (value: string, field: string) => void;
   field: string;
   zIndex?: number;
@@ -65,7 +65,7 @@ const DropDown = ({
         <CustomText text={title} type="text_medium_16" />
         <View style={styles.control}>
           <Pressable onPress={handleDropdown} style={styles.dropDownItem}>
-            <CustomText text={initValue || 'Select type'} />
+            <CustomText text={initValue || data[0]} />
           </Pressable>
 
           {isVisiable && (

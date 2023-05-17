@@ -5,7 +5,7 @@ import {colors, styles} from '@utils';
 import {WHITE_COLOR} from '@theme';
 
 type CustomTextProps = {
-  text: string;
+  text?: string;
   children?: React.ReactNode | string;
   type?: keyof typeof styles;
   color?: keyof typeof colors;
@@ -15,7 +15,7 @@ type CustomTextProps = {
 };
 
 const CustomText = ({
-  text,
+  text = '',
   type = 'text_medium_20',
   children,
   customStyle,

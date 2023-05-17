@@ -7,7 +7,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import React, {forwardRef, memo, useCallback} from 'react';
+import React, {forwardRef, useCallback} from 'react';
 import CustomText from '../Text';
 import {DARK_GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
 
@@ -114,7 +114,7 @@ const CustomInput: React.ForwardRefRenderFunction<
   );
 };
 
-export default memo(forwardRef(CustomInput));
+export default forwardRef(CustomInput);
 
 const styles = StyleSheet.create({
   inputgroup: {
@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
     color: DARK_GRAY_COLOR,
     fontSize: 20,
     fontWeight: '400',
-    // flex: 1,
   },
   column: {
     borderColor: WHITE_COLOR,

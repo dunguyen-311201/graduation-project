@@ -16,7 +16,7 @@ import {
 import Config from 'react-native-config';
 
 import {Location} from '@types';
-import {ClearInputIcon, DirectionIcon, TEXT_COLOR} from '@theme';
+import {CloseIcon, DirectionIcon, TEXT_COLOR} from '@theme';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -117,7 +117,7 @@ const SearchInput = ({
         <View style={styles.rightButton}>
           {location?.description?.district !== '' && (
             <Pressable style={styles.buttonClear} onPress={handleClear}>
-              <Image source={ClearInputIcon} style={styles.iconClear} />
+              <Image source={CloseIcon} style={styles.iconClear} />
             </Pressable>
           )}
           {!isDirection && (

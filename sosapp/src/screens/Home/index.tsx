@@ -1,125 +1,113 @@
 import {useNavigation} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
+import {
+  View,
+  Image,
+  PermissionsAndroid,
+  StyleSheet,
+  Linking,
+} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {View, Image, PermissionsAndroid, StyleSheet} from 'react-native';
 
+import {
+  getUserByID,
+  handleOffLocation,
+  handleOnLocation,
+  requestLocationPermission,
+} from '@utils';
 import {
   ScreenBase,
   Card,
   CustomText,
   CustomButton,
   SearchInput,
-  CustomModal,
+  Loading,
+  Notify,
 } from '@components';
 import {EScreen} from '@enums';
+import {useAuth, useNotifiCation} from '@hooks';
 import {MenuButton} from './components';
-import {useAuth, useMessage} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
 import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
-import {getUserByID, handleOffLocation, handleOnLocation} from '@utils';
-
-PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
 const HomeScreen = () => {
   const {navigate, openDrawer, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
+  const {currentUser} = useAuth();
+
+  const {message, handleQuit, handleOk, uid, body} = useNotifiCation({
+    navigate,
+  });
+
+  console.log(currentUser?.displayName, uid);
+
   const [onLocation, setOnLocation] = useState(false);
 
-  const [uid, setUid] = useState<string>();
-  const {message} = useMessage(uid);
-
-  const {currentUser} = useAuth();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setOptions({headerShown: false});
-
     const setup = async () => {
-      if (currentUser !== null) {
+      // await Linking.openSettings();
+      if (currentUser) {
         const user = await getUserByID(currentUser.uid);
-        if (user) {
-          const {location} = user;
-
-          if (location) {
-            setOnLocation(true);
-            return;
-          }
+        if (user?.location) {
+          setOnLocation(true);
         }
+
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+
+        await requestLocationPermission();
+        return;
       }
       setOnLocation(false);
+      setLoading(false);
     };
 
     setup();
   }, [currentUser, setOptions]);
 
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      if (remoteMessage?.data) {
-        console.log(remoteMessage?.data);
-        setUid(remoteMessage.data.uid);
-      }
-    });
-
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
-    });
-
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage?.data) {
-          console.log(remoteMessage?.data);
-          navigate(EScreen.DETAIL_MESSAGE, {uid: remoteMessage.data.uid});
-        }
-      });
-
-    return unsubscribe;
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setUid(undefined);
-  }, []);
-
-  const handleNotify = useCallback(() => {
-    if (uid) {
-      navigate(EScreen.DETAIL_MESSAGE, {uid});
-      setUid(undefined);
+  const handleLocation = useCallback(async () => {
+    setLoading(true);
+    if (onLocation) {
+      await handleOffLocation();
+      setOnLocation(false);
+      setLoading(false);
+      return;
     }
-  }, [navigate, uid]);
+    await handleOnLocation();
+    setOnLocation(true);
+    setLoading(false);
+  }, [onLocation]);
 
-  const handleMap = useCallback(() => {
+  const handleMap = useCallback(async () => {
     navigate(EScreen.MAP, {});
-  }, [navigate]);
+  }, []);
 
   const handleSendRescue = useCallback(() => {
     navigate(EScreen.SEND_DISTRESS_SIGNAL);
-  }, [navigate]);
-
-  const handleLocation = useCallback(async () => {
-    if (onLocation) {
-      handleOffLocation();
-      setOnLocation(false);
-      return;
-    }
-
-    handleOnLocation();
-    setOnLocation(true);
-  }, [onLocation]);
-
-  console.log({message});
+  }, []);
 
   return (
     <>
+      {loading && <Loading />}
+
+      {/* Handle Show Notifications */}
+
       {message && (
-        <CustomModal
-          title={message.type}
-          description={message.description}
-          isVisible={true}
-          onClose={handleClose}
-          onOk={handleNotify}
+        <Notify
+          message={message}
+          onOk={handleOk}
+          onQuit={handleQuit}
+          body={body}
         />
       )}
-      <ScreenBase customStyle={styles.container} padding>
+
+      {/* Handle Show Notifications */}
+
+      <ScreenBase customStyle={styles.container} padding={1}>
         <View style={styles.homeHeader}>
           <MenuButton onPress={openDrawer} marginTop={32} />
           <CustomText
@@ -130,7 +118,7 @@ const HomeScreen = () => {
             customStyle={styles.title}
           />
           <CustomButton
-            label={`Turn ${onLocation ? 'off' : 'on'} location`}
+            label={`Turn ${onLocation ? 'off' : 'on'} Rescue`}
             type="outline"
             onPress={handleLocation}
           />

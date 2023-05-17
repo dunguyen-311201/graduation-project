@@ -13,4 +13,5 @@ export enum EScreen {
   DRAWER = 'drawer-screen',
   HELP = 'help-screen',
   DETAIL_MESSAGE = 'detail-message-screen',
+  PENDING_MESSAGE = 'pending-message-screen',
 }

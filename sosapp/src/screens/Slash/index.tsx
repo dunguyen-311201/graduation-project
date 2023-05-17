@@ -13,14 +13,15 @@ import {FIRST_INSTALLED} from '@constants';
 import {getAsyncStorage} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme';
-import {Context} from '@context/index';
+import {Context} from '@context';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
 
   const [isNew, setIsNew] = useState(false);
 
-  const {isAuthenticated, isCompleted, onCompleted} = useContext(Context);
+  const {isAuthenticated} = useContext(Context);
+
   useEffect(() => {
     const setup = async () => {
       const isFirst = await getAsyncStorage(FIRST_INSTALLED);
@@ -32,16 +33,13 @@ function SplashScreen() {
 
       if (isAuthenticated) {
         navigate(EScreen.DRAWER);
-        return;
+      } else {
+        navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
       }
-      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-      onCompleted(false);
     };
 
-    if (isCompleted) {
-      setup();
-    }
-  }, [isAuthenticated, isCompleted, navigate, onCompleted]);
+    setup();
+  }, [isAuthenticated]);
 
   const _navigateNext = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);

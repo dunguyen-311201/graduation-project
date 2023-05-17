@@ -12,6 +12,7 @@ import {EButton} from '@enums';
 import Shadow from '../../Shadow';
 import {Styles as st} from '@utils';
 import CustomText from '../Text';
+import {DARK_BLUE_COLOR} from '@theme/color';
 
 type ButtonProps = {
   label?: string;
@@ -22,17 +23,65 @@ type ButtonProps = {
   paddingVertical?: number;
   paddingHorizontal?: number;
   onPress?: () => void;
+  disabled?: boolean;
+  iconSize?: {height: number; width: number};
 };
 
+const CustomButton = ({
+  label = '',
+  type = 'default',
+  icon,
+  iconSize,
+  customStyle,
+  onPress,
+  children,
+  disabled,
+}: ButtonProps) => {
+  const textSize =
+    type === 'notify'
+      ? 'text_medium_14'
+      : type === 'outline'
+      ? 'text_large_20'
+      : 'text_xLarge';
+
+  if (type === 'primary') {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={[styles[EButton[type]], customStyle]}>
+        <Shadow customStyle={styles.shadow} paddingVertical={16}>
+          <CustomText text={label} type="text_xLarge" />
+          {icon && <Image source={icon} style={[styles.icon, iconSize]} />}
+        </Shadow>
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableOpacity
+      disabled={disabled}
+      onPress={onPress}
+      style={[
+        styles[EButton[type]],
+        {...(disabled && {backgroundColor: '#eeeeee'})},
+        customStyle,
+      ]}>
+      {children}
+      {label && <CustomText text={label} type={textSize} />}
+      {icon && <Image source={icon} style={[iconSize]} />}
+    </TouchableOpacity>
+  );
+};
+
+export default memo(CustomButton);
+
 const styles = StyleSheet.create({
-  ['button-container']: {
+  shadow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  button: {
-    flexDirection: 'row',
     borderRadius: 10,
   },
+  icon: {marginLeft: 30},
   [EButton.default]: {
     backgroundColor: '#000000',
     width: '100%',
@@ -46,10 +95,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'transparent',
     borderColor: '#EDF6FF',
-    borderWidth: 1.7,
+    borderWidth: 2,
     borderRadius: 17,
     paddingVertical: 7,
     paddingHorizontal: 20,
+  },
+  [EButton.notify]: {
+    opacity: 0.9,
+    borderRadius: 17,
+    paddingVertical: 4,
+    paddingHorizontal: 20,
+    backgroundColor: DARK_BLUE_COLOR,
+    alignSelf: 'flex-start',
   },
   [EButton.primary]: {
     borderRadius: 10,
@@ -59,56 +116,13 @@ const styles = StyleSheet.create({
   },
   [EButton.secondary]: {
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  center: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  arrowRightIcon: {marginLeft: 20},
 });
-
-const CustomButton = ({
-  label = '',
-  type = 'default',
-  icon,
-  customStyle,
-  onPress,
-}: ButtonProps) => {
-  let Button;
-  const style = styles[EButton[type]];
-  switch (type) {
-    case 'secondary':
-    case 'outline':
-      Button = (
-        <TouchableOpacity style={[style, customStyle]} onPress={onPress}>
-          <CustomText
-            text={label}
-            type="text_large_20"
-            {...(type === 'secondary' && {color: 'blue'})}
-          />
-          {icon && <Image source={icon} />}
-        </TouchableOpacity>
-      );
-      break;
-    case 'primary':
-      Button = (
-        <TouchableOpacity onPress={onPress} style={[style, customStyle]}>
-          <Shadow customStyle={styles.button} paddingVertical={16}>
-            <CustomText text={label} type="text_xLarge" />
-            {icon && <Image source={icon} style={styles.arrowRightIcon} />}
-          </Shadow>
-        </TouchableOpacity>
-      );
-      break;
-
-    default:
-      Button = (
-        <TouchableOpacity style={[style, customStyle]} onPress={onPress}>
-          <CustomText text={label} type="text_xLarge" />
-        </TouchableOpacity>
-      );
-      break;
-  }
-
-  return Button;
-};
-
-export default memo(CustomButton);

@@ -1,20 +1,20 @@
-import {StyleSheet, View, Platform} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect} from 'react';
 import {RouteProp, useRoute, useNavigation} from '@react-navigation/native';
 
-import {EScreen} from '@enums';
-import {RootParamList} from '@navigation/RootNavigation';
-import {useMessage} from '@hooks';
 import {
-  CustomInput,
+  CustomButton,
   CustomText,
   DropDown,
   ScreenBase,
   Textreae,
+  UserInfo,
 } from '@components';
+import {EScreen} from '@enums';
+import {useMessage, useUser} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
-import {TMessage, TUser} from '@types';
-import {getUserByID} from '@utils';
+import {RootParamList} from '@navigation/RootNavigation';
+import {ToLocationIcon} from '@theme/image';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.DETAIL_MESSAGE>;
 
@@ -28,99 +28,74 @@ const DetailMessage = () => {
   const {uid} = useRoute<ConfirmRoute>().params || {};
 
   const {message} = useMessage(uid);
+  const hUser = useUser(message?.userId);
 
-  const [messageData, setMessageData] = useState<TMessage>();
-  const [userData, setUserData] = useState<TUser>({phoneNumber: ''});
+  const hService = useUser(message?.serviceId);
 
   useEffect(() => {
     setOptions({title: 'Detail Message'});
+  }, [setOptions]);
 
-    setMessageData(message);
-
-    const getUserData = async () => {
-      if (message) {
-        const user = await getUserByID(message.userId);
-        if (user) {
-          setUserData({
-            ...user,
-            name: `${user.firstName} ${user.lastName}`,
-          });
-        }
-      }
-    };
-
-    getUserData();
-  }, [message, setOptions]);
-
-  const handleChangeMessage = useCallback((value: string, field: string) => {
-    setMessageData(prev => ({...prev, [field]: value}));
+  const handleSettingProfile = useCallback(() => {
+    navigate(EScreen.SETTINGS);
   }, []);
 
-  const handleChangeUser = useCallback((value: string, field: string) => {
-    setUserData(prev => ({...prev, [field]: value}));
-  }, []);
-
-  const handleOpenMap = useCallback(() => {
-    if (messageData) {
-      navigate(EScreen.MAP, {initLocation: messageData?.location});
-    }
-  }, [messageData, navigate]);
-
-  const handleNext = useCallback(async () => {
-    navigate(EScreen.DRAWER);
-  }, [navigate]);
+  const handleMap = useCallback(() => {
+    navigate(EScreen.MAP, {
+      to: hService.user?.location,
+      from: message?.location,
+    });
+  }, [hService.user?.location, message?.location, navigate]);
 
   return (
-    <ScreenBase onNext={handleNext}>
-      {messageData && userData && (
-        <View style={styles.formMessage}>
-          <DropDown
-            data={status}
-            field="status"
-            title="Status"
-            onSelect={handleChangeMessage}
-            initValue={messageData.status || 'spending'}
-            zIndex={2}
-          />
-          <DropDown
-            data={types}
-            field="type"
-            title="Type"
-            onSelect={handleChangeMessage}
-            initValue={messageData.type}
-            zIndex={1}
-          />
-          <CustomInput
-            value={userData.name}
-            title="Name"
-            field="name"
-            onChangeText={handleChangeUser}
-          />
-          <CustomInput
-            value={userData.phoneNumber}
-            title="Phone"
-            field="phoneNumber"
-            onChangeText={handleChangeUser}
-          />
-          <CustomInput
-            field="location"
-            value={messageData.location?.description?.more}
-            title="Location"
-          />
-          <CustomText
-            text="See location on Map"
-            type="text_medium_14"
-            color="blue"
-            onPress={handleOpenMap}
-          />
-          <Textreae
-            title="Description"
-            field="description"
-            onChangeText={handleChangeMessage}
-            value={messageData.description}
-          />
+    <ScreenBase>
+      <View style={styles.content}>
+        <View style={styles.row}>
+          {hUser.user && (
+            <UserInfo user={hUser.user} onLongPress={handleSettingProfile} />
+          )}
+          {hService.user && (
+            <UserInfo user={hService.user} marginLeft={10} disabled />
+          )}
         </View>
-      )}
+
+        <DropDown
+          data={status}
+          field="status"
+          title="Status"
+          onSelect={() => {}}
+          initValue={message?.status || 'spending'}
+          zIndex={2}
+        />
+        <DropDown
+          data={types}
+          field="type"
+          title="Type"
+          onSelect={() => {}}
+          initValue={message?.type}
+          zIndex={1}
+        />
+
+        <Textreae
+          title="Description"
+          field="description"
+          onChangeText={() => {}}
+          value={message?.description}
+        />
+
+        <View style={styles.row}>
+          <CustomButton
+            type="secondary"
+            onPress={handleMap}
+            customStyle={styles.seeMapButton}>
+            <CustomText
+              text="See location on Map"
+              type="text_medium_18"
+              color="blue"
+            />
+          </CustomButton>
+        </View>
+      </View>
     </ScreenBase>
   );
 };
@@ -128,8 +103,15 @@ const DetailMessage = () => {
 export default DetailMessage;
 
 const styles = StyleSheet.create({
-  formMessage: {
+  content: {
     flex: 1,
     marginTop: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+  },
+  seeMapButton: {
+    marginTop: 10,
   },
 });

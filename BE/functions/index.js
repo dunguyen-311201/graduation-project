@@ -92,36 +92,36 @@ app.post("/messages", (req, res) => {
       }
 
       // subscribe to notifications when message status changes
-      // ref.on("value", async (snap) => {
-      //   const mess = snap.val();
-      //   // push notification Service Rescue and User Emergency
-      //   tokens = [];
-      //   if (mess.status !== "pending") {
-      //     const { serviceId } = mess;
-      //     if (user) {
-      //       tokens.push(user.token);
-      //     }
+      ref.on("value", async (snap) => {
+        const mess = snap.val();
+        // push notification Service Rescue and User Emergency
+        const tokens = [];
+        if (mess.status !== "pending") {
+          const { serviceId } = mess;
+          if (user) {
+            tokens.push(user.token);
+          }
 
-      //     if (serviceId) {
-      //       const { token } = (await db.doc("users/" + serviceId).get()).data();
-      //       if (token) tokens.push(token);
-      //     }
-      //   }
+          if (serviceId) {
+            const { token } = (await db.doc("users/" + serviceId).get()).data();
+            if (token) tokens.push(token);
+          }
+        }
 
-      //   // unsubcribe message change
-      //   if (mess.status === "complete") {
-      //     ref.off("value");
-      //   }
+        // unsubcribe message change
+        if (mess.status === "complete") {
+          ref.off("value");
+        }
 
-      //   if (tokens.length > 0) {
-      //     await pushNotifications({
-      //       data: { uid },
-      //       tokens,
-      //       type: req.body.type,
-      //       user: `${user.firstName} ${user.lastName}`,
-      //     });
-      //   }
-      // });
+        if (tokens.length > 0) {
+          await pushNotifications({
+            data: { uid },
+            tokens,
+            type: req.body.type,
+            user: `${user.firstName} ${user.lastName}`,
+          });
+        }
+      });
 
       return res.status(201).send({ uid });
     } catch (error) {

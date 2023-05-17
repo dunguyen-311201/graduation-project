@@ -8,11 +8,11 @@ import {ScreenBase, Social} from '@components';
 import {FacebookIcon, GoogleIcon} from '@theme';
 
 const SignupBySocialScreen = () => {
-  const {setOptions, navigate, goBack} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_BY_SOCIAL>>();
 
   useEffect(() => {
-    setOptions({headerShown: false});
+    setOptions({headerShown: true});
   }, [setOptions]);
 
   const _navigateNext = useCallback(() => {
@@ -24,10 +24,7 @@ const SignupBySocialScreen = () => {
   const handleSignupGoogle = useCallback(async () => {}, []);
 
   return (
-    <ScreenBase
-      title="Choose an account"
-      onBack={goBack}
-      onNext={_navigateNext}>
+    <ScreenBase title="Choose an account" onNext={_navigateNext}>
       <Social
         title="Facebook"
         icon={FacebookIcon}

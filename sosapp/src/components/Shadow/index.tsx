@@ -1,5 +1,5 @@
 import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import CustomLinearGradient from '../CustomLinearGradient';
 import {BLACK_COLOR} from '@theme/color';
 
@@ -20,7 +20,7 @@ const Shadow = ({customStyle, children, paddingVertical}: ShadowProps) => {
   );
 };
 
-export default Shadow;
+export default memo(Shadow);
 
 const styles = StyleSheet.create({
   shadow1: {

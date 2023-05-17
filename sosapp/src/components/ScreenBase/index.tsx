@@ -17,7 +17,7 @@ type ScreenBaseProps = {
   children?: React.ReactNode;
   onNext?: () => void;
   customStyle?: StyleProp<ViewStyle>;
-  padding?: boolean;
+  padding?: number;
 };
 
 const ScreenBase = ({
@@ -26,10 +26,10 @@ const ScreenBase = ({
   desc,
   onNext,
   customStyle,
-  padding = false,
+  padding,
 }: ScreenBaseProps) => {
   return (
-    <View style={[styles.container, {...(!padding && styles.padding)}]}>
+    <View style={[styles.container, {paddingHorizontal: padding || 32}]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.keyboard, customStyle]}>
@@ -63,9 +63,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flex: 1,
     paddingBottom: 62,
-  },
-  padding: {
-    paddingHorizontal: 32,
   },
   keyboard: {
     flex: 1,

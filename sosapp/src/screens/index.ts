@@ -6,9 +6,10 @@ import SignupBySocialScreen from './SignupBySocial';
 import SetupInfoScreen from './SetupInfo';
 import ConfirmPolicyScreen from './ConfirmPolicy';
 import SettingsScreen from './Settings';
-import MessagesScreen from './Messages';
 import MapScreen from './Map';
 import SendDistreeSignal from './SendDistressSignal';
+import PendingMessageScreen from './PendingMessage';
+import MessagesScreen from './Messages';
 import DetailMessageScreen from './DetailMessage';
 
 export {
@@ -22,6 +23,7 @@ export {
   ConfirmPolicyScreen,
   SettingsScreen,
   SendDistreeSignal,
+  PendingMessageScreen,
   MessagesScreen,
   DetailMessageScreen,
 };

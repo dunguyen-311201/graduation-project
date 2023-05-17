@@ -5,7 +5,7 @@ import {
   Pressable,
   ViewStyle,
 } from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import {CustomText} from '../common';
 
 type SocialProps = {
@@ -21,14 +21,14 @@ const Social = ({icon, title, customStyle, onPress}: SocialProps) => {
       <Image source={icon} />
       <CustomText
         text={title}
-        type="text_medium_gray_24"
+        type="text_medium_20"
         customStyle={styles.title}
       />
     </Pressable>
   );
 };
 
-export default Social;
+export default memo(Social);
 
 const styles = StyleSheet.create({
   container: {

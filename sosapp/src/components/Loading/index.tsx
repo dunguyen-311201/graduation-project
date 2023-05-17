@@ -1,5 +1,5 @@
 import {Image, Modal, View, StyleSheet, Animated} from 'react-native';
-import React from 'react';
+import React, {memo} from 'react';
 import {Easing} from 'react-native-reanimated';
 import {LoadingIcon} from '@theme';
 
@@ -34,7 +34,7 @@ const Loading = () => {
   );
 };
 
-export default Loading;
+export default memo(Loading);
 
 const styles = StyleSheet.create({
   container: {

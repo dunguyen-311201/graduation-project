@@ -8,18 +8,22 @@ import {PHONE, PHONES} from '@constants';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
 import {RootScreenNavigationProps} from '@navigation';
-import {ScreenBase, CustomText, Loading} from '@components';
-import {getAsyncStorage, setAsyncStorage, signupByPhoneNumber} from '@utils';
+import {ScreenBase, CustomText, Loading, Error} from '@components';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
+import {useAuth} from '@hooks';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('917874915');
+
+  const {signInByPhoneNumber} = useAuth();
 
   useEffect(() => {
     const setup = async () => {
@@ -33,37 +37,45 @@ const SignupByPhoneNumberScreen = () => {
   }, []);
 
   const handleNext = useCallback(async () => {
-    try {
-      setLoading(true);
-      const textPhone = `${nation.code}${phone}`;
-      const verificationId = await signupByPhoneNumber(textPhone);
+    setLoading(true);
+    const textPhone = `${nation.code}${phone}`;
+    const verificationId = await signInByPhoneNumber(textPhone);
 
-      if (verificationId !== null) {
-        await setAsyncStorage(PHONE, phone);
-        setLoading(false);
-        navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-          phone: textPhone,
-          verificationId,
-        });
-      }
-    } catch (error) {
+    if (verificationId) {
+      await setAsyncStorage(PHONE, phone);
+
       setLoading(false);
-      console.log('Valid phone number error: ' + error);
+
+      navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+        phone: textPhone,
+        verificationId,
+      });
+    } else {
+      setError(true);
     }
-  }, [nation.code, navigate, phone]);
+
+    setLoading(false);
+  }, [nation.code, phone]);
 
   const handleNavigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
   }, [navigate]);
 
-  const handleChangePhone = useCallback((value: string) => {
-    const formattedValue = value.replace(/[^0-9]/g, '');
-    let formattedPhoneNumber = formattedValue.replace(
-      /(\d{3})(\d{3})(\d{3})/,
-      '$1 $2 $3',
-    );
-    setPhone(formattedPhoneNumber);
-  }, []);
+  const handleChangePhone = useCallback(
+    (value: string) => {
+      if (error) {
+        setError(false);
+      }
+
+      const formattedValue = value.replace(/[^0-9]/g, '');
+      let formattedPhoneNumber = formattedValue.replace(
+        /(\d{3})(\d{3})(\d{3})/,
+        '$1 $2 $3',
+      );
+      setPhone(formattedPhoneNumber);
+    },
+    [error],
+  );
 
   return (
     <ScreenBase title="Enter your phone number" onNext={handleNext}>
@@ -86,6 +98,7 @@ const SignupByPhoneNumberScreen = () => {
         />
         <Image source={ArrowRightBlueIcon} style={styles.iconSocial} />
       </TouchableOpacity>
+      {error && <Error message="Please check your phone number!" />}
     </ScreenBase>
   );
 };

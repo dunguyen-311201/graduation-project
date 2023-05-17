@@ -4,22 +4,24 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useContext, useMemo, useState, useEffect} from 'react';
+import React, {useContext, useMemo} from 'react';
 
-import {useAuth} from '@hooks';
-import {Location} from '@types';
 import {Context} from '@context';
-import {ProfileIcon} from '@theme';
-import {CURRENT_LOCATION} from '@constants';
-import {getAsyncStorage, handleLogout} from '@utils';
+import {
+  ArrowIcon,
+  BACKGROUND_COLOR,
+  BLACK_COLOR,
+  ProfileIcon,
+  WHITE_COLOR,
+} from '@theme';
+import {handleLogout} from '@utils';
 import {CustomButton, CustomText} from '@components';
+import {EScreen} from '@enums/EScreen';
+import useAuth from '@hooks/useAuth';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {currentUser} = useAuth();
-
-  const [location, setLocation] = useState<Location>();
-
   const {onAuthenticated} = useContext(Context);
+  const {currentUser} = useAuth();
 
   const [icon, displayName] = useMemo(() => {
     let _icon = ProfileIcon,
@@ -36,20 +38,13 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
     return [_icon, _displayName];
   }, [currentUser]);
 
-  useEffect(() => {
-    const setup = async () => {
-      const lo = await getAsyncStorage<Location>(CURRENT_LOCATION);
-      if (lo !== null) {
-        setLocation(lo);
-      }
-    };
-
-    setup();
-  }, []);
-
   const _handleLogout = async () => {
     await handleLogout();
     onAuthenticated(false);
+  };
+
+  const handleGoMessage = async () => {
+    props.navigation.navigate(EScreen.MESSAGES);
   };
 
   return (
@@ -58,32 +53,31 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
         {...props}
         contentContainerStyle={styles.drawerContent}>
         <View style={styles.profile}>
-          <View style={styles.info}>
-            <Image source={icon} style={styles.avatar} />
+          <View style={styles.content}>
+            <View style={styles.avatar}>
+              <Image source={icon} style={styles.img} />
+            </View>
             <CustomText
               text={displayName}
               customStyle={styles.name}
-              type="text_medium_18"
+              type="text_large_20"
+              color="white"
             />
           </View>
+          <CustomButton
+            label="Messages"
+            type="secondary"
+            customStyle={styles.buttonMessage}
+            onPress={handleGoMessage}
+            icon={ArrowIcon}
+            iconSize={{height: 11, width: 8}}
+          />
         </View>
-        <DrawerItemList {...props} />
+        <View style={styles.list}>
+          <DrawerItemList {...props} />
+        </View>
       </DrawerContentScrollView>
       <View style={styles.bottom}>
-        <View style={styles.location}>
-          <View style={styles.row}>
-            <CustomText
-              text="Device Location: "
-              color="black"
-              type="text_medium_14"
-            />
-            <CustomText
-              text={location?.description?.city || ''}
-              color="blue"
-              type="text_medium_14"
-            />
-          </View>
-        </View>
         <CustomButton label="Sign out" onPress={_handleLogout} />
       </View>
     </View>
@@ -95,43 +89,44 @@ export default DrawerContent;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: BACKGROUND_COLOR,
   },
   drawerContent: {
-    backgroundColor: '#fff',
+    backgroundColor: BACKGROUND_COLOR,
   },
   profile: {
     paddingVertical: 20,
-    marginLeft: 20,
+    backgroundColor: BLACK_COLOR,
+    paddingHorizontal: 40,
   },
-  info: {
-    alignSelf: 'flex-start',
+  content: {
+    flexDirection: 'row',
+    borderBottomColor: WHITE_COLOR,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  avatar: {
+    height: 70,
+    width: 70,
+    borderRadius: 35,
+    backgroundColor: '#C4C4C4',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  img: {
+    width: 48,
+    height: 46,
   },
   name: {
-    marginTop: 10,
+    marginLeft: 20,
   },
+  list: {paddingLeft: 20, paddingTop: 20},
   bottom: {
-    marginHorizontal: 20,
+    marginHorizontal: 40,
     marginBottom: 20,
   },
-  location: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  iconReset: {
-    width: 20,
-    height: 20,
+  buttonMessage: {
+    marginTop: 33,
   },
 });

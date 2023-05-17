@@ -1,17 +1,15 @@
 import auth from '@react-native-firebase/auth';
 import firebase from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 
 import {TUser} from '@types';
-import Config from 'react-native-config';
-const ENV = Config.ENV;
 
 const signupByPhoneNumber = async (phone: string) => {
-  const confirmation = await auth().signInWithPhoneNumber(phone);
-  // if (ENV !== 'production') {
-  //   auth().settings().
-  // }
-  const verificationId = confirmation.verificationId;
-  return verificationId;
+  try {
+    const confirmation = await auth().signInWithPhoneNumber(phone);
+    const verificationId = confirmation.verificationId;
+    return verificationId;
+  } catch (error) {}
 };
 
 const getCurrentUser = () => {
@@ -24,53 +22,45 @@ const handleVerification = async (verificationId: string, code: string) => {
 
     const userCredential = await auth().signInWithCredential(credential);
     return userCredential;
-  } catch (error) {
-    return null;
-  }
+  } catch (error) {}
 };
 
 const signupInfo = async (user: TUser) => {
-  await firebase().collection('users').doc(user.uid).set(user);
-};
+  const token = await messaging().getToken();
 
-const checkSignup = async (uid: string) => {
-  try {
-    const user = (
-      await firebase().collection('users').where('uid', '==', uid).get()
-    ).docs[0].data();
-
-    return user !== undefined;
-  } catch (error) {
-    return false;
-  }
-};
-
-const handleUpdateProfile = async (displayName: string) => {
-  await auth().currentUser?.updateProfile({displayName, photoURL: ''});
-};
-
-const handleUpdateInfo = async (user: TUser) => {
   await firebase()
-    .doc(`users/${user.uid}`)
-    .update({...user});
+    .collection('users')
+    .doc(user.uid)
+    .set({...user, token});
+};
+
+const handleLastLogin = async () => {
+  const currentUser = auth().currentUser;
+
+  if (currentUser) {
+    const uid = currentUser.uid;
+    const token = await messaging().getToken();
+
+    await firebase()
+      .doc('users/' + uid)
+      .update({uid, token, lastLogin: Date.now()});
+  }
 };
 
 const handleLogout = async () => {
   const currentUser = getCurrentUser();
   if (currentUser !== null) {
     const uid = currentUser.uid;
-    await handleUpdateInfo({lastLogin: null, uid});
+    await firebase().doc(`users/${uid}`).update({lastLogin: null, uid});
     await auth().signOut();
   }
 };
 
 export {
   handleLogout,
-  handleUpdateInfo,
+  handleLastLogin,
   handleVerification,
   signupByPhoneNumber,
-  handleUpdateProfile,
   signupInfo,
-  checkSignup,
   getCurrentUser,
 };

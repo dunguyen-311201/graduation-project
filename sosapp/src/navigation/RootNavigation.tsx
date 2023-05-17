@@ -1,5 +1,5 @@
-import React, {useContext, useEffect} from 'react';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import React, {useContext} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {EScreen} from '@enums';
 import DrawerNavigation from './DrawerNavigation';
@@ -17,6 +17,7 @@ import {
 import {Location} from '@types';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
 import {Context} from '@context';
+import TabBottomNavigation from './TabBottomNavigation';
 
 export type RootParamList = {
   [EScreen.DRAWER]: undefined;
@@ -29,8 +30,9 @@ export type RootParamList = {
     phone: string;
     verificationId: string;
   };
-  [EScreen.MAP]: {initLocation?: Location | null};
+  [EScreen.MAP]: {from?: Location | null; to?: Location | null};
   [EScreen.SEND_DISTRESS_SIGNAL]: undefined;
+  [EScreen.MESSAGES]: undefined;
   [EScreen.DETAIL_MESSAGE]: {uid: string};
 };
 
@@ -66,6 +68,10 @@ const RootNavigation = () => {
               name={EScreen.DRAWER}
               component={DrawerNavigation}
               options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.MESSAGES}
+              component={TabBottomNavigation}
             />
             <Stack.Screen
               name={EScreen.DETAIL_MESSAGE}

@@ -134,17 +134,6 @@ export const Styles = {
   },
 };
 
-enum TextType {
-  'text fw-600 fs-64' = 'text_large',
-  'text fw-500 fs-30' = 'text_medium_30',
-  'text fw-500 fs-24' = 'text_medium_24',
-  'text fw-500 fs-20' = 'text_medium_20',
-  'text fw-400 fs-24' = 'text_regular_24',
-  'text fw-400 fs-20' = 'text_regular_20',
-  'text fw-500 fs-16' = 'text_medium_16',
-  'text fw-500 fs-14' = 'text_medium_14',
-}
-
 export const styles = StyleSheet.create({
   text_large_64: {
     fontSize: 64,
@@ -219,5 +208,11 @@ export const colors = StyleSheet.create({
   blue: {
     color: LIGHT_BLUE_COLOR,
   },
+  white: {
+    color: TEXT_COLOR,
+  },
   black: {color: BLACK_COLOR},
+  red: {
+    color: 'red',
+  },
 });

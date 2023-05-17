@@ -3,4 +3,5 @@ export enum EButton {
   'default' = 'button-default',
   'primary' = 'button-primary',
   'secondary' = 'button-secondary',
+  'notify' = 'button-notify',
 }

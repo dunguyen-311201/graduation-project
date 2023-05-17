@@ -14,10 +14,10 @@ export type TAddress = {
 };
 
 export interface TUser {
-  [EUser.first]?: string;
-  [EUser.last]?: string;
+  [EUser.first]: string;
+  [EUser.last]: string;
   [EUser.role]?: Roles;
-  [EUser.uid]?: string;
+  [EUser.uid]: string;
   [EUser.email]?: string;
   [EUser.phoneNumber]?: string;
   [EUser.photoURL]?: string;

@@ -3,13 +3,15 @@ import {createContext} from 'react';
 export type ContextProps = {
   onAuthenticated: (state: boolean) => void;
   isAuthenticated: boolean;
-  isCompleted: boolean;
-  onCompleted: (state: boolean) => void;
+  muids: string[];
+  addMessage: (uid: string) => void;
+  removeMessage: (uid: string) => void;
 };
 
 export const Context = createContext<ContextProps>({
   onAuthenticated: () => {},
   isAuthenticated: false,
-  isCompleted: true,
-  onCompleted: () => {},
+  muids: [],
+  addMessage: () => {},
+  removeMessage: () => {},
 });

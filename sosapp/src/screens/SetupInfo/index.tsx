@@ -1,21 +1,13 @@
-import {StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {StyleSheet, View, TextInput} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
-import {EScreen} from '@enums';
+import {EScreen, EUser} from '@enums';
+import {FIRST_INSTALLED} from '@constants';
+import {setAsyncStorage, signupInfo} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, Loading, ScreenBase} from '@components';
-import {
-  getDeviceToken,
-  handleUpdateProfile,
-  setAsyncStorage,
-  signupInfo,
-} from '@utils';
-import {EUser} from '@enums';
-import {FIRST_INSTALLED} from '@constants';
-import {TextInput} from 'react-native-gesture-handler';
-import {TUser} from '@types';
-import useAuth from '@hooks/useAuth';
+import {useAuth} from '@hooks';
 
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
@@ -24,20 +16,15 @@ const SetupInfoScreen = () => {
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
 
-  const {currentUser} = useAuth();
+  const {currentUser, updateProfile} = useAuth();
 
-  const [data, setData] = useState<TUser>();
   const [loading, setLoading] = useState(false);
 
-  const {firstName, lastName} = data || {};
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     setOptions({headerShown: true});
-
-    if (currentUser) {
-      const {uid, phoneNumber} = currentUser;
-      setData({uid, phoneNumber});
-    }
 
     if (inputFirstRef?.current) {
       inputFirstRef?.current?.focus();
@@ -46,29 +33,27 @@ const SetupInfoScreen = () => {
 
   const handleNext = useCallback(async () => {
     setLoading(true);
-    try {
-      if (firstName && lastName) {
-        const token = await getDeviceToken();
-        await signupInfo({
-          ...data,
-          token,
-          lastLogin: Date.now(),
-        });
-        await handleUpdateProfile(`${firstName} ${lastName}`);
-        await setAsyncStorage(FIRST_INSTALLED, 1);
+    if (currentUser) {
+      try {
+        if (firstName !== '' && lastName !== '') {
+          await updateProfile(`${firstName} ${lastName}`);
+
+          await signupInfo({
+            firstName,
+            lastName,
+            lastLogin: Date.now(),
+            uid: currentUser.uid,
+            phoneNumber: currentUser.phoneNumber || '',
+          });
+          await setAsyncStorage(FIRST_INSTALLED, 1);
+          navigate(EScreen.CONFIRM_POLICY);
+        }
+      } catch (error) {
+        console.log('Sign up Info failed: ', error);
       }
-    } catch (error) {
-      console.log('Sign up Info failed: ', error);
     }
     setLoading(false);
-    navigate(EScreen.CONFIRM_POLICY);
-  }, [data, firstName, lastName, navigate]);
-
-  const handleChangeText = useCallback((value: string, field?: string) => {
-    if (field) {
-      setData(prev => ({...prev, [field]: value}));
-    }
-  }, []);
+  }, [currentUser, firstName, lastName, navigate, updateProfile]);
 
   const handleEndEditing = useCallback(
     (field: string) => {
@@ -89,7 +74,7 @@ const SetupInfoScreen = () => {
           <CustomInput
             field={EUser.first}
             value={firstName}
-            onChangeText={handleChangeText}
+            onChangeText={setFirstName}
             title="First"
             ref={inputFirstRef}
             customStyle={styles.input}
@@ -98,7 +83,7 @@ const SetupInfoScreen = () => {
           <CustomInput
             field={EUser.last}
             value={lastName}
-            onChangeText={handleChangeText}
+            onChangeText={setLastName}
             ref={inputLastRef}
             title="Last"
             onEndEditing={handleEndEditing}

@@ -1,12 +1,24 @@
-import {TMessage} from '@types';
-import {useState, useEffect} from 'react';
+import {useState, useContext, useEffect} from 'react';
 import database from '@react-native-firebase/database';
+
+import {TMessage} from '@types';
+import {EMessage} from '@enums/EMessage';
+import {callAPI} from '@services/api';
+import {Route} from '@constants/api';
+import useAuth from './useAuth';
+import {Context} from '@context';
 
 const useMessage = (uid?: string) => {
   const [message, setMessage] = useState<TMessage>();
+  const [loading, setLoading] = useState(false);
+
+  const {removeMessage} = useContext(Context);
+
+  const {currentUser} = useAuth();
 
   useEffect(() => {
     const fethMessage = async () => {
+      setLoading(true);
       if (uid) {
         database()
           .ref('/messages/' + uid)
@@ -14,19 +26,53 @@ const useMessage = (uid?: string) => {
             const data = snapshot.val();
             if (data) {
               setMessage({...data});
+            } else {
+              database()
+                .ref('/messages/' + uid)
+                .off('value');
+
+              uid && removeMessage(uid);
+
+              setMessage(undefined);
             }
           });
-
-        return;
+      } else {
+        setMessage(undefined);
       }
 
-      setMessage(undefined);
+      setLoading(false);
     };
 
     fethMessage();
-  }, [uid]);
+  }, [removeMessage, uid]);
 
-  return {message};
+  const onComfirm = async () => {
+    if (uid) {
+      return await callAPI({
+        data: {
+          status: EMessage.MESSAGE_IN_PROGRESS,
+          serviceId: currentUser?.uid,
+        },
+        method: 'PUT',
+        route: `${Route.MESSAGE}/${uid}`,
+      });
+    }
+  };
+
+  const onComplete = async () => {
+    if (uid) {
+      return await callAPI({
+        data: {
+          status: EMessage.MESSAGE_COMPLETED,
+          serviverId: currentUser?.uid,
+        },
+        method: 'PUT',
+        route: `${Route.MESSAGE}/${uid}`,
+      });
+    }
+  };
+
+  return {message, onComfirm, loading, onComplete};
 };
 
 export default useMessage;

@@ -7,15 +7,14 @@ import {StyleSheet} from 'react-native';
 
 import {EScreen} from '@enums';
 import DrawerContent from './DrawerContent';
-import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
-import {SettingsScreen, MessagesScreen, HomeScreen} from '@screens';
-
-export type DrawerParamList = {
-  [EScreen.SETTINGS]: undefined;
-  [EScreen.MESSAGES]: undefined;
-  [EScreen.HOME]: undefined;
-  [EScreen.HELP]: undefined;
-};
+import {
+  BACKGROUND_COLOR,
+  DARK_GRAY_COLOR,
+  TEXT_COLOR,
+  WHITE_COLOR,
+} from '@theme';
+import {SettingsScreen, HomeScreen} from '@screens';
+import TabBottomNavigation from './TabBottomNavigation';
 
 const Drawer = createDrawerNavigator();
 
@@ -57,20 +56,12 @@ const DrawerNavigation = () => {
         component={SettingsScreen}
       />
       <Drawer.Screen
-        name={EScreen.MESSAGES}
-        options={{
-          title: EScreen.MESSAGES.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={MessagesScreen}
-      />
-      <Drawer.Screen
         name={EScreen.HELP}
         options={{
           title: EScreen.HELP.split('-')[0],
           drawerLabelStyle: {...styles.title},
         }}
-        component={MessagesScreen}
+        component={TabBottomNavigation}
       />
     </Drawer.Navigator>
   );
@@ -81,8 +72,8 @@ export default DrawerNavigation;
 const styles = StyleSheet.create({
   title: {
     textTransform: 'capitalize',
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 20,
+    fontWeight: '400',
+    color: TEXT_COLOR,
   },
 });

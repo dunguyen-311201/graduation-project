@@ -5,9 +5,10 @@ import {CustomInput} from '@components/common';
 type ComfirmInputProps = {
   code: string;
   onChange: (value: string) => void;
+  onFocus: () => void;
 };
 
-const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
+const ComfirmInput = ({code, onChange, onFocus}: ComfirmInputProps) => {
   const data = Array(6)
     .fill('')
     .map((_, index) => code[index] || '');
@@ -24,18 +25,16 @@ const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
         const index = parseInt(field, 10);
 
         onChange((prev: string) => {
-          const _code =
-            prev.substring(0, index) +
-            value +
-            prev.substring(index + 1, prev.length);
-          if (prev.length > index && index > 0) {
+          if (value === '' && index > 0) {
             inputsRef.current[index - 1].focus();
-          } else if (index < 5) {
-            if (_code.length > 0) {
-              inputsRef.current[index + 1].focus();
-            }
           }
-          return _code;
+          if (prev.length < 5 && value !== '') {
+            inputsRef.current[index + 1].focus();
+          }
+
+          return (
+            prev.substring(0, index) + `${value}` + prev.substring(index + 1, 6)
+          );
         });
       }
     },
@@ -51,6 +50,7 @@ const ComfirmInput = ({code, onChange}: ComfirmInputProps) => {
         value={item}
         customStyle={styles.input}
         inputMode="numeric"
+        onFocus={onFocus}
         onChangeText={handleInputChangeText}
         valueStyle={styles.text}
         ref={ref => (inputsRef.current[index] = ref)}

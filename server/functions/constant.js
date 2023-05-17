@@ -1,0 +1,5 @@
+const MESSAGE_PENDING = "Pending";
+const MESSAGE_COMPLETED = "Completed";
+const MESSAGE_IN_PROGRESS = "In Progress";
+
+module.exports = {MESSAGE_PENDING, MESSAGE_COMPLETED, MESSAGE_IN_PROGRESS};

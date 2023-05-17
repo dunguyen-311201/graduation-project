@@ -73,7 +73,6 @@ const PhoneInput = ({
         title={nation?.code}
         onEndEditing={onEndEditing}
         maxLength={11}
-        customStyle={styles.input}
         valueStyle={styles.valueStyle}
       />
     </View>
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 3,
   },
-  input: {width: 250},
+  input: {},
   flagSelect: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -114,5 +113,6 @@ const styles = StyleSheet.create({
   },
   valueStyle: {
     fontSize: 24,
+    width: 200,
   },
 });

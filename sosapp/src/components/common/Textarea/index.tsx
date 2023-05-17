@@ -5,7 +5,7 @@ import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
 import CustomText from '../Text';
 
 type TextareaProps = {
-  value: string;
+  value?: string;
   onChangeText: (value: string, field: string) => void;
   field: string;
   title: string;
@@ -26,7 +26,7 @@ const Textarea = ({field, onChangeText, value, title}: TextareaProps) => {
         placeholder="Type more infomation"
         placeholderTextColor={DARK_GRAY_COLOR}
         clearTextOnFocus
-        value={value}
+        value={value || ''}
         onChangeText={handleTextChange}
       />
     </View>
