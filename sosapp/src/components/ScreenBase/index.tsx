@@ -5,6 +5,7 @@ import {
   ViewStyle,
   KeyboardAvoidingView,
   StyleProp,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {memo} from 'react';
 
@@ -18,6 +19,8 @@ type ScreenBaseProps = {
   onNext?: () => void;
   customStyle?: StyleProp<ViewStyle>;
   padding?: number;
+  onTouchOutside?: () => void;
+  disableNext?: boolean;
 };
 
 const ScreenBase = ({
@@ -27,31 +30,37 @@ const ScreenBase = ({
   onNext,
   customStyle,
   padding,
+  onTouchOutside,
+  disableNext,
 }: ScreenBaseProps) => {
   return (
-    <View style={[styles.container, {paddingHorizontal: padding || 32}]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={[styles.keyboard, customStyle]}>
-        {title && (
-          <CustomText
-            text={title}
-            customStyle={styles.header}
-            type="text_medium_30"
-          />
-        )}
-        {desc && (
-          <CustomText
-            text={desc}
-            customStyle={styles.header}
-            type="text_medium_24"
-          />
-        )}
+    <TouchableWithoutFeedback onPress={onTouchOutside}>
+      <View style={[styles.container, {paddingHorizontal: padding || 32}]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={[styles.keyboard, customStyle]}>
+          {title && (
+            <CustomText
+              text={title}
+              customStyle={styles.header}
+              type="text_medium_30"
+            />
+          )}
+          {desc && (
+            <CustomText
+              text={desc}
+              customStyle={styles.header}
+              type="text_medium_24"
+            />
+          )}
 
-        {children}
-      </KeyboardAvoidingView>
-      {onNext && <CustomButton onPress={onNext} label="Next" />}
-    </View>
+          {children}
+        </KeyboardAvoidingView>
+        {onNext && (
+          <CustomButton onPress={onNext} label="Next" disabled={disableNext} />
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

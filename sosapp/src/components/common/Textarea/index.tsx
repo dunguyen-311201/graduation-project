@@ -1,39 +1,61 @@
-import React from 'react';
-import {StyleSheet, View, TextInput} from 'react-native';
+import React, {
+  forwardRef,
+  useRef,
+  useCallback,
+  useImperativeHandle,
+} from 'react';
+import {StyleSheet, View, TextInput, TextInputProps} from 'react-native';
 
 import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
 import CustomText from '../Text';
 
-type TextareaProps = {
-  value?: string;
-  onChangeText: (value: string, field: string) => void;
+interface TextareaProps extends TextInputProps {
   field: string;
   title: string;
-};
+  value?: string;
+  onChangeText?: (value: string, field: string) => void;
+}
 
-const Textarea = ({field, onChangeText, value, title}: TextareaProps) => {
-  const handleTextChange = (text: string) => {
-    onChangeText(text, field);
-  };
+export interface TextareaRef {
+  focusInput: () => void;
+}
+
+// const Textarea = forwardRef<TextareaRef, TextareaProps>((props, ref) => {
+const Textarea = (props, ref) => {
+  const textInputRef = useRef<TextInput>(null);
+
+  useImperativeHandle(ref, () => ({
+    focusInput: () => {
+      if (textInputRef.current) {
+        textInputRef.current.focus();
+      }
+    },
+  }));
+
+  const handleChangeText = useCallback((value: string) => {
+    props.onChangeText(value, props.field);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <CustomText text={title} type="text_medium_14" />
+      <CustomText text={props.title} type="text_medium_14" />
       <TextInput
+        ref={textInputRef}
+        {...props}
         multiline
         numberOfLines={3}
         style={styles.input}
         placeholder="Type more infomation"
         placeholderTextColor={DARK_GRAY_COLOR}
         clearTextOnFocus
-        value={value || ''}
-        onChangeText={handleTextChange}
+        value={props?.value || ''}
+        onChangeText={handleChangeText}
       />
     </View>
   );
 };
 
-export default Textarea;
+export default forwardRef<TextareaRef, TextareaProps>(Textarea);
 
 const styles = StyleSheet.create({
   container: {

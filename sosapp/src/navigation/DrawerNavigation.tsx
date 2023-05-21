@@ -55,14 +55,6 @@ const DrawerNavigation = () => {
         }}
         component={SettingsScreen}
       />
-      <Drawer.Screen
-        name={EScreen.HELP}
-        options={{
-          title: EScreen.HELP.split('-')[0],
-          drawerLabelStyle: {...styles.title},
-        }}
-        component={TabBottomNavigation}
-      />
     </Drawer.Navigator>
   );
 };

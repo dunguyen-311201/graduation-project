@@ -9,8 +9,8 @@ import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
 import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase, CustomText, Loading, Error} from '@components';
-import {getAsyncStorage, setAsyncStorage} from '@utils';
-import {useAuth} from '@hooks';
+import {getAsyncStorage} from '@utils';
+import auth from '@react-native-firebase/auth';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate} =
@@ -21,9 +21,9 @@ const SignupByPhoneNumberScreen = () => {
 
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
-  const [phone, setPhone] = useState('917874915');
+  const [phone, setPhone] = useState('');
 
-  const {signInByPhoneNumber} = useAuth();
+  // const {signInByPhoneNumber} = useAuth();
 
   useEffect(() => {
     const setup = async () => {
@@ -37,25 +37,21 @@ const SignupByPhoneNumberScreen = () => {
   }, []);
 
   const handleNext = useCallback(async () => {
-    setLoading(true);
-    const textPhone = `${nation.code}${phone}`;
-    const verificationId = await signInByPhoneNumber(textPhone);
-
-    if (verificationId) {
-      await setAsyncStorage(PHONE, phone);
-
-      setLoading(false);
-
-      navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-        phone: textPhone,
-        verificationId,
-      });
-    } else {
+    if (phone.replace(/\s/g, '').length !== 9) {
       setError(true);
+      return;
     }
+    setLoading(true);
+    const phoneNumber = `${nation.code}${phone}`.replace(/\s/g, '');
+
+    const result = await auth().signInWithPhoneNumber(phoneNumber);
 
     setLoading(false);
-  }, [nation.code, phone]);
+    navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+      phone: phoneNumber,
+      verificationId: result.verificationId,
+    });
+  }, [nation.code, navigate, phone]);
 
   const handleNavigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);

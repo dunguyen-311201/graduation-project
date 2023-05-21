@@ -3,8 +3,7 @@ import {StyleSheet, View, TextInput} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {EScreen, EUser} from '@enums';
-import {FIRST_INSTALLED} from '@constants';
-import {setAsyncStorage, signupInfo} from '@utils';
+import {signupInfo} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, Loading, ScreenBase} from '@components';
 import {useAuth} from '@hooks';
@@ -45,12 +44,9 @@ const SetupInfoScreen = () => {
             uid: currentUser.uid,
             phoneNumber: currentUser.phoneNumber || '',
           });
-          await setAsyncStorage(FIRST_INSTALLED, 1);
           navigate(EScreen.CONFIRM_POLICY);
         }
-      } catch (error) {
-        console.log('Sign up Info failed: ', error);
-      }
+      } catch (error) {}
     }
     setLoading(false);
   }, [currentUser, firstName, lastName, navigate, updateProfile]);

@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
+import {PermissionsAndroid, Linking, Alert} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
 import {EScreen} from '@enums';
@@ -27,6 +28,38 @@ const useNotify = ({navigate}: {navigate: any}) => {
 
   useEffect(() => {
     // Handle Notifications app open
+    const setup = async () => {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+
+      await messaging().requestPermission();
+
+      if (granted === PermissionsAndroid.RESULTS.DENY) {
+        Alert.alert(
+          'Notifications Permission',
+          'This app needs access to your push notifications',
+          [
+            {
+              text: 'Ask me later',
+              onPress: () => {
+                navigate(EScreen.HOME);
+              },
+            },
+            {
+              text: 'Cancel',
+              onPress: () => {
+                navigate(EScreen.HOME);
+              },
+              style: 'cancel',
+            },
+            {text: 'OK', onPress: () => Linking.openSettings()},
+          ],
+        );
+      }
+    };
+
+    setup();
 
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       const {uid} = remoteMessage.data || {};

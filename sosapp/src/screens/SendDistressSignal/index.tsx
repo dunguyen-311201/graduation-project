@@ -1,13 +1,17 @@
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Keyboard} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import Config from 'react-native-config';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {callAPI} from '@services';
 import {EScreen} from '@enums';
 import {Location, TMessage} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
-import {getAsyncStorage, requestLocationPermission} from '@utils';
+import {
+  getAsyncStorage,
+  getLocationByEmulator,
+  getLocationDetails,
+  setAsyncStorage,
+} from '@utils';
 import {
   ScreenBase,
   DropDown,
@@ -15,10 +19,13 @@ import {
   Loading,
   SearchInput,
   CustomText,
+  Error,
 } from '@components';
 import {CURRENT_LOCATION} from '@constants/cache';
 import {ERROR_CODE, Route} from '@constants';
 import useAuth from '@hooks/useAuth';
+import {TextInput} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
 
 const types = [
   'Rescue request',
@@ -29,58 +36,75 @@ const types = [
 ];
 
 const SendDistreeSignal = () => {
-  const {setOptions, navigate, goBack} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
 
   const {currentUser} = useAuth();
+  const [error, setError] = useState(null);
+  const [location, setLocation] = useState<Location>();
+
+  const textreaeRef = useRef<TextInput>(null);
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<TMessage>();
+  const [message, setMessage] = useState<TMessage>({
+    description: '',
+    type: types[0],
+    userId: currentUser?.uid,
+  });
 
   useEffect(() => {
     setOptions({
       title: 'Send A Distress Signal',
     });
 
+    Geolocation.getCurrentPosition(position => {
+      const {latitude, longitude} = position.coords;
+
+      setLocation({latitude, longitude});
+    });
+  }, []);
+
+  useEffect(() => {
     const setup = async () => {
       if (currentUser) {
         setLoading(true);
 
-        const location = await getAsyncStorage<Location>(CURRENT_LOCATION);
-
-        if (Config.ENV === 'dev') {
-          if (location) {
-            setMessage({
-              location,
-              userId: currentUser.uid,
-              description: '',
-              type: types[0],
-            });
-
-            setLoading(false);
-            return;
-          }
+        if (location?.city) {
+          return;
         }
-        await requestLocationPermission({
-          onLocation: async (deviceLocation: Location) => {
-            setMessage({
-              location: deviceLocation,
-              userId: currentUser.uid,
-              description: '',
-              type: types[0],
-            });
-            setLoading(false);
-          },
-          onDenyLocation: () => goBack(),
-        });
+
+        const testLocation = await getLocationByEmulator();
+        let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
+
+        if (current === null && testLocation) {
+          current = testLocation;
+        }
+
+        if (testLocation) {
+          setMessage(prev => ({...prev, location: testLocation}));
+          await setAsyncStorage(CURRENT_LOCATION, testLocation);
+        } else if (
+          location &&
+          current?.city === null &&
+          location.city === null
+        ) {
+          const details = await getLocationDetails(location);
+          setMessage(prev => ({...prev, location: details}));
+        } else {
+          setMessage(prev => ({...prev, location: current}));
+        }
+
+        setLoading(false);
       }
     };
 
     setup();
-  }, [currentUser]);
+  }, [currentUser, location]);
 
   const sendSignal = useCallback(async () => {
     setLoading(true);
+
+    console.log(message);
 
     const {data, status} = await callAPI({
       route: Route.MESSAGE,
@@ -88,8 +112,10 @@ const SendDistreeSignal = () => {
       data: message,
     });
 
-    if (status !== ERROR_CODE && data) {
+    if (status !== ERROR_CODE && data?.uid) {
       navigate(EScreen.DETAIL_MESSAGE, {uid: data.uid});
+    } else {
+      setError(data);
     }
 
     setLoading(false);
@@ -101,18 +127,21 @@ const SendDistreeSignal = () => {
     }
   }, []);
 
-  const handleEndEditing = useCallback((field: string) => {
-    field;
-  }, []);
-
   const handleSearch = useCallback(async (_location: Location) => {
     setMessage(prev => ({...prev, location: _location}));
+  }, []);
+
+  const handleTouchOutside = useCallback(() => {
+    if (textreaeRef?.current) {
+      Keyboard.dismiss();
+    }
   }, []);
 
   return (
     <>
       {loading && <Loading />}
       <ScreenBase
+        onTouchOutside={handleTouchOutside}
         onNext={sendSignal}
         title="You have to connect to the support service">
         <View style={styles.mapField}>
@@ -135,11 +164,13 @@ const SendDistreeSignal = () => {
           title="Type"
         />
         <Textreae
+          ref={textreaeRef}
           title="Description"
           value={message?.description}
           field="description"
           onChangeText={handleChangeText}
         />
+        {error && <Error message="Please check request!" />}
       </ScreenBase>
     </>
   );

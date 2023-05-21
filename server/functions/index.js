@@ -13,14 +13,13 @@ const {
   MESSAGE_IN_PROGRESS,
 } = require("./constant");
 
-const serviceAccount =
-  require("./sosapp-386606-firebase-adminsdk-qd8q5-2a3ae2a35c.json");
+// eslint-disable-next-line max-len
+const serviceAccount = require("./sosapp-386606-firebase-adminsdk-qd8q5-2a3ae2a35c.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://sosapp-386606-default-rtdb.firebaseio.com",
 });
-
 
 const db = admin.firestore();
 
@@ -57,28 +56,32 @@ app.post("/messages", (req, res) => {
       users.forEach((doc) => {
         data = doc.data();
         if (
-          data.lastLogin !== null &&
           data.uid !== userId &&
-          data.location&&
-          data.location.description&&
-          data.location.description.city ===
-            req.body.location.description.city
+          data.lastLogin &&
+          data.location &&
+          req.body.location &&
+          req.body.location.city &&
+          req.body.location.city === data.location.city
         ) {
-          tokens.push(doc.data().token);
+          tokens.push(data.token);
           services.push(data.uid);
         }
       });
 
+      console.log({tokens});
+
       services.push(userId);
 
       // await db.doc("messages/"+uid).set(m);
-      await rdb.ref("/messages/"+uid).set(m);
+      await rdb.ref("/messages/" + uid).set(m);
 
-      await rdb.ref("/message-users/"+uid).set(services);
+      await rdb.ref("/message-users/" + uid).set(services);
 
-      await Promise.all(services.map(async (item)=>{
-        await rdb.ref("/user-messages/"+item+"/0/"+uid).set(1);
-      }));
+      await Promise.all(
+          services.map(async (item) => {
+            await rdb.ref("/user-messages/" + item + "/0/" + uid).set(1);
+          }),
+      );
 
       // filter info user send messages
       const user = users.find((item) => item.data().uid === userId).data();
@@ -88,7 +91,8 @@ app.post("/messages", (req, res) => {
           notification: {
             title: req.body.type,
             body: `${user.firstName} ${user.lastName} ${DES[req.body.type]}`,
-            imageUrl: "https://static.invertase.io/assets/React-Native-Firebase.svg",
+            imageUrl:
+              "https://static.invertase.io/assets/React-Native-Firebase.svg",
           },
           tokens,
           data: {uid, userId},
@@ -106,11 +110,11 @@ app.post("/messages", (req, res) => {
 });
 
 app.get("/messages/:uid", (req, res) => {
-  (async ()=>{
+  (async () => {
     try {
       const uid = req.params.uid;
 
-      const ref = rdb.ref("/messages/"+uid);
+      const ref = rdb.ref("/messages/" + uid);
       const message = (await ref.get()).val();
 
       if (message) {
@@ -123,7 +127,7 @@ app.get("/messages/:uid", (req, res) => {
 });
 
 app.put("/messages/:uid", (req, res) => {
-  (async ()=>{
+  (async () => {
     try {
       const uid = req.params.uid;
       const cStatus = req.body.status;
@@ -131,11 +135,11 @@ app.put("/messages/:uid", (req, res) => {
       const cType = req.body.type;
       const cServiceId = req.body.serviceId;
 
-      const ref = rdb.ref("/messages/"+uid);
+      const ref = rdb.ref("/messages/" + uid);
 
       const message = (await ref.get()).val();
 
-      const {userId, serviceId, type, status, description} = message||{};
+      const {userId, serviceId, type, status, description} = message || {};
 
       let service;
       let data;
@@ -156,50 +160,52 @@ app.put("/messages/:uid", (req, res) => {
         data = {...data, type: cType};
       }
 
-      const user = (await db.doc("users/"+userId).get()).data();
+      const user = (await db.doc("users/" + userId).get()).data();
 
       if (data && user) {
-        if ( status === MESSAGE_PENDING && cStatus === MESSAGE_IN_PROGRESS) {
+        if (status === MESSAGE_PENDING && cStatus === MESSAGE_IN_PROGRESS) {
           // list users recive requests
-          const mu0s = (await rdb.ref("/message-users/"+uid).get()).val();
+          const mu0s = (await rdb.ref("/message-users/" + uid).get()).val();
           // mu0s = mu0s.filter((item) => item!== cServiceId);
-          await Promise.all(mu0s.map(async (key)=>{
-            await rdb.ref("/user-messages/"+key+"/0/"+uid ).remove();
-          }));
-          await rdb.ref("/message-users/"+uid).remove();
+          await Promise.all(
+              mu0s.map(async (key) => {
+                await rdb.ref("/user-messages/" + key + "/0/" + uid).remove();
+              }),
+          );
+          await rdb.ref("/message-users/" + uid).remove();
 
-          await rdb.ref("/user-messages/"+cServiceId+"/1/"+uid ).set(1);
-          await rdb.ref("/user-messages/"+userId+"/1/"+uid ).set(1);
-
+          await rdb.ref("/user-messages/" + cServiceId + "/1/" + uid).set(1);
+          await rdb.ref("/user-messages/" + userId + "/1/" + uid).set(1);
 
           await ref.update(data);
 
-          service = (await db.doc("users/"+cServiceId).get()).data();
+          service = (await db.doc("users/" + cServiceId).get()).data();
           const {firstName, lastName} = service;
 
-          await admin.messaging()
-              .send({
-                token: user.token,
-                data: {uid, userId},
-                notification: {
-                  body: `${firstName} ${lastName} confirmed to save you!`,
-                },
-              });
-        } else if (status === MESSAGE_IN_PROGRESS &&
-           cStatus === MESSAGE_COMPLETED) {
+          await admin.messaging().send({
+            token: user.token,
+            data: {uid, userId},
+            notification: {
+              body: `${firstName} ${lastName} confirmed to save you!`,
+            },
+          });
+        } else if (
+          status === MESSAGE_IN_PROGRESS &&
+          cStatus === MESSAGE_COMPLETED
+        ) {
           await ref.update(data);
-          service = (await db.doc("users/"+serviceId).get()).data();
+          service = (await db.doc("users/" + serviceId).get()).data();
           const {firstName, lastName} = service;
 
-          await admin.messaging()
-              .send({
-                token: user.token,
-                data: {uid, userId},
-                notification: {
-                  body: `${firstName} ${lastName}`+
+          await admin.messaging().send({
+            token: user.token,
+            data: {uid, userId},
+            notification: {
+              body:
+                `${firstName} ${lastName}` +
                 " successful rescue has been confirmed!",
-                },
-              });
+            },
+          });
         }
         return res.status(200).send(data);
       } else {

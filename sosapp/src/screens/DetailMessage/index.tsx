@@ -11,10 +11,9 @@ import {
   UserInfo,
 } from '@components';
 import {EScreen} from '@enums';
-import {useMessage, useUser} from '@hooks';
+import {useAuth, useMessage, useUser} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
-import {ToLocationIcon} from '@theme/image';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.DETAIL_MESSAGE>;
 
@@ -27,10 +26,12 @@ const DetailMessage = () => {
 
   const {uid} = useRoute<ConfirmRoute>().params || {};
 
-  const {message} = useMessage(uid);
-  const hUser = useUser(message?.userId);
+  const {currentUser} = useAuth();
 
-  const hService = useUser(message?.serviceId);
+  const {message} = useMessage(uid);
+  const user = useUser(message?.userId);
+
+  const service = useUser(message?.serviceId);
 
   useEffect(() => {
     setOptions({title: 'Detail Message'});
@@ -41,21 +42,43 @@ const DetailMessage = () => {
   }, []);
 
   const handleMap = useCallback(() => {
+    if (currentUser?.uid === message?.userId) {
+      if (service?.user?.location) {
+        navigate(EScreen.MAP, {
+          to: service?.user?.location,
+        });
+        return;
+      }
+      navigate(EScreen.MAP);
+      return;
+    }
     navigate(EScreen.MAP, {
-      to: hService.user?.location,
-      from: message?.location,
+      to: message?.location,
     });
-  }, [hService.user?.location, message?.location, navigate]);
+  }, [message, service?.user]);
+
+  const handleNext = useCallback(() => {
+    navigate(EScreen.HOME);
+  }, []);
 
   return (
-    <ScreenBase>
+    <ScreenBase
+      {...(currentUser?.uid === user.user?.uid && {onNext: handleNext})}>
       <View style={styles.content}>
         <View style={styles.row}>
-          {hUser.user && (
-            <UserInfo user={hUser.user} onLongPress={handleSettingProfile} />
+          {user.user && (
+            <UserInfo
+              user={user.user}
+              onLongPress={handleSettingProfile}
+              disabled={currentUser?.uid !== user.user.uid}
+            />
           )}
-          {hService.user && (
-            <UserInfo user={hService.user} marginLeft={10} disabled />
+          {service.user && (
+            <UserInfo
+              user={service.user}
+              marginLeft={10}
+              disabled={currentUser?.uid !== service.user.uid}
+            />
           )}
         </View>
 

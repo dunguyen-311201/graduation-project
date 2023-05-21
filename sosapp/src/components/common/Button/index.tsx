@@ -63,7 +63,7 @@ const CustomButton = ({
       onPress={onPress}
       style={[
         styles[EButton[type]],
-        {...(disabled && {backgroundColor: '#eeeeee'})},
+        {...(disabled && {opacity: 0.5})},
         customStyle,
       ]}>
       {children}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
+    // width: '100%',
   },
   center: {
     alignItems: 'center',

@@ -11,6 +11,7 @@ type CustomTextProps = {
   color?: keyof typeof colors;
   customStyle?: TextStyle;
   border?: boolean;
+  center?: boolean;
   onPress?: ((event: GestureResponderEvent) => void) | undefined;
 };
 
@@ -22,6 +23,7 @@ const CustomText = ({
   onPress,
   border = false,
   color,
+  center,
 }: CustomTextProps) => {
   return (
     <Text
@@ -31,6 +33,7 @@ const CustomText = ({
         ...(color && colors[color]),
         ...(border && _styles.border),
         ...customStyle,
+        ...(center && {textAlign: 'center'}),
       }}
       onPress={onPress}>
       {text}

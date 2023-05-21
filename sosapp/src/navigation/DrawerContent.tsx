@@ -7,13 +7,7 @@ import {Image, StyleSheet, View} from 'react-native';
 import React, {useContext, useMemo} from 'react';
 
 import {Context} from '@context';
-import {
-  ArrowIcon,
-  BACKGROUND_COLOR,
-  BLACK_COLOR,
-  ProfileIcon,
-  WHITE_COLOR,
-} from '@theme';
+import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
 import {handleLogout} from '@utils';
 import {CustomButton, CustomText} from '@components';
 import {EScreen} from '@enums/EScreen';
@@ -69,8 +63,6 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
             type="secondary"
             customStyle={styles.buttonMessage}
             onPress={handleGoMessage}
-            icon={ArrowIcon}
-            iconSize={{height: 11, width: 8}}
           />
         </View>
         <View style={styles.list}>

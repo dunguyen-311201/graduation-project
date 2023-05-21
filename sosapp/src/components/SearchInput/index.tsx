@@ -64,8 +64,9 @@ const SearchInput = ({
 
         const currentLocation: Location = {
           latitude: lat,
+          city: data.terms?.at(-2).value,
           longitude: lng,
-          description: {more: detail?.formatted_address},
+          description: data.description,
         };
 
         await onSearch(currentLocation, field);
@@ -93,19 +94,15 @@ const SearchInput = ({
           fetchDetails={true}
           onPress={handleSearch}
           keepResultsAfterBlur={false}
-          onFail={error => console.log(error)}
           textInputProps={{
-            value:
-              location?.description?.more ||
-              location?.description?.district ||
-              '',
+            value: location?.description || '',
             maxLength: 25,
             onChangeText: (value: string) => {
               setLocation({
                 latitude: 0,
                 longitude: 0,
                 ...location,
-                description: {more: value},
+                description: value,
               });
             },
           }}
@@ -115,7 +112,7 @@ const SearchInput = ({
           nearbyPlacesAPI="GooglePlacesSearch"
         />
         <View style={styles.rightButton}>
-          {location?.description?.district !== '' && (
+          {location?.description && (
             <Pressable style={styles.buttonClear} onPress={handleClear}>
               <Image source={CloseIcon} style={styles.iconClear} />
             </Pressable>

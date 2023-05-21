@@ -18,19 +18,22 @@ import {
   TEXT_COLOR,
   WHITE_COLOR,
 } from '@theme';
-import {
-  fetchDistanceAndTime,
-  getAsyncStorage,
-  requestLocationPermission,
-} from '@utils';
 import {EScreen} from '@enums';
 import {Location} from '@types';
+import {useAuth, useNotifiCation} from '@hooks';
 import {CustomMarker} from './components';
 import {CURRENT_LOCATION} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
+import {
+  fetchDistanceAndTime,
+  getAsyncStorage,
+  getLocationByEmulator,
+  getLocationDetails,
+  setAsyncStorage,
+} from '@utils';
 import {BackIcon, CustomText, Loading, Notify, SearchInput} from '@components';
-import {useNotifiCation} from '@hooks';
+import Geolocation from '@react-native-community/geolocation';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -51,7 +54,11 @@ const MapScreen = () => {
     navigate,
   });
 
-  const {from, to} = useRoute<ConfirmRoute>().params;
+  const [location, setLocation] = useState<Location>();
+
+  const {currentUser} = useAuth();
+
+  const {from, to} = useRoute<ConfirmRoute>().params || {};
 
   const [isDirection, setIsDirection] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,39 +68,65 @@ const MapScreen = () => {
   useEffect(() => {
     setOptions({headerShown: false});
 
-    const setup = async () => {
-      setLoading(true);
-      const location = await getAsyncStorage<Location>(CURRENT_LOCATION);
+    Geolocation.getCurrentPosition(position => {
+      const {latitude, longitude} = position.coords;
 
-      if (Config.ENV === 'dev') {
-        if (location) {
-          setLocations({
-            from: from || location,
-            ...(to && {to}),
-          });
-          setLoading(false);
+      setLocation({latitude, longitude});
+    });
+  }, []);
+
+  useEffect(() => {
+    const setup = async () => {
+      if (currentUser) {
+        setLoading(true);
+
+        const testLocation = await getLocationByEmulator();
+        let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
+
+        if (location?.city) {
           return;
         }
-      }
-      await requestLocationPermission({
-        onLocation: async (deviceLocation: Location) => {
+
+        if (current === null && testLocation) {
+          current = testLocation;
+        }
+
+        if (testLocation) {
           setLocations({
-            from: from || deviceLocation,
+            from: from || testLocation,
             ...(to && {to}),
           });
-          setLoading(false);
-        },
-        onDenyLocation: () => goBack(),
-      });
+          await setAsyncStorage(CURRENT_LOCATION, testLocation);
+        } else if (
+          location &&
+          current?.city === null &&
+          location.city === null
+        ) {
+          const details = await getLocationDetails(location);
+          setLocations({
+            from: from || details,
+            ...(to && {to}),
+          });
+        } else {
+          setLocations({
+            from: from || current,
+            ...(to && {to}),
+          });
+        }
+
+        setLoading(false);
+      }
     };
 
     setup();
-  }, [from, to]);
+  }, [currentUser, from, location, to]);
 
   useEffect(() => {
-    if (locations?.to && locations?.from) {
+    const _to = locations?.to;
+    const _from = locations?.from;
+    if (_to && _from) {
       fetchDistanceAndTime(
-        {...locations},
+        {to: _to, from: _from},
         (distance: string, timeout: string) =>
           setLocations({
             ...locations,

@@ -1,10 +1,10 @@
 import {Pressable, StyleSheet, View} from 'react-native';
 import React, {useCallback, memo, useEffect, useState} from 'react';
 
-import {WHITE_COLOR, ToLocationIcon} from '@theme';
+import {WHITE_COLOR} from '@theme';
 import {Location, TMessage} from '@types';
 import {CustomButton, CustomText} from '../common';
-import {useAuth, useMessage} from '@hooks';
+import {useAuth, useMessage, useUser} from '@hooks';
 import {EMessage} from '@enums';
 import {ERROR_CODE} from '@constants/api';
 
@@ -14,7 +14,7 @@ const MessageInfo = ({
   onLongPress,
 }: {
   data: TMessage;
-  onMap: (location: Location) => void;
+  onMap: (location?: Location) => void;
   onLongPress: (uid: string) => void;
 }) => {
   const {onComfirm, onComplete} = useMessage(data.uid);
@@ -25,15 +25,24 @@ const MessageInfo = ({
 
   const {currentUser} = useAuth();
 
+  const {user} = useUser(data.serviceId);
+
   useEffect(() => {
     data && setMessage(data);
   }, [data]);
 
   const handleGoMap = useCallback(() => {
-    if (data.location) {
+    // user send request
+    if (currentUser?.uid === message.userId) {
+      if (user?.location) {
+        onMap(user.location);
+        return;
+      }
+      onMap();
+    } else {
       onMap(data.location);
     }
-  }, [data.location, onMap]);
+  }, [currentUser?.uid, message, user?.location, data.location, onMap]);
 
   const handleLongPress = useCallback(() => {
     data.uid && onLongPress(data.uid);
@@ -59,7 +68,7 @@ const MessageInfo = ({
 
   return (
     <Pressable style={styles.container} onLongPress={handleLongPress}>
-      <View>
+      <View style={styles.content}>
         <View style={styles.row}>
           <CustomText text="Type: " type="text_medium_18" color="black" />
           <CustomText text={message.type} type="text_medium_18" color="blue" />
@@ -82,41 +91,39 @@ const MessageInfo = ({
 
         <View style={styles.row}>
           <CustomText text="Location: " type="text_medium_18" color="black" />
-          <CustomText
-            text={message.location?.description?.more}
-            type="text_medium_18"
-            color="blue"
-          />
-          <CustomButton
-            icon={ToLocationIcon}
-            type="secondary"
-            iconSize={styles.locationIcon}
-            onPress={handleGoMap}
-          />
+
+          <CustomButton type="secondary" onPress={handleGoMap}>
+            <CustomText
+              text={message.location?.description}
+              type="text_medium_18"
+              color="blue"
+            />
+          </CustomButton>
         </View>
 
-        {currentUser?.uid !== message.userId && (
-          <View style={styles.actions}>
-            <CustomButton
-              label="Comfirm"
-              type="notify"
-              disabled={
-                message.status !== EMessage.MESSAGE_PENDING || isVisible
-              }
-              onPress={handleComfirm}
-            />
-            <CustomButton
-              label="Complete"
-              type="notify"
-              disabled={
-                message.status === EMessage.MESSAGE_COMPLETED ||
-                message.status === EMessage.MESSAGE_PENDING ||
-                isVisible
-              }
-              onPress={handleComplete}
-            />
-          </View>
-        )}
+        {currentUser?.uid !== message.userId &&
+          message.status !== EMessage.MESSAGE_COMPLETED && (
+            <View style={styles.actions}>
+              <CustomButton
+                label="Comfirm"
+                type="notify"
+                disabled={
+                  message.status !== EMessage.MESSAGE_PENDING || isVisible
+                }
+                onPress={handleComfirm}
+              />
+              <CustomButton
+                label="Complete"
+                type="notify"
+                disabled={
+                  message.status === EMessage.MESSAGE_COMPLETED ||
+                  message.status === EMessage.MESSAGE_PENDING ||
+                  isVisible
+                }
+                onPress={handleComplete}
+              />
+            </View>
+          )}
       </View>
     </Pressable>
   );
@@ -131,7 +138,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     backgroundColor: WHITE_COLOR,
     alignSelf: 'flex-start',
-    borderRadius: 10,
+    borderRadius: 2,
+  },
+  content: {
+    overflow: 'scroll',
   },
   row: {
     flexDirection: 'row',

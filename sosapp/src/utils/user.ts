@@ -4,6 +4,7 @@ import firebase from '@react-native-firebase/firestore';
 import {Location, TUser} from '@types';
 import {getAsyncStorage} from './asyncStorage';
 import {CURRENT_LOCATION} from '@constants/cache';
+import {getLocation} from './location';
 
 const getUserByID = async (uid: string) => {
   const data = (

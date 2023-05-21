@@ -1,15 +1,15 @@
-import React, {useCallback, useContext, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
 import {Context} from '@context';
-import {FIRST_INSTALLED} from '@constants';
 import {Error, Loading, ScreenBase} from '@components';
 import ComfirmInput from './components/ComfirmInput';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
-import {handleLastLogin, setAsyncStorage} from '@utils';
-import {useAuth} from '@hooks';
+import {handleLastLogin} from '@utils';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {PHONES_TEST} from '@constants';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -23,32 +23,64 @@ const ConfirmPhoneNumberScreen = () => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const {verification} = useAuth();
-
   const {onAuthenticated} = useContext(Context);
 
-  const handleNext = useCallback(async () => {
-    setLoading(true);
+  const [isDisible, setIsDisabled] = useState(true);
 
-    const userCredential = await verification(verificationId, code);
-
-    if (userCredential) {
-      const {additionalUserInfo} = userCredential;
-
-      if (additionalUserInfo?.isNewUser) {
-        setLoading(false);
-        navigate(EScreen.SIGNUP_INFO);
-        return;
+  const onAuthStateChanged = useCallback(
+    (user: FirebaseAuthTypes.User | null) => {
+      if (user) {
+        if (user.displayName) {
+          onAuthenticated(true);
+        } else {
+          navigate(EScreen.SIGNUP_INFO);
+        }
+      } else {
+        setIsDisabled(false);
       }
+    },
+    [],
+  );
 
-      await setAsyncStorage(FIRST_INSTALLED, 1);
-      await handleLastLogin();
-      onAuthenticated(true);
+  useEffect(() => {
+    if (code.length === 6) {
+      setIsDisabled(false);
     } else {
-      setError(true);
-      setLoading(false);
+      setIsDisabled(true);
     }
-  }, [code, verificationId]);
+    if (phone && !PHONES_TEST.includes(phone)) {
+      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+      return subscriber;
+    }
+  }, [code, onAuthStateChanged, phone]);
+
+  const handleNext = useCallback(async () => {
+    if (!isDisible) {
+      setLoading(true);
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationId,
+        code,
+      );
+      const userCredential = await auth().signInWithCredential(credential);
+
+      if (userCredential) {
+        const {additionalUserInfo} = userCredential;
+
+        if (additionalUserInfo?.isNewUser) {
+          setLoading(false);
+          navigate(EScreen.SIGNUP_INFO);
+          return;
+        }
+
+        await handleLastLogin();
+        onAuthenticated(true);
+        setLoading(false);
+      } else {
+        setError(true);
+        setLoading(false);
+      }
+    }
+  }, [code, isDisible]);
 
   const handleFocus = useCallback(() => {
     if (error) {
@@ -62,7 +94,8 @@ const ConfirmPhoneNumberScreen = () => {
       {loading && <Loading />}
       <ScreenBase
         desc={'Enter The 6-Digit Code At\n' + phone}
-        onNext={handleNext}>
+        onNext={handleNext}
+        disableNext={isDisible}>
         <ComfirmInput code={code} onChange={setCode} onFocus={handleFocus} />
       </ScreenBase>
     </>

@@ -10,7 +10,7 @@ import {
 } from '@components';
 import {EScreen} from '@enums';
 import {FIRST_INSTALLED} from '@constants';
-import {getAsyncStorage} from '@utils';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {ArrowRightIcon, CheckShieldIcon} from '@theme';
 import {Context} from '@context';
@@ -24,8 +24,11 @@ function SplashScreen() {
 
   useEffect(() => {
     const setup = async () => {
-      const isFirst = await getAsyncStorage(FIRST_INSTALLED);
+      if (isAuthenticated) {
+        await setAsyncStorage(FIRST_INSTALLED, 1);
+      }
 
+      const isFirst = await getAsyncStorage(FIRST_INSTALLED);
       if (!isFirst) {
         setIsNew(true);
         return;

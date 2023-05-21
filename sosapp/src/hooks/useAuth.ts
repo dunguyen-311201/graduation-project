@@ -24,7 +24,7 @@ const useAuth = () => {
   };
 
   const signInByPhoneNumber = async (phoneNumber: string) => {
-    return (await auth().signInWithPhoneNumber(phoneNumber)).verificationId;
+    return await auth().signInWithPhoneNumber(phoneNumber);
   };
 
   const verification = async (verificationId: string, code: string) => {

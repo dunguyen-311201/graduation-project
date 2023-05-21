@@ -5,22 +5,17 @@ import {useNavigation} from '@react-navigation/native';
 import {EScreen} from '@enums';
 import {Location, TMessage} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
-import {useMessages, useNotifiCation} from '@hooks';
-import {ScreenBase, MessageInfo, CustomText, Notify} from '@components';
+import {useMessages} from '@hooks';
+import {ScreenBase, MessageInfo, CustomText} from '@components';
 
 const PendingMessage = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
 
-  const {message, handleQuit, handleOk, body} = useNotifiCation({
-    navigate,
-  });
   const {messages} = useMessages();
 
-  const handleGoMap = useCallback((location: Location) => {
-    if (location) {
-      navigate(EScreen.MAP, {from: location});
-    }
+  const goMap = useCallback((location?: Location) => {
+    navigate(EScreen.MAP, {to: location});
   }, []);
 
   const handleNavigateDetail = useCallback((uid: string) => {
@@ -31,11 +26,11 @@ const PendingMessage = () => {
     ({item}: {item: TMessage}) => (
       <MessageInfo
         data={item}
-        onMap={handleGoMap}
+        onMap={goMap}
         onLongPress={handleNavigateDetail}
       />
     ),
-    [handleGoMap, handleNavigateDetail],
+    [handleNavigateDetail],
   );
 
   const keyExtractor = useCallback((item: TMessage) => item.uid + '', []);
@@ -47,34 +42,24 @@ const PendingMessage = () => {
 
   return (
     <>
-      {/* Handle Show Notifications */}
-
-      {message && (
-        <Notify
-          message={message}
-          onOk={handleOk}
-          onQuit={handleQuit}
-          body={body}
-        />
-      )}
-
-      {/* Handle Show Notifications */}
-
-      <ScreenBase>
-        {messages?.length > 0 ? (
-          <FlatList
-            data={messages}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            ItemSeparatorComponent={ItemSeparatorComponent}
-          />
-        ) : (
-          <CustomText
-            text="List request is empty!"
-            type="text_large_64"
-            color="red"
-          />
-        )}
+      <ScreenBase padding={10} customStyle={styles.container}>
+        <View style={styles.content}>
+          {messages?.length > 0 ? (
+            <FlatList
+              data={messages}
+              renderItem={renderItem}
+              keyExtractor={keyExtractor}
+              ItemSeparatorComponent={ItemSeparatorComponent}
+            />
+          ) : (
+            <CustomText
+              text="There are currently no requests, scroll to the side tab to see your requests or the ones you've confirmed!"
+              type="text_regular_24"
+              color="red"
+              center
+            />
+          )}
+        </View>
       </ScreenBase>
     </>
   );
@@ -83,15 +68,13 @@ const PendingMessage = () => {
 export default PendingMessage;
 
 const styles = StyleSheet.create({
+  container: {
+    paddingTop: 10,
+  },
   content: {
     flex: 1,
-    marginTop: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 10,
   },
   separator: {
-    height: 10,
+    height: 5,
   },
 });

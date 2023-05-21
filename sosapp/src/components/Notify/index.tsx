@@ -9,7 +9,7 @@ import {TMessage} from '@types';
 
 type NotifyProps = {
   message?: TMessage;
-  body: string;
+  body?: string;
   onOk: () => void;
   onQuit: () => void;
 };

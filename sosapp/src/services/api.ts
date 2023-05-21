@@ -27,12 +27,10 @@ const callAPI = async ({data, method, route}: API) => {
         break;
     }
 
-    console.log(url);
     const res = await fetch(url, options);
     const _data = await res.json();
     return {data: _data, status: res.status};
   } catch (error) {
-    console.log(error);
     return {data: null, status: ERROR_CODE, message: error};
   }
 };

@@ -42,4 +42,10 @@ const PHONES: Nation[] = [
   },
 ];
 
-export {PHONES};
+const PHONES_TEST = [
+  // '+84917874915',
+  // '+84856830225',
+  '+84905501421',
+  '+84326655819',
+];
+export {PHONES, PHONES_TEST};
