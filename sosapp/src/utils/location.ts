@@ -1,5 +1,7 @@
 import DeviceInfo from 'react-native-device-info';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation, {
+  GeolocationResponse,
+} from '@react-native-community/geolocation';
 import {PermissionsAndroid, Platform, Alert, Linking} from 'react-native';
 
 import Config from 'react-native-config';
@@ -8,19 +10,6 @@ import {CURRENT_LOCATION} from '@constants';
 import {getAsyncStorage, setAsyncStorage} from './asyncStorage';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
-
-const getLocationByEmulator = async () => {
-  if (await DeviceInfo.isEmulator()) {
-    const location: Location = {
-      latitude: 16.0544563,
-      longitude: 108.0717219,
-      city: 'Da Nang',
-      description: 'Da Nang, Vietnam',
-    };
-    await setAsyncStorage(CURRENT_LOCATION, location);
-    return location;
-  }
-};
 
 const getLocationDetails = async ({latitude, longitude}: Location) => {
   const res = await fetch(
@@ -35,122 +24,69 @@ const getLocationDetails = async ({latitude, longitude}: Location) => {
   if (result) {
     const components = result.address_components;
 
-    // const district = components[0].long_name;
+    const district = components?.at(-3).long_name;
     const city = components?.at(-2).long_name;
-    // const nation = components[2].long_name;
+    const nation = components?.at(-1).long_name;
 
-    const des: Location = {
+    console.log({district, city, nation, a: components?.at(-4).long_name});
+
+    const lo: Location = {
       latitude,
       longitude,
       city,
       description: result.formatted_address,
     };
 
-    await setAsyncStorage(CURRENT_LOCATION, des);
-    return des;
+    return lo;
   }
 };
 
-const getLocation = async (onDenyLocation?: () => void) => {
-  if (await DeviceInfo.isEmulator()) {
-    const location: Location = {
-      latitude: 16.0544563,
-      longitude: 108.0717219,
-      city: 'Da Nang',
-      description: 'Da Nang, Vietnam',
-    };
-    await setAsyncStorage(CURRENT_LOCATION, location);
-    return;
-  }
-  Geolocation.getCurrentPosition(
-    async position => {
-      const {latitude, longitude} = position.coords;
-
-      let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
-      if (
-        !current ||
-        (Math.round(current?.latitude) !== Math.round(latitude) &&
-          Math.round(current?.longitude) !== Math.round(longitude))
-      ) {
-        await requestLocationPermission(onDenyLocation);
-
-        const data = await getLocationDetails({latitude, longitude});
-        current = {
-          latitude,
-          longitude,
-          ...data,
-        };
-        await setAsyncStorage(CURRENT_LOCATION, current);
-      }
-    },
-    () => {},
-    {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-  );
-};
-
-const requestLocationPermission = async (onDenyLocation?: () => void) => {
+const requestLocationPermission = async () => {
   if (Platform.OS === 'android') {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     );
 
+    let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
+
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       if (await DeviceInfo.isEmulator()) {
-        const location: Location = {
+        await setAsyncStorage(CURRENT_LOCATION, {
           latitude: 16.0544563,
           longitude: 108.0717219,
           city: 'Da Nang',
           description: 'Da Nang, Vietnam',
-        };
-        await setAsyncStorage(CURRENT_LOCATION, location);
-        onDenyLocation && onDenyLocation();
+        });
         return;
       }
 
-      onDenyLocation && onDenyLocation();
-      Geolocation.getCurrentPosition(
-        async position => {
-          const {latitude, longitude} = position.coords;
-
-          let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
-          if (
-            !current ||
-            (Math.round(current?.latitude) !== Math.round(latitude) &&
-              Math.round(current?.longitude) !== Math.round(longitude))
-          ) {
-            await requestLocationPermission(onDenyLocation);
-
-            const data = await getLocationDetails({latitude, longitude});
-            current = {
-              latitude,
-              longitude,
-              ...data,
-            };
-            await setAsyncStorage(CURRENT_LOCATION, current);
-          }
+      const position: GeolocationResponse = await new Promise(
+        (resolve, reject) => {
+          Geolocation.getCurrentPosition(resolve, reject);
         },
-        () => {},
-        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
       );
-    } else {
+
+      const {latitude, longitude} = position.coords;
+
+      if (
+        (current &&
+          Math.abs(current.latitude - latitude) > 0.001 &&
+          Math.abs(current.longitude - longitude) > 0.001) ||
+        current === null
+      ) {
+        const location = await getLocationDetails({latitude, longitude});
+        location && (await setAsyncStorage(CURRENT_LOCATION, location));
+      }
+    } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
       Alert.alert(
         'Location Permission',
         'This app needs access to your location to show your current position on the map',
         [
           {
             text: 'Ask me later',
-            onPress: () => {
-              onDenyLocation && onDenyLocation();
-            },
+            onPress: () => {},
           },
-          {
-            text: 'Cancel',
-            onPress: () => {
-              onDenyLocation && onDenyLocation();
-            },
-            style: 'cancel',
-          },
-          {text: 'OK', onPress: () => Linking.openSettings()},
+          {text: 'Setting', onPress: () => Linking.openSettings()},
         ],
       );
     }
@@ -175,10 +111,4 @@ const fetchDistanceAndTime = async (
   }
 };
 
-export {
-  getLocation,
-  requestLocationPermission,
-  getLocationDetails,
-  fetchDistanceAndTime,
-  getLocationByEmulator,
-};
+export {requestLocationPermission, getLocationDetails, fetchDistanceAndTime};

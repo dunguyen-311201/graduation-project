@@ -6,11 +6,7 @@ import {
   getUserByID,
   handleOffLocation,
   handleOnLocation,
-  getLocationDetails,
   requestLocationPermission,
-  getAsyncStorage,
-  getLocationByEmulator,
-  setAsyncStorage,
 } from '@utils';
 import {
   ScreenBase,
@@ -26,17 +22,12 @@ import {useAuth, useNotifiCation} from '@hooks';
 import {MenuButton} from './components';
 import {RootScreenNavigationProps} from '@navigation';
 import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
-import Geolocation from '@react-native-community/geolocation';
-import {Location} from '@types';
-import {CURRENT_LOCATION} from '@constants/cache';
 
 const HomeScreen = () => {
-  console.log('re-render');
   const {navigate, openDrawer, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   const {currentUser} = useAuth();
-  const [location, setLocation] = useState<Location>();
 
   const {message, handleQuit, handleOk, body} = useNotifiCation({
     navigate,
@@ -46,15 +37,7 @@ const HomeScreen = () => {
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setOptions({headerShown: false});
-
-    Geolocation.getCurrentPosition(position => {
-      const {latitude, longitude} = position.coords;
-
-      setLocation({latitude, longitude});
-    });
-  }, []);
+  requestLocationPermission();
 
   useEffect(() => {
     const setup = async () => {
@@ -67,33 +50,14 @@ const HomeScreen = () => {
           setOnLocation(false);
         }
 
-        if (location?.city) {
-          return;
-        }
-
-        const testLocation = await getLocationByEmulator();
-        let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
-
-        if (current === null && testLocation) {
-          current = testLocation;
-        }
-
-        if (testLocation) {
-          setLocation(testLocation);
-          await setAsyncStorage(CURRENT_LOCATION, testLocation);
-        } else if (
-          location &&
-          current?.city === null &&
-          location.city === null
-        ) {
-          await getLocationDetails(location);
-        }
         setLoading(false);
       }
     };
 
+    setOptions({headerShown: false});
+
     setup();
-  }, [currentUser, location]);
+  }, []);
 
   const handleLocation = useCallback(async () => {
     setLoading(true);

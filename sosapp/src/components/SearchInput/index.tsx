@@ -16,7 +16,7 @@ import {
 import Config from 'react-native-config';
 
 import {Location} from '@types';
-import {CloseIcon, DirectionIcon, TEXT_COLOR} from '@theme';
+import {DirectionIcon, TEXT_COLOR} from '@theme';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -75,10 +75,6 @@ const SearchInput = ({
     [field, onSearch],
   );
 
-  const handleClear = useCallback(() => {
-    setLocation(undefined);
-  }, []);
-
   return (
     <View style={[styles.container, customStyle, {...(zIndex && {zIndex})}]}>
       <View style={styles.group}>
@@ -96,7 +92,7 @@ const SearchInput = ({
           keepResultsAfterBlur={false}
           textInputProps={{
             value: location?.description || '',
-            maxLength: 25,
+            selectTextOnFocus: true,
             onChangeText: (value: string) => {
               setLocation({
                 latitude: 0,
@@ -112,11 +108,6 @@ const SearchInput = ({
           nearbyPlacesAPI="GooglePlacesSearch"
         />
         <View style={styles.rightButton}>
-          {location?.description && (
-            <Pressable style={styles.buttonClear} onPress={handleClear}>
-              <Image source={CloseIcon} style={styles.iconClear} />
-            </Pressable>
-          )}
           {!isDirection && (
             <Pressable style={styles.buttondirection} onPress={onToDirection}>
               <Image source={DirectionIcon} style={styles.directionIcon} />

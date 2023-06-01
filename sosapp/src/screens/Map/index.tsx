@@ -28,12 +28,9 @@ import {RootParamList} from '@navigation/RootNavigation';
 import {
   fetchDistanceAndTime,
   getAsyncStorage,
-  getLocationByEmulator,
-  getLocationDetails,
-  setAsyncStorage,
+  requestLocationPermission,
 } from '@utils';
-import {BackIcon, CustomText, Loading, Notify, SearchInput} from '@components';
-import Geolocation from '@react-native-community/geolocation';
+import {BackIcon, CustomText, Notify, SearchInput} from '@components';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -54,72 +51,35 @@ const MapScreen = () => {
     navigate,
   });
 
-  const [location, setLocation] = useState<Location>();
-
   const {currentUser} = useAuth();
 
   const {from, to} = useRoute<ConfirmRoute>().params || {};
 
   const [isDirection, setIsDirection] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [locations, setLocations] = useState<SearchLocation>();
 
+  requestLocationPermission();
+
   useEffect(() => {
     setOptions({headerShown: false});
-
-    Geolocation.getCurrentPosition(position => {
-      const {latitude, longitude} = position.coords;
-
-      setLocation({latitude, longitude});
-    });
   }, []);
 
   useEffect(() => {
     const setup = async () => {
       if (currentUser) {
-        setLoading(true);
+        const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
 
-        const testLocation = await getLocationByEmulator();
-        let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
-
-        if (location?.city) {
-          return;
-        }
-
-        if (current === null && testLocation) {
-          current = testLocation;
-        }
-
-        if (testLocation) {
+        if (cacheLocation) {
           setLocations({
-            from: from || testLocation,
-            ...(to && {to}),
-          });
-          await setAsyncStorage(CURRENT_LOCATION, testLocation);
-        } else if (
-          location &&
-          current?.city === null &&
-          location.city === null
-        ) {
-          const details = await getLocationDetails(location);
-          setLocations({
-            from: from || details,
-            ...(to && {to}),
-          });
-        } else {
-          setLocations({
-            from: from || current,
+            from: from || cacheLocation,
             ...(to && {to}),
           });
         }
-
-        setLoading(false);
       }
     };
-
     setup();
-  }, [currentUser, from, location, to]);
+  }, [currentUser, from, to]);
 
   useEffect(() => {
     const _to = locations?.to;
@@ -169,7 +129,6 @@ const MapScreen = () => {
       )}
 
       {/* Handle Show Notifications */}
-      {loading && <Loading />}
       <View style={styles.container}>
         {!isDirection ? (
           <View style={styles.navbar}>

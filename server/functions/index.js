@@ -26,7 +26,7 @@ const db = admin.firestore();
 const rdb = admin.database();
 
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({ origin: true }));
 
 // post request
 app.post("/messages", (req, res) => {
@@ -68,8 +68,6 @@ app.post("/messages", (req, res) => {
         }
       });
 
-      console.log({tokens});
-
       services.push(userId);
 
       // await db.doc("messages/"+uid).set(m);
@@ -78,9 +76,9 @@ app.post("/messages", (req, res) => {
       await rdb.ref("/message-users/" + uid).set(services);
 
       await Promise.all(
-          services.map(async (item) => {
-            await rdb.ref("/user-messages/" + item + "/0/" + uid).set(1);
-          }),
+        services.map(async (item) => {
+          await rdb.ref("/user-messages/" + item + "/0/" + uid).set(1);
+        })
       );
 
       // filter info user send messages
@@ -95,16 +93,16 @@ app.post("/messages", (req, res) => {
               "https://static.invertase.io/assets/React-Native-Firebase.svg",
           },
           tokens,
-          data: {uid, userId},
+          data: { uid, userId },
         };
 
         await admin.messaging().sendEachForMulticast(message);
       }
 
-      return res.status(201).send({uid, userId});
+      return res.status(201).send({ uid, userId });
     } catch (error) {
       console.log(error);
-      return res.status(400).send({error});
+      return res.status(400).send({ error });
     }
   })();
 });
@@ -139,25 +137,25 @@ app.put("/messages/:uid", (req, res) => {
 
       const message = (await ref.get()).val();
 
-      const {userId, serviceId, type, status, description} = message || {};
+      const { userId, serviceId, type, status, description } = message || {};
 
       let service;
       let data;
 
       if (cDescription && cDescription !== description) {
-        data = {...data, description: cDescription};
+        data = { ...data, description: cDescription };
       }
 
       if (cStatus && cStatus !== status) {
-        data = {...data, status: cStatus};
+        data = { ...data, status: cStatus };
       }
 
       if (cServiceId && cServiceId !== serviceId) {
-        data = {...data, serviceId: cServiceId};
+        data = { ...data, serviceId: cServiceId };
       }
 
       if (cType && cType !== type) {
-        data = {...data, type: cType};
+        data = { ...data, type: cType };
       }
 
       const user = (await db.doc("users/" + userId).get()).data();
@@ -168,9 +166,9 @@ app.put("/messages/:uid", (req, res) => {
           const mu0s = (await rdb.ref("/message-users/" + uid).get()).val();
           // mu0s = mu0s.filter((item) => item!== cServiceId);
           await Promise.all(
-              mu0s.map(async (key) => {
-                await rdb.ref("/user-messages/" + key + "/0/" + uid).remove();
-              }),
+            mu0s.map(async (key) => {
+              await rdb.ref("/user-messages/" + key + "/0/" + uid).remove();
+            })
           );
           await rdb.ref("/message-users/" + uid).remove();
 
@@ -180,11 +178,11 @@ app.put("/messages/:uid", (req, res) => {
           await ref.update(data);
 
           service = (await db.doc("users/" + cServiceId).get()).data();
-          const {firstName, lastName} = service;
+          const { firstName, lastName } = service;
 
           await admin.messaging().send({
             token: user.token,
-            data: {uid, userId},
+            data: { uid, userId },
             notification: {
               body: `${firstName} ${lastName} confirmed to save you!`,
             },
@@ -195,11 +193,11 @@ app.put("/messages/:uid", (req, res) => {
         ) {
           await ref.update(data);
           service = (await db.doc("users/" + serviceId).get()).data();
-          const {firstName, lastName} = service;
+          const { firstName, lastName } = service;
 
           await admin.messaging().send({
             token: user.token,
-            data: {uid, userId},
+            data: { uid, userId },
             notification: {
               body:
                 `${firstName} ${lastName}` +

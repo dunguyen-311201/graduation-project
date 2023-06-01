@@ -6,26 +6,20 @@ import {callAPI} from '@services';
 import {EScreen} from '@enums';
 import {Location, TMessage} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
+import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {
-  getAsyncStorage,
-  getLocationByEmulator,
-  getLocationDetails,
-  setAsyncStorage,
-} from '@utils';
-import {
-  ScreenBase,
   DropDown,
   Textreae,
   Loading,
   SearchInput,
   CustomText,
   Error,
+  ScreenBase,
 } from '@components';
 import {CURRENT_LOCATION} from '@constants/cache';
 import {ERROR_CODE, Route} from '@constants';
 import useAuth from '@hooks/useAuth';
 import {TextInput} from 'react-native';
-import Geolocation from '@react-native-community/geolocation';
 
 const types = [
   'Rescue request',
@@ -41,7 +35,6 @@ const SendDistreeSignal = () => {
 
   const {currentUser} = useAuth();
   const [error, setError] = useState(null);
-  const [location, setLocation] = useState<Location>();
 
   const textreaeRef = useRef<TextInput>(null);
 
@@ -52,15 +45,11 @@ const SendDistreeSignal = () => {
     userId: currentUser?.uid,
   });
 
+  requestLocationPermission();
+
   useEffect(() => {
     setOptions({
       title: 'Send A Distress Signal',
-    });
-
-    Geolocation.getCurrentPosition(position => {
-      const {latitude, longitude} = position.coords;
-
-      setLocation({latitude, longitude});
     });
   }, []);
 
@@ -69,42 +58,20 @@ const SendDistreeSignal = () => {
       if (currentUser) {
         setLoading(true);
 
-        if (location?.city) {
-          return;
+        let cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+
+        if (cacheLocation) {
+          setMessage(prev => ({...prev, location: cacheLocation}));
         }
-
-        const testLocation = await getLocationByEmulator();
-        let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
-
-        if (current === null && testLocation) {
-          current = testLocation;
-        }
-
-        if (testLocation) {
-          setMessage(prev => ({...prev, location: testLocation}));
-          await setAsyncStorage(CURRENT_LOCATION, testLocation);
-        } else if (
-          location &&
-          current?.city === null &&
-          location.city === null
-        ) {
-          const details = await getLocationDetails(location);
-          setMessage(prev => ({...prev, location: details}));
-        } else {
-          setMessage(prev => ({...prev, location: current}));
-        }
-
         setLoading(false);
       }
     };
 
     setup();
-  }, [currentUser, location]);
+  }, [currentUser]);
 
   const sendSignal = useCallback(async () => {
     setLoading(true);
-
-    console.log(message);
 
     const {data, status} = await callAPI({
       route: Route.MESSAGE,
