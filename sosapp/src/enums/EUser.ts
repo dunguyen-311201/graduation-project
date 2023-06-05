@@ -14,4 +14,5 @@ export enum EUser {
   lastLogin = 'lastLogin',
   isRescue = 'isRescue',
   address = 'address',
+  citizenIdentification = 'citizenIdentification',
 }

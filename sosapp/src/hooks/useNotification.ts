@@ -1,10 +1,10 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useContext, useEffect, useState} from 'react';
 import {PermissionsAndroid, Linking, Alert} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 
 import {EScreen} from '@enums';
 import useMessage from './useMessage';
-import useAuth from './useAuth';
+import {Context} from '@context/index';
 
 const useNotify = ({navigate}: {navigate: any}) => {
   const [muid, setMuid] = useState<string>();
@@ -12,7 +12,7 @@ const useNotify = ({navigate}: {navigate: any}) => {
 
   const {message} = useMessage(muid);
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
 
   const handleNotify = useCallback(
     (uid: string, userId?: string) => {

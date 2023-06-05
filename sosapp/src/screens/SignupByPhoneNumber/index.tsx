@@ -1,3 +1,4 @@
+import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
@@ -5,12 +6,11 @@ import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {Nation} from '@types';
 import {EScreen} from '@enums';
 import {PHONE, PHONES} from '@constants';
+import {getAsyncStorage} from '@utils';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
 import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase, CustomText, Loading, Error} from '@components';
-import {getAsyncStorage} from '@utils';
-import auth from '@react-native-firebase/auth';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate} =
@@ -22,8 +22,6 @@ const SignupByPhoneNumberScreen = () => {
   const [nation, setNation] = useState<Nation>({...PHONES[0]});
 
   const [phone, setPhone] = useState('');
-
-  // const {signInByPhoneNumber} = useAuth();
 
   useEffect(() => {
     const setup = async () => {

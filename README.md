@@ -4,7 +4,7 @@
 
 - This document will describe detailed tasks to be implemented in version 1.
 
-#### TIMELINE 4 weeks
+#### TIMELINE 3 months
 
 #### REQUIREMENT
 - Emergency alerts: The application should allow the user to send a distress signal or emergency alert to a pre-configured emergency contact or service with just one click.

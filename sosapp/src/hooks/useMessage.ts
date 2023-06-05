@@ -5,16 +5,13 @@ import {TMessage} from '@types';
 import {EMessage} from '@enums/EMessage';
 import {callAPI} from '@services/api';
 import {Route} from '@constants/api';
-import useAuth from './useAuth';
 import {Context} from '@context';
 
 const useMessage = (uid?: string) => {
   const [message, setMessage] = useState<TMessage>();
   const [loading, setLoading] = useState(false);
 
-  const {removeMessage} = useContext(Context);
-
-  const {currentUser} = useAuth();
+  const {removeMessage, currentUser} = useContext(Context);
 
   useEffect(() => {
     const fethMessage = async () => {

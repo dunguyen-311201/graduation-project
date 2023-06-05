@@ -14,11 +14,12 @@ export type TAddress = {
 };
 
 export interface TUser {
-  [EUser.first]: string;
-  [EUser.last]: string;
+  [EUser.first]?: string;
+  [EUser.last]?: string;
+  [EUser.displayName]?: string;
   [EUser.role]?: Roles;
   [EUser.uid]: string;
-  [EUser.email]?: string;
+  [EUser.email]?: string | null;
   [EUser.phoneNumber]?: string;
   [EUser.photoURL]?: string;
   [EUser.token]?: string | null;
@@ -28,4 +29,5 @@ export interface TUser {
   [EUser.isRescue]?: boolean;
   [EUser.address]?: TAddress;
   [EUser.name]?: string;
+  [EUser.citizenIdentification]?: string;
 }

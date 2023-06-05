@@ -1,17 +1,16 @@
 // import StorybookUIRoot from './.ondevice/Storybook';
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {RootNavigation} from './navigation';
 import {Context, ContextProps} from './context';
-import {useAuth} from './hooks';
+import auth from '@react-native-firebase/auth';
 
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
-
-  const {currentUser} = useAuth();
+  const [currentUser, setCurrentUser] = useState(auth().currentUser);
 
   const isAuth = useMemo(
     () => currentUser?.displayName !== undefined,
@@ -24,6 +23,7 @@ function App() {
     isAuthenticated,
     onAuthenticated: setIsAuthenticated,
     muids: messages,
+    currentUser,
     addMessage: (uid: string) => {
       setMessages(prev => {
         if (!prev.includes(uid)) {
@@ -41,6 +41,14 @@ function App() {
       });
     },
   };
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(user => {
+      setCurrentUser(user);
+    });
+
+    return subscriber;
+  }, []);
 
   return (
     <Context.Provider value={store}>

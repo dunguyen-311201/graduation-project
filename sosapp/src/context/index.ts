@@ -1,4 +1,5 @@
 import {createContext} from 'react';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 export type ContextProps = {
   onAuthenticated: (state: boolean) => void;
@@ -6,6 +7,7 @@ export type ContextProps = {
   muids: string[];
   addMessage: (uid: string) => void;
   removeMessage: (uid: string) => void;
+  currentUser: FirebaseAuthTypes.User | null;
 };
 
 export const Context = createContext<ContextProps>({
@@ -14,4 +16,5 @@ export const Context = createContext<ContextProps>({
   muids: [],
   addMessage: () => {},
   removeMessage: () => {},
+  currentUser: null,
 });

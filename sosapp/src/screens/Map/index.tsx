@@ -5,7 +5,7 @@ import MapView, {
 } from 'react-native-maps';
 import Config from 'react-native-config';
 import MapViewDirections from 'react-native-maps-directions';
-import React, {useEffect, useCallback, useState} from 'react';
+import React, {useEffect, useCallback, useState, useContext} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
 
@@ -20,7 +20,7 @@ import {
 } from '@theme';
 import {EScreen} from '@enums';
 import {Location} from '@types';
-import {useAuth, useNotifiCation} from '@hooks';
+import {useNotifiCation} from '@hooks';
 import {CustomMarker} from './components';
 import {CURRENT_LOCATION} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
@@ -31,6 +31,7 @@ import {
   requestLocationPermission,
 } from '@utils';
 import {BackIcon, CustomText, Notify, SearchInput} from '@components';
+import {Context} from '@context';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -51,7 +52,7 @@ const MapScreen = () => {
     navigate,
   });
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
 
   const {from, to} = useRoute<ConfirmRoute>().params || {};
 

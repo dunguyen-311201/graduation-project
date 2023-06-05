@@ -1,15 +1,15 @@
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import database, {FirebaseDatabaseTypes} from '@react-native-firebase/database';
 
 import {TMessage} from '@types';
-import useAuth from './useAuth';
+import {Context} from '@context';
 
 const useMessages = (type: number = 0) => {
   const [messages, setMessages] = useState<TMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
 
   useEffect(() => {
     const handleSubcribeData = async (

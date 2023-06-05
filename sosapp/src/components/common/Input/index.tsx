@@ -28,6 +28,7 @@ type CustomInputProps = {
   onEndEditing?: (feild: string) => void;
   customStyle?: ViewStyle;
   border?: boolean;
+  editable?: boolean;
   flex?: 'row' | 'column';
 };
 const CustomInput: React.ForwardRefRenderFunction<
@@ -48,6 +49,7 @@ const CustomInput: React.ForwardRefRenderFunction<
     onBlur,
     onFocus,
     onEndEditing,
+    editable,
     customStyle,
     border,
     flex = 'column',
@@ -92,11 +94,12 @@ const CustomInput: React.ForwardRefRenderFunction<
       <TextInput
         value={value}
         ref={ref}
+        editable={editable}
         style={[
           styles.input,
-          valueStyle,
           {...(flex === 'column' && styles.column)},
           {...(border && styles.border)},
+          valueStyle,
         ]}
         onChangeText={_onChangeText}
         onBlur={_onBlur}

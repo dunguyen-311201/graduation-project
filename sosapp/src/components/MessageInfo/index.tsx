@@ -1,12 +1,13 @@
 import {Pressable, StyleSheet, View} from 'react-native';
-import React, {useCallback, memo, useEffect, useState} from 'react';
+import React, {useCallback, memo, useEffect, useState, useContext} from 'react';
 
 import {WHITE_COLOR} from '@theme';
 import {Location, TMessage} from '@types';
 import {CustomButton, CustomText} from '../common';
-import {useAuth, useMessage, useUser} from '@hooks';
+import {useMessage, useUser} from '@hooks';
 import {EMessage} from '@enums';
 import {ERROR_CODE} from '@constants/api';
+import {Context} from '@context';
 
 const MessageInfo = ({
   data,
@@ -23,8 +24,7 @@ const MessageInfo = ({
 
   const [isVisible, setIsVisible] = useState(false);
 
-  const {currentUser} = useAuth();
-
+  const {currentUser} = useContext(Context);
   const {user} = useUser(data.serviceId);
 
   useEffect(() => {

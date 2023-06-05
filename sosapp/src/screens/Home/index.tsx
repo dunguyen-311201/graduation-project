@@ -1,13 +1,8 @@
 import {useNavigation} from '@react-navigation/native';
 import {View, Image, StyleSheet} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
-import {
-  getUserByID,
-  handleOffLocation,
-  handleOnLocation,
-  requestLocationPermission,
-} from '@utils';
+import {getUserByID, requestLocationPermission} from '@utils';
 import {
   ScreenBase,
   Card,
@@ -18,22 +13,26 @@ import {
   Notify,
 } from '@components';
 import {EScreen} from '@enums';
-import {useAuth, useNotifiCation} from '@hooks';
+import {useNotifiCation} from '@hooks';
 import {MenuButton} from './components';
 import {RootScreenNavigationProps} from '@navigation';
 import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
+import {Context} from '@context';
+import UpgradeForm from './components/UpgradeForm';
 
 const HomeScreen = () => {
   const {navigate, openDrawer, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
 
   const {message, handleQuit, handleOk, body} = useNotifiCation({
     navigate,
   });
 
   const [onLocation, setOnLocation] = useState(false);
+
+  const [isVisible, setVisible] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -59,18 +58,11 @@ const HomeScreen = () => {
     setup();
   }, []);
 
-  const handleLocation = useCallback(async () => {
-    setLoading(true);
-    if (onLocation) {
-      await handleOffLocation();
-      setOnLocation(false);
-      setLoading(false);
-      return;
-    }
-    await handleOnLocation();
-    setOnLocation(true);
-    setLoading(false);
-  }, [onLocation]);
+  let {displayName, uid, email, phoneNumber} = currentUser || {};
+
+  const handleUpgrade = useCallback(() => {
+    setVisible(true);
+  }, []);
 
   const handleMap = useCallback(async () => {
     navigate(EScreen.MAP, {});
@@ -80,9 +72,19 @@ const HomeScreen = () => {
     navigate(EScreen.SEND_DISTRESS_SIGNAL);
   }, []);
 
+  const handleCloseModal = useCallback(() => {
+    setVisible(false);
+  }, []);
+
   return (
     <>
       {loading && <Loading />}
+      {displayName && uid && phoneNumber && isVisible && (
+        <UpgradeForm
+          user={{displayName, uid, email, phoneNumber}}
+          handleClose={handleCloseModal}
+        />
+      )}
 
       {/* Handle Show Notifications */}
 
@@ -108,9 +110,9 @@ const HomeScreen = () => {
             customStyle={styles.title}
           />
           <CustomButton
-            label={`Turn ${onLocation ? 'off' : 'on'} Rescue`}
+            label={onLocation ? 'Upgrade' : 'Dropdown'}
             type="outline"
-            onPress={handleLocation}
+            onPress={handleUpgrade}
           />
         </View>
         <View style={styles.options}>

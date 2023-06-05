@@ -1,6 +1,12 @@
-import {StyleSheet, View, Keyboard} from 'react-native';
+import {StyleSheet, View, TextInput, Keyboard} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {callAPI} from '@services';
 import {EScreen} from '@enums';
@@ -16,10 +22,8 @@ import {
   Error,
   ScreenBase,
 } from '@components';
-import {CURRENT_LOCATION} from '@constants/cache';
-import {ERROR_CODE, Route} from '@constants';
-import useAuth from '@hooks/useAuth';
-import {TextInput} from 'react-native';
+import {ERROR_CODE, CURRENT_LOCATION, Route} from '@constants';
+import {Context} from '@context';
 
 const types = [
   'Rescue request',
@@ -33,7 +37,7 @@ const SendDistreeSignal = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
   const [error, setError] = useState(null);
 
   const textreaeRef = useRef<TextInput>(null);

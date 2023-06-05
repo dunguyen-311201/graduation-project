@@ -1,27 +1,44 @@
-import {useEffect, useState} from 'react';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
+import firebase from '@react-native-firebase/firestore';
+import {TUser} from '@types';
+import {useCallback} from 'react';
 
 const useAuth = () => {
-  const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
-    auth().currentUser,
-  );
+  // const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
+  //   auth().currentUser,
+  // );
 
-  useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(user => {
-      setCurrentUser(user);
-    });
+  // useEffect(() => {
+  //   const subscriber = auth().onAuthStateChanged(user => {
+  //     setCurrentUser(user);
+  //   });
 
-    return subscriber;
-  }, []);
+  //   return subscriber;
+  // }, []);
 
   const updateProfile = async (name: string) => {
     await auth().currentUser?.updateProfile({displayName: name});
-    setCurrentUser(auth().currentUser);
   };
 
   const signOut = async () => {
     await auth().signOut();
   };
+
+  const upgrade = useCallback(async (user: TUser) => {
+    const {email, phoneNumber, uid, citizenIdentification} = user;
+    if (email) {
+      await auth().currentUser?.updateEmail(email);
+      await firebase()
+        .doc('users/' + uid)
+        .update({citizenIdentification, email});
+    } else if (phoneNumber) {
+      // const snapshot = await auth().verifyPhoneNumber(phoneNumber);
+      // const credential = auth.PhoneAuthProvider.credential(
+      //   snapshot.verificationId,
+      //   snapshot.code,
+      // );
+    }
+  }, []);
 
   const signInByPhoneNumber = async (phoneNumber: string) => {
     return await auth().signInWithPhoneNumber(phoneNumber);
@@ -40,11 +57,11 @@ const useAuth = () => {
   };
 
   return {
-    currentUser,
     updateProfile,
     signOut,
     signInByPhoneNumber,
     verification,
+    upgrade,
   };
 };
 

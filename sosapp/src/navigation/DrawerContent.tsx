@@ -10,12 +10,10 @@ import {Context} from '@context';
 import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
 import {handleLogout} from '@utils';
 import {CustomButton, CustomText} from '@components';
-import {EScreen} from '@enums/EScreen';
-import useAuth from '@hooks/useAuth';
+import {EScreen} from '@enums';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {onAuthenticated} = useContext(Context);
-  const {currentUser} = useAuth();
+  const {onAuthenticated, currentUser} = useContext(Context);
 
   const [icon, displayName] = useMemo(() => {
     let _icon = ProfileIcon,

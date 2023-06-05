@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 import {RouteProp, useRoute, useNavigation} from '@react-navigation/native';
 
 import {
@@ -11,9 +11,10 @@ import {
   UserInfo,
 } from '@components';
 import {EScreen} from '@enums';
-import {useAuth, useMessage, useUser} from '@hooks';
+import {useMessage, useUser} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
+import {Context} from '@context';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.DETAIL_MESSAGE>;
 
@@ -26,7 +27,7 @@ const DetailMessage = () => {
 
   const {uid} = useRoute<ConfirmRoute>().params || {};
 
-  const {currentUser} = useAuth();
+  const {currentUser} = useContext(Context);
 
   const {message} = useMessage(uid);
   const user = useUser(message?.userId);

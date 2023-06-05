@@ -1,12 +1,18 @@
 import {useNavigation} from '@react-navigation/native';
 import {StyleSheet, View, TextInput} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {EScreen, EUser} from '@enums';
 import {signupInfo} from '@utils';
 import {RootScreenNavigationProps} from '@navigation';
 import {CustomInput, Loading, ScreenBase} from '@components';
-import {useAuth} from '@hooks';
+import {Context} from '@context';
 
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
@@ -15,7 +21,7 @@ const SetupInfoScreen = () => {
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
 
-  const {currentUser, updateProfile} = useAuth();
+  const {currentUser} = useContext(Context);
 
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +41,9 @@ const SetupInfoScreen = () => {
     if (currentUser) {
       try {
         if (firstName !== '' && lastName !== '') {
-          await updateProfile(`${firstName} ${lastName}`);
+          await currentUser?.updateProfile({
+            displayName: `${firstName} ${lastName}`,
+          });
 
           await signupInfo({
             firstName,
@@ -49,7 +57,7 @@ const SetupInfoScreen = () => {
       } catch (error) {}
     }
     setLoading(false);
-  }, [currentUser, firstName, lastName, navigate, updateProfile]);
+  }, [currentUser, firstName, lastName, navigate]);
 
   const handleEndEditing = useCallback(
     (field: string) => {

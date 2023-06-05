@@ -14,7 +14,6 @@ import {
   WHITE_COLOR,
 } from '@theme';
 import {SettingsScreen, HomeScreen} from '@screens';
-import TabBottomNavigation from './TabBottomNavigation';
 
 const Drawer = createDrawerNavigator();
 

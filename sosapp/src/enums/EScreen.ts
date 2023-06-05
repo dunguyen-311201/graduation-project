@@ -7,7 +7,7 @@ export enum EScreen {
   SIGNUP_BY_PHONE_NUMBER = 'signuSp-by-phone-number-screen',
   SIGNUP_BY_SOCIAL = 'signup-by-social-screen',
   MAP = 'map-screen',
-  SETTINGS = 'settings-screen',
+  SETTINGS = 'setting-screen',
   MESSAGES = 'messages-screen',
   SEND_DISTRESS_SIGNAL = 'send-distress-signal-screen',
   DRAWER = 'drawer-screen',
