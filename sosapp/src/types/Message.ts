@@ -1,13 +1,18 @@
 import {Location} from './Location';
 
+export type TStatus = 'pending' | 'in progress' | 'completed' | 'expired';
+
 export type TMessage = {
   description: string;
   type: string;
-  status?: string;
-  uid?: string;
-  userId: string;
-  location?: Location | null;
+  status: TStatus;
+  id: string;
+  userID: string;
+  location: Location | null;
   onView?: () => void;
   onQuit?: () => void;
-  serviceId?: string;
+  workerID?: string;
+  startAt?: number;
+  endAt?: number;
+  time: number;
 };

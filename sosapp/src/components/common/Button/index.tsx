@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ViewStyle,
   ImageSourcePropType,
+  ActivityIndicator,
+  View,
 } from 'react-native';
 import React, {memo} from 'react';
 
@@ -12,7 +14,7 @@ import {EButton} from '@enums';
 import Shadow from '../../Shadow';
 import {Styles as st} from '@utils';
 import CustomText from '../Text';
-import {DARK_BLUE_COLOR} from '@theme/color';
+import {GRAY_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 
 type ButtonProps = {
   label?: string;
@@ -25,6 +27,8 @@ type ButtonProps = {
   onPress?: () => void;
   disabled?: boolean;
   iconSize?: {height: number; width: number};
+  isLoading?: boolean;
+  reverse?: boolean;
 };
 
 const CustomButton = ({
@@ -36,24 +40,19 @@ const CustomButton = ({
   onPress,
   children,
   disabled,
+  reverse,
+  isLoading = false,
 }: ButtonProps) => {
-  const textSize =
-    type === 'notify'
-      ? 'text_medium_14'
-      : type === 'outline'
-      ? 'text_large_20'
-      : 'text_xLarge';
-
   if (type === 'primary') {
     return (
-      <TouchableOpacity
-        onPress={onPress}
-        style={[styles[EButton[type]], customStyle]}>
-        <Shadow customStyle={styles.shadow} paddingVertical={16}>
+      <Shadow customStyle={styles.shadow} paddingVertical={16}>
+        <TouchableOpacity
+          onPress={onPress}
+          style={[styles[EButton[type]], customStyle]}>
           <CustomText text={label} type="text_xLarge" />
-          {icon && <Image source={icon} style={[styles.icon, iconSize]} />}
-        </Shadow>
-      </TouchableOpacity>
+          {icon && <Image source={icon} style={[iconSize]} />}
+        </TouchableOpacity>
+      </Shadow>
     );
   }
 
@@ -62,13 +61,42 @@ const CustomButton = ({
       disabled={disabled}
       onPress={onPress}
       style={[
+        customStyle,
         styles[EButton[type]],
         {...(disabled && {opacity: 0.5})},
-        customStyle,
+        {...(reverse && {flexDirection: 'row-reverse', columnGap: 20})},
       ]}>
       {children}
-      {label && <CustomText text={label} type={textSize} />}
-      {icon && <Image source={icon} style={[iconSize]} />}
+      {label && (
+        <CustomText
+          text={label}
+          type={
+            type === 'notify'
+              ? 'text_medium_14'
+              : type === 'outline'
+              ? 'text_large_20'
+              : type === 'secondary'
+              ? 'text_medium_20'
+              : 'text_xLarge'
+          }
+          color={type === 'secondary' ? 'blue' : 'white'}
+        />
+      )}
+      {icon && (
+        <View
+          style={{
+            ...(reverse && styles.reverse),
+          }}>
+          <Image source={icon} />
+        </View>
+      )}
+      {isLoading && (
+        <ActivityIndicator
+          size="large"
+          color={LIGHT_BLUE_COLOR}
+          style={styles.loading}
+        />
+      )}
     </TouchableOpacity>
   );
 };
@@ -81,9 +109,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
   },
-  icon: {marginLeft: 30},
   [EButton.default]: {
     backgroundColor: '#000000',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
     paddingVertical: 16,
     textAlign: 'center',
@@ -103,9 +133,9 @@ const styles = StyleSheet.create({
   [EButton.notify]: {
     opacity: 0.9,
     borderRadius: 17,
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingHorizontal: 20,
-    backgroundColor: DARK_BLUE_COLOR,
+    backgroundColor: '#00BFFF',
     alignSelf: 'flex-start',
   },
   [EButton.primary]: {
@@ -113,16 +143,25 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     alignItems: 'center',
     justifyContent: 'center',
+    columnGap: 5,
   },
   [EButton.secondary]: {
-    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    // width: '100%',
+    columnGap: 20,
   },
   center: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loading: {
+    marginLeft: 20,
+  },
+  reverse: {
+    backgroundColor: GRAY_COLOR,
+    alignContent: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 50,
   },
 });

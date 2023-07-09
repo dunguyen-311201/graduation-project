@@ -1,5 +1,5 @@
 import {FlatList, StyleSheet, View, Pressable} from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {memo, useCallback, useState} from 'react';
 import CustomText from '../Text';
 import {BLACK_COLOR, WHITE_COLOR} from '@theme';
 
@@ -10,6 +10,7 @@ type DropDownProps = {
   field: string;
   zIndex?: number;
   title: string;
+  disabled?: boolean;
 };
 
 const DropDown = ({
@@ -18,6 +19,7 @@ const DropDown = ({
   onSelect,
   field,
   zIndex,
+  disabled,
   title,
 }: DropDownProps) => {
   const [isVisiable, setIsVisiable] = useState<boolean>(false);
@@ -41,7 +43,7 @@ const DropDown = ({
       };
 
       return (
-        <Pressable onPress={handlePress}>
+        <Pressable onPress={handlePress} disabled={disabled}>
           <CustomText
             text={item}
             type="text_medium_20"
@@ -64,7 +66,10 @@ const DropDown = ({
         }}>
         <CustomText text={title} type="text_medium_16" />
         <View style={styles.control}>
-          <Pressable onPress={handleDropdown} style={styles.dropDownItem}>
+          <Pressable
+            onPress={handleDropdown}
+            disabled={disabled}
+            style={styles.dropDownItem}>
             <CustomText text={initValue || data[0]} />
           </Pressable>
 
@@ -82,7 +87,7 @@ const DropDown = ({
   );
 };
 
-export default DropDown;
+export default memo(DropDown);
 
 const styles = StyleSheet.create({
   dropDown: {

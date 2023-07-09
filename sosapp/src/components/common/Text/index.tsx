@@ -45,9 +45,7 @@ const CustomText = ({
 export default memo(CustomText);
 
 const _styles = StyleSheet.create({
-  text: {
-    minHeight: 20,
-  },
+  text: {},
   border: {
     borderColor: WHITE_COLOR,
     borderWidth: 1,

@@ -1,123 +1,226 @@
-import {StyleSheet, View} from 'react-native';
-import React, {useCallback, useContext, useEffect} from 'react';
-import {RouteProp, useRoute, useNavigation} from '@react-navigation/native';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import {Alert, StyleSheet, View} from 'react-native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {
+  ActiveIcon,
   CustomButton,
-  CustomText,
   DropDown,
+  DropDown2,
+  ExpiredIcon,
+  InProgressIcon,
+  PendingIcon,
   ScreenBase,
   Textreae,
   UserInfo,
 } from '@components';
-import {EScreen} from '@enums';
-import {useMessage, useUser} from '@hooks';
-import {RootScreenNavigationProps} from '@navigation';
-import {RootParamList} from '@navigation/RootNavigation';
 import {Context} from '@context';
+import {EMessage, ERole, EScreen} from '@enums';
+import {requestLocationPermission} from '@utils';
+import {RootScreenNavigationProps} from '@navigation';
+import {useMessage, useUsers, useWorker} from '@hooks';
+import {RootParamList} from '@navigation/RootNavigation';
+import {MESSAGE_IN_PROGRESS, MESSAGE_PENDING, types} from '@constants';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.DETAIL_MESSAGE>;
 
-const status = ['Pending', 'In Progress', 'Complete'];
-const types = ['Traffic accident', 'Vehicle breakdown'];
-
 const DetailMessage = () => {
-  const {setOptions, navigate} =
+  const {navigate, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.DETAIL_MESSAGE>>();
 
-  const {uid} = useRoute<ConfirmRoute>().params || {};
+  const {id, onReject, onDelete} = useRoute<ConfirmRoute>().params || {};
 
   const {currentUser} = useContext(Context);
 
-  const {message} = useMessage(uid);
-  const user = useUser(message?.userId);
+  const {message, onComfirm, onComplete, onAssign, loading} = useMessage(id);
 
-  const service = useUser(message?.serviceId);
+  const [workerID, setWorkerID] = useState<string>();
+
+  const {workers} = useWorker(true);
+
+  const {user} = useUsers(message?.workerID);
+
+  const workerDropdown = useMemo(
+    () =>
+      workers.map(worker => ({
+        id: worker.id,
+        value: worker.displayName,
+      })),
+    [workers],
+  );
+
+  currentUser?.role === ERole.WORKER
+    ? requestLocationPermission(1)
+    : requestLocationPermission();
 
   useEffect(() => {
-    setOptions({title: 'Detail Message'});
-  }, [setOptions]);
-
-  const handleSettingProfile = useCallback(() => {
-    navigate(EScreen.SETTINGS);
-  }, []);
+    if (message?.status) {
+      let Icon: any;
+      if (message.status === EMessage.MESSAGE_PENDING) {
+        Icon = <PendingIcon />;
+      } else if (message.status === EMessage.MESSAGE_IN_PROGRESS) {
+        Icon = <InProgressIcon />;
+      } else if (message.status === EMessage.MESSAGE_COMPLETED) {
+        Icon = <ActiveIcon />;
+      } else {
+        Icon = <ExpiredIcon />;
+      }
+      setOptions({
+        headerRight: () => Icon,
+        headerRightContainerStyle: styles.headerRight,
+      });
+    }
+  }, [message?.status]);
 
   const handleMap = useCallback(() => {
-    if (currentUser?.uid === message?.userId) {
-      if (service?.user?.location) {
-        navigate(EScreen.MAP, {
-          to: service?.user?.location,
-        });
+    if (message?.location) {
+      if (currentUser?.role === ERole.USER && user?.location) {
+        navigate(EScreen.MAP, {to: user.location});
+
         return;
       }
-      navigate(EScreen.MAP);
-      return;
+      navigate(EScreen.MAP, {to: message?.location});
     }
-    navigate(EScreen.MAP, {
-      to: message?.location,
-    });
-  }, [message, service?.user]);
+  }, [message?.location, user?.location]);
 
-  const handleNext = useCallback(() => {
-    navigate(EScreen.HOME);
+  const handleDelete = useCallback(async () => {
+    message && onDelete && (await onDelete(message.id));
+    navigate(EScreen.MESSAGES);
+  }, [message]);
+
+  const handleSelect = useCallback((_workerID: string) => {
+    setWorkerID(_workerID);
   }, []);
+
+  const handleReject = useCallback(async () => {
+    onReject && (await onReject());
+    navigate(EScreen.DRAWER);
+  }, [onReject]);
+
+  const handleAssign = useCallback(async () => {
+    if (workerID) {
+      await onAssign(workerID);
+      navigate(EScreen.DRAWER);
+    } else {
+      Alert.alert('Select Worker', 'Please select a worker to assign!', [
+        {
+          onPress: () => {},
+          text: 'OK',
+        },
+      ]);
+    }
+  }, [workerID]);
+
+  const isDelete = useMemo(
+    () => message?.status === MESSAGE_PENDING || message?.status === 'expired',
+    [message],
+  );
 
   return (
     <ScreenBase
-      {...(currentUser?.uid === user.user?.uid && {onNext: handleNext})}>
+      padding={20}
+      loading={loading}
+      {...(isDelete && {
+        ...(currentUser?.role === ERole.CENTER
+          ? {
+              onNext: handleAssign,
+              nextTitle: 'Assign',
+              disableNext: !workerID,
+            }
+          : currentUser?.role === ERole.USER
+          ? {
+              onNext: handleDelete,
+              nextTitle: 'Remove',
+              disableNext: !isDelete,
+            }
+          : {}),
+      })}>
       <View style={styles.content}>
-        <View style={styles.row}>
-          {user.user && (
+        <View>
+          <View style={styles.row}>
             <UserInfo
-              user={user.user}
-              onLongPress={handleSettingProfile}
-              disabled={currentUser?.uid !== user.user.uid}
+              id={message?.userID}
+              onLongPress={() => {}}
+              customStyle={styles.item}
             />
-          )}
-          {service.user && (
-            <UserInfo
-              user={service.user}
-              marginLeft={10}
-              disabled={currentUser?.uid !== service.user.uid}
-            />
-          )}
+
+            <UserInfo id={message?.workerID} customStyle={styles.item} />
+          </View>
         </View>
 
         <DropDown
-          data={status}
-          field="status"
-          title="Status"
-          onSelect={() => {}}
-          initValue={message?.status || 'spending'}
-          zIndex={2}
-        />
-        <DropDown
           data={types}
+          initValue={message?.type}
+          onSelect={() => {}}
           field="type"
           title="Type"
-          onSelect={() => {}}
-          initValue={message?.type}
           zIndex={1}
+          disabled={true}
         />
 
         <Textreae
           title="Description"
           field="description"
-          onChangeText={() => {}}
+          onChangeText={handleMap}
           value={message?.description}
+          editable={currentUser?.role !== 'user'}
         />
 
-        <View style={styles.row}>
-          <CustomButton
-            type="secondary"
-            onPress={handleMap}
-            customStyle={styles.seeMapButton}>
-            <CustomText
-              text="See location on Map"
-              type="text_medium_18"
-              color="blue"
+        <CustomButton
+          type="secondary"
+          onPress={handleMap}
+          customStyle={styles.seeMapButton}
+          label="See location on Map"
+        />
+
+        {currentUser?.role === ERole.CENTER &&
+          message?.status === MESSAGE_PENDING && (
+            <DropDown2
+              data={workerDropdown}
+              value={workerID}
+              onSelect={handleSelect}
             />
-          </CustomButton>
+          )}
+
+        <View style={styles.options}>
+          {currentUser?.role === ERole.WORKER && (
+            <>
+              {message?.status === MESSAGE_PENDING && (
+                <>
+                  <CustomButton
+                    onPress={onComfirm}
+                    customStyle={styles.seeMapButton}
+                    label="Comfirm"
+                  />
+                  {onReject && (
+                    <CustomButton
+                      onPress={handleReject}
+                      customStyle={styles.seeMapButton}
+                      label="Reject"
+                    />
+                  )}
+                </>
+              )}
+            </>
+          )}
+
+          {currentUser?.role !== ERole.CENTER && (
+            <>
+              {message?.status === MESSAGE_IN_PROGRESS && (
+                <CustomButton
+                  onPress={onComplete}
+                  customStyle={styles.seeMapButton}
+                  label="Complete"
+                />
+              )}
+            </>
+          )}
         </View>
       </View>
     </ScreenBase>
@@ -133,9 +236,19 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    paddingVertical: 10,
+    columnGap: 10,
   },
   seeMapButton: {
     marginTop: 10,
+  },
+  options: {
+    marginTop: 10,
+  },
+  item: {
+    backgroundColor: 'yellow',
+    flex: 1,
+  },
+  headerRight: {
+    paddingRight: 20,
   },
 });

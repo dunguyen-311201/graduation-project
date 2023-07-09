@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import {StyleSheet, View, TextInput} from 'react-native';
+import {CustomInput, CustomSwitch, ScreenBase} from '@components';
+import {EScreen, EUser} from '@enums';
 import React, {
   useCallback,
   useContext,
@@ -7,26 +7,41 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import {StyleSheet, TextInput, View} from 'react-native';
 
-import {EScreen, EUser} from '@enums';
-import {signupInfo} from '@utils';
-import {RootScreenNavigationProps} from '@navigation';
-import {CustomInput, Loading, ScreenBase} from '@components';
 import {Context} from '@context';
+import {RootScreenNavigationProps} from '@navigation';
+import {
+  getAsyncStorage,
+  setAsyncStorage,
+  requestLocationPermission,
+} from '@utils';
+import {useNavigation} from '@react-navigation/native';
+import {Location, TRole} from '@types';
+import {CURRENT_LOCATION, USER_CACHE} from '@constants';
 
+type FormData = {
+  [EUser.displayName]?: string;
+  [EUser.role]?: TRole;
+  [EUser.citizenIdentification]?: string;
+  [EUser.location]?: Location;
+  [EUser.first]?: string;
+  [EUser.last]?: string;
+};
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
 
   const inputFirstRef = useRef<TextInput>(null);
   const inputLastRef = useRef<TextInput>(null);
+  const inputcitizenRef = useRef<TextInput>(null);
+
+  const [data, setData] = useState<FormData>();
+  const [isCenter, setIsCenter] = useState(false);
 
   const {currentUser} = useContext(Context);
 
   const [loading, setLoading] = useState(false);
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     setOptions({headerShown: true});
@@ -36,78 +51,111 @@ const SetupInfoScreen = () => {
     }
   }, [setOptions, currentUser]);
 
+  useEffect(() => {
+    const setup = async () => {
+      await requestLocationPermission();
+      const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      cache && setData(prev => ({...prev, location: cache}));
+    };
+
+    isCenter && setup();
+  }, [isCenter]);
+
   const handleNext = useCallback(async () => {
-    setLoading(true);
-    if (currentUser) {
-      try {
-        if (firstName !== '' && lastName !== '') {
-          await currentUser?.updateProfile({
-            displayName: `${firstName} ${lastName}`,
-          });
+    try {
+      setLoading(true);
+      let {firstName, lastName, ...db} = data || {};
 
-          await signupInfo({
-            firstName,
-            lastName,
-            lastLogin: Date.now(),
-            uid: currentUser.uid,
-            phoneNumber: currentUser.phoneNumber || '',
-          });
-          navigate(EScreen.CONFIRM_POLICY);
-        }
-      } catch (error) {}
-    }
-    setLoading(false);
-  }, [currentUser, firstName, lastName, navigate]);
+      let newCache = {
+        ...db,
+        displayName: `${firstName} ${lastName}`,
+      };
 
-  const handleEndEditing = useCallback(
-    (field: string) => {
-      if (field === EUser.first) {
-        inputLastRef?.current?.focus();
-        return;
+      if (isCenter) {
+        newCache = {...newCache, role: 'center'};
       }
-      handleNext();
-    },
-    [handleNext],
-  );
+      const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      if (cache) {
+        newCache = {...newCache, location: cache};
+      }
+
+      firstName && lastName && (await setAsyncStorage(USER_CACHE, newCache));
+
+      navigate(EScreen.CONFIRM_POLICY);
+    } catch (_error) {}
+    setLoading(false);
+  }, [data, isCenter]);
+
+  const handleChangeSwitch = useCallback(() => {
+    setIsCenter(prev => !prev);
+  }, []);
+
+  const handleChangeInput = useCallback((value: string, field: string) => {
+    setData(prev => ({...prev, [field]: value}));
+  }, []);
+
+  const handleEndEditing = useCallback((field: string) => {
+    if (field === EUser.first) {
+      inputLastRef?.current?.focus();
+      return;
+    }
+  }, []);
 
   return (
-    <>
-      {loading && <Loading />}
-      <ScreenBase desc="What's your name?" onNext={handleNext}>
-        <View style={styles.group}>
+    <ScreenBase
+      title="Setup Infomation"
+      onNext={handleNext}
+      loading={loading}
+      disableNext={false}>
+      <View style={styles.content}>
+        <CustomInput
+          field={EUser.first}
+          value={data?.firstName || ''}
+          onChangeText={handleChangeInput}
+          title="First Name"
+          ref={inputFirstRef}
+          border
+          onEndEditing={handleEndEditing}
+        />
+        <CustomInput
+          field={EUser.last}
+          value={data?.lastName || ''}
+          onChangeText={handleChangeInput}
+          ref={inputLastRef}
+          title="Last Name"
+          onEndEditing={handleEndEditing}
+          border
+        />
+
+        <CustomSwitch
+          title="I am Center Rescue"
+          value={isCenter}
+          onChange={handleChangeSwitch}
+        />
+
+        {isCenter && (
           <CustomInput
-            field={EUser.first}
-            value={firstName}
-            onChangeText={setFirstName}
-            title="First"
-            ref={inputFirstRef}
-            customStyle={styles.input}
+            field={EUser.citizenIdentification}
+            value={data?.citizenIdentification || ''}
+            onChangeText={handleChangeInput}
+            title="CitizenIdentification"
+            inputMode="numeric"
+            ref={inputcitizenRef}
             onEndEditing={handleEndEditing}
+            border
           />
-          <CustomInput
-            field={EUser.last}
-            value={lastName}
-            onChangeText={setLastName}
-            ref={inputLastRef}
-            title="Last"
-            onEndEditing={handleEndEditing}
-            customStyle={styles.input}
-          />
-        </View>
-      </ScreenBase>
-    </>
+        )}
+      </View>
+    </ScreenBase>
   );
 };
 
 export default SetupInfoScreen;
 
 const styles = StyleSheet.create({
-  group: {
-    flexDirection: 'row',
+  content: {
     justifyContent: 'space-between',
     marginTop: 20,
-  },
-  input: {
-    width: '45%',
+    rowGap: 16,
   },
 });

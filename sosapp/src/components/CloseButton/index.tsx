@@ -1,7 +1,7 @@
-import {StyleSheet, Pressable, Image} from 'react-native';
 import React from 'react';
+import {StyleSheet, Pressable, Image} from 'react-native';
 
-import {CloseIcon, DARK_GRAY_COLOR} from '@theme';
+import {CloseIcon, GRAY_COLOR} from '@theme';
 
 type CloseButtonProps = {
   top?: number;
@@ -24,20 +24,16 @@ export default CloseButton;
 
 const styles = StyleSheet.create({
   closeButton: {
-    position: 'absolute',
-    zIndex: 3,
-    right: 0,
-    top: 0,
-    backgroundColor: DARK_GRAY_COLOR,
+    backgroundColor: GRAY_COLOR,
     opacity: 0.8,
-    width: 25,
-    height: 25,
-    borderRadius: 12.5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   closeicon: {
-    width: 10,
-    height: 10,
+    width: 12,
+    height: 12,
   },
 });

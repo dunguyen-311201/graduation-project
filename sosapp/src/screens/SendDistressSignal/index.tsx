@@ -1,41 +1,44 @@
-import {StyleSheet, View, TextInput, Keyboard} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import React, {
+  memo,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
+import {useNavigation, RouteProp, useRoute} from '@react-navigation/native';
+import firebase from '@react-native-firebase/firestore';
+import {StyleSheet, TextInput, View} from 'react-native';
 
-import {callAPI} from '@services';
-import {EScreen} from '@enums';
-import {Location, TMessage} from '@types';
-import {RootScreenNavigationProps} from '@navigation';
-import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {
-  DropDown,
-  Textreae,
-  Loading,
-  SearchInput,
   CustomText,
+  DropDown,
   Error,
   ScreenBase,
+  SearchInput,
+  Textreae,
 } from '@components';
-import {ERROR_CODE, CURRENT_LOCATION, Route} from '@constants';
+import {EScreen} from '@enums';
+import {Location} from '@types';
 import {Context} from '@context';
+import {getAsyncStorage, requestLocationPermission} from '@utils';
+import {CURRENT_LOCATION, MESSAGE_PENDING, types} from '@constants';
+import {RootScreenNavigationProps} from '@navigation';
+import {RootParamList} from '@navigation/RootNavigation';
 
-const types = [
-  'Rescue request',
-  'Traffic incident report',
-  'Road issue report',
-  'Replacement vehicle request',
-  'Emergency support request',
-];
+type FormData = {
+  description?: string;
+  type?: string;
+  location: Location | null;
+};
+
+type ConfirmRoute = RouteProp<RootParamList, EScreen.SEND_DISTRESS_SIGNAL>;
 
 const SendDistreeSignal = () => {
-  const {setOptions, navigate} =
+  const {reset} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
+
+  const {onNew} = useRoute<ConfirmRoute>().params || {};
 
   const {currentUser} = useContext(Context);
   const [error, setError] = useState(null);
@@ -43,54 +46,46 @@ const SendDistreeSignal = () => {
   const textreaeRef = useRef<TextInput>(null);
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<TMessage>({
+  const [message, setMessage] = useState<FormData>({
     description: '',
     type: types[0],
-    userId: currentUser?.uid,
+    location: null,
   });
 
-  requestLocationPermission();
-
-  useEffect(() => {
-    setOptions({
-      title: 'Send A Distress Signal',
-    });
-  }, []);
+  requestLocationPermission(0);
 
   useEffect(() => {
     const setup = async () => {
-      if (currentUser) {
-        setLoading(true);
-
-        let cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
-
-        if (cacheLocation) {
-          setMessage(prev => ({...prev, location: cacheLocation}));
-        }
-        setLoading(false);
+      const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      if (cache) {
+        setMessage(prev => ({...prev, location: cache}));
       }
     };
 
     setup();
-  }, [currentUser]);
+  }, []);
 
   const sendSignal = useCallback(async () => {
-    setLoading(true);
+    if (currentUser) {
+      setLoading(true);
 
-    const {data, status} = await callAPI({
-      route: Route.MESSAGE,
-      method: 'POST',
-      data: message,
-    });
+      try {
+        const mess = {
+          ...message,
+          status: MESSAGE_PENDING,
+          time: Date.now(),
+          userID: currentUser.id,
+        };
 
-    if (status !== ERROR_CODE && data?.uid) {
-      navigate(EScreen.DETAIL_MESSAGE, {uid: data.uid});
-    } else {
-      setError(data);
+        reset({routes: [{name: EScreen.MESSAGES}], index: 0});
+        onNew && (await onNew(mess));
+      } catch (_error: any) {
+        setError(_error);
+      }
+
+      setLoading(false);
     }
-
-    setLoading(false);
-  }, [message, navigate]);
+  }, [message, currentUser]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -102,52 +97,43 @@ const SendDistreeSignal = () => {
     setMessage(prev => ({...prev, location: _location}));
   }, []);
 
-  const handleTouchOutside = useCallback(() => {
-    if (textreaeRef?.current) {
-      Keyboard.dismiss();
-    }
-  }, []);
-
   return (
-    <>
-      {loading && <Loading />}
-      <ScreenBase
-        onTouchOutside={handleTouchOutside}
-        onNext={sendSignal}
-        title="You have to connect to the support service">
-        <View style={styles.mapField}>
-          <CustomText text="Location" type="text_medium_16" />
-          <SearchInput
-            origin={message?.location}
-            onSearch={handleSearch}
-            placeholder="Location"
-            field="location"
-            isDirection={true}
-            zIndex={4}
-            customStyle={styles.search}
-          />
-        </View>
-        <DropDown
-          data={types}
-          initValue={message?.type}
-          onSelect={handleChangeText}
-          field="type"
-          title="Type"
+    <ScreenBase
+      loading={loading}
+      onNext={sendSignal}
+      title="You have to connect to the support service">
+      <View style={styles.mapField}>
+        <CustomText text="Location" type="text_medium_16" />
+        <SearchInput
+          region={message?.location}
+          onSearch={handleSearch}
+          placeholder="Location"
+          field="location"
+          isDirection={true}
+          zIndex={4}
+          customStyle={styles.search}
         />
-        <Textreae
-          ref={textreaeRef}
-          title="Description"
-          value={message?.description}
-          field="description"
-          onChangeText={handleChangeText}
-        />
-        {error && <Error message="Please check request!" />}
-      </ScreenBase>
-    </>
+      </View>
+      <DropDown
+        data={types}
+        initValue={message?.type}
+        onSelect={handleChangeText}
+        field="type"
+        title="Type"
+      />
+      <Textreae
+        ref={textreaeRef}
+        title="Description"
+        value={message?.description}
+        field="description"
+        onChangeText={handleChangeText}
+      />
+      {error && <Error message="Please check request!" />}
+    </ScreenBase>
   );
 };
 
-export default SendDistreeSignal;
+export default memo(SendDistreeSignal);
 
 const styles = StyleSheet.create({
   mapField: {

@@ -1,39 +1,37 @@
-import {FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
+import {
+  FlatList,
+  TextInput,
+  Image,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import React, {memo, useCallback, useState} from 'react';
-import {CustomInput} from '@components/common';
-import {PHONES} from '../../../constants';
+
 import {Nation} from '@types';
-import {WHITE_COLOR} from '@theme/color';
-import {DropDownIcon} from '@theme/image';
+import {PHONES} from '@constants';
+import {CustomText} from '@components';
 import NationSelect from './NationSelect';
+import {WHITE_COLOR, DropDownIcon, DARK_GRAY_COLOR} from '@theme';
 
 type PhoneInputProps = {
-  nation: Nation;
-  phone?: string;
-  onEndEditing?: () => void;
-  onChangePhone: (phone: string) => void;
-  onChangeNation: (_nation: Nation) => void;
+  field: string;
+  errorMessage?: string;
+  onEndEditing: (value: string, field: string) => void;
 };
 
-const PhoneInput = ({
-  nation,
-  phone,
-  onChangePhone,
-  onChangeNation,
-  onEndEditing,
-}: PhoneInputProps) => {
+const PhoneInput = ({field, onEndEditing, errorMessage}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [national, setNational] = useState<Nation>(PHONES.at(0));
 
-  const handleSelectNation = useCallback(
-    (code: string) => {
-      const _nation = PHONES.find(item => item.code === code);
-      if (_nation) {
-        onChangeNation(_nation);
-        setIsvisible(false);
-      }
-    },
-    [onChangeNation],
-  );
+  const handleSelectNation = useCallback((code: string) => {
+    const _nation = PHONES.find(item => item.code === code);
+    if (_nation) {
+      setNational(_nation);
+      setIsvisible(false);
+    }
+  }, []);
 
   const _renderItem = useCallback(
     ({item}: {item: Nation}) => (
@@ -49,32 +47,46 @@ const PhoneInput = ({
     [],
   );
 
-  return (
-    <View style={styles.phoneinput}>
-      {isVisible && (
-        <FlatList
-          style={styles.nationList}
-          data={PHONES}
-          renderItem={_renderItem}
-          keyExtractor={_keyExtractor}
-        />
-      )}
-      <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
-        <Image source={{uri: nation?.url}} style={styles.flag} />
-        <Image source={DropDownIcon} style={styles.dropDown} />
-      </Pressable>
+  const handleEndEdit = useCallback(() => {
+    if (national && phone) {
+      onEndEditing(national.code + phone, field);
+    }
+  }, [national, phone]);
 
-      <CustomInput
-        value={phone}
-        flex="row"
-        onChangeText={onChangePhone}
-        field="phone"
-        inputMode="numeric"
-        title={nation?.code}
-        onEndEditing={onEndEditing}
-        maxLength={11}
-        valueStyle={styles.valueStyle}
-      />
+  return (
+    <View style={styles.container}>
+      <View style={styles.phoneInput}>
+        {isVisible && (
+          <FlatList
+            style={styles.nationList}
+            data={PHONES}
+            renderItem={_renderItem}
+            keyExtractor={_keyExtractor}
+            overScrollMode="always"
+          />
+        )}
+        <View style={styles.nation}>
+          <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
+            <Image source={{uri: national.url}} style={styles.flag} />
+            <Image source={DropDownIcon} style={styles.dropDown} />
+          </Pressable>
+          <CustomText text={national.code} type="text_medium_24" />
+        </View>
+        <View style={styles.inputGroup}>
+          <TextInput
+            style={styles.input}
+            value={phone}
+            onChangeText={setPhone}
+            onEndEditing={handleEndEdit}
+            inputMode="numeric"
+            maxLength={9}
+            selectTextOnFocus
+          />
+          {errorMessage && (
+            <CustomText text={errorMessage} color="red" type="text_medium_14" />
+          )}
+        </View>
+      </View>
     </View>
   );
 };
@@ -82,13 +94,25 @@ const PhoneInput = ({
 export default memo(PhoneInput);
 
 const styles = StyleSheet.create({
-  phoneinput: {
+  container: {
+    rowGap: 10,
     position: 'relative',
-    flexDirection: 'row',
     zIndex: 2,
-    marginTop: 20,
   },
+  phoneInput: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    // flex: 10,
+  },
+  inputGroup: {flex: 6},
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: WHITE_COLOR,
+    color: DARK_GRAY_COLOR,
+    fontSize: 24,
 
+    padding: 0,
+  },
   nationList: {
     backgroundColor: WHITE_COLOR,
     borderRadius: 10,
@@ -97,12 +121,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 3,
+    height: 200,
   },
-  input: {},
-  flagSelect: {
+  nation: {
     flexDirection: 'row',
+    columnGap: 10,
+    flex: 4,
+  },
+  flagSelect: {
     alignItems: 'center',
-    marginRight: 10,
+    flexDirection: 'row',
   },
   flag: {
     width: 52,
@@ -110,9 +138,5 @@ const styles = StyleSheet.create({
   },
   dropDown: {
     marginLeft: 5,
-  },
-  valueStyle: {
-    fontSize: 24,
-    width: 200,
   },
 });

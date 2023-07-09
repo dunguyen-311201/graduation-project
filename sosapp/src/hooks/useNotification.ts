@@ -1,33 +1,16 @@
-import {useCallback, useContext, useEffect, useState} from 'react';
-import {PermissionsAndroid, Linking, Alert} from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging';
+import {useState, useEffect, useCallback} from 'react';
+import {PermissionsAndroid, Alert, Linking} from 'react-native';
 
-import {EScreen} from '@enums';
-import useMessage from './useMessage';
-import {Context} from '@context/index';
+import {rejectAssign} from '@utils';
+import {TNotification} from '@types';
 
-const useNotify = ({navigate}: {navigate: any}) => {
-  const [muid, setMuid] = useState<string>();
-  const [body, setBody] = useState<string>();
-
-  const {message} = useMessage(muid);
-
-  const {currentUser} = useContext(Context);
-
-  const handleNotify = useCallback(
-    (uid: string, userId?: string) => {
-      if (userId === currentUser?.uid) {
-        navigate(EScreen.DETAIL_MESSAGE, {uid});
-        return;
-      }
-
-      navigate(EScreen.MESSAGES);
-    },
-    [currentUser?.uid, navigate],
-  );
+const useNotification = () => {
+  const [notify, setNotify] = useState<TNotification | null>(null);
 
   useEffect(() => {
-    // Handle Notifications app open
     const setup = async () => {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -42,15 +25,11 @@ const useNotify = ({navigate}: {navigate: any}) => {
           [
             {
               text: 'Ask me later',
-              onPress: () => {
-                navigate(EScreen.HOME);
-              },
+              onPress: () => {},
             },
             {
               text: 'Cancel',
-              onPress: () => {
-                navigate(EScreen.HOME);
-              },
+              onPress: () => {},
               style: 'cancel',
             },
             {text: 'OK', onPress: () => Linking.openSettings()},
@@ -62,42 +41,64 @@ const useNotify = ({navigate}: {navigate: any}) => {
     setup();
 
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      const {uid} = remoteMessage.data || {};
-      const notification = remoteMessage.notification;
-
-      if (uid && notification) {
-        setMuid(uid);
-        setBody(notification.body);
-      }
+      console.log('Notification');
+      await handleNotification(remoteMessage);
     });
 
-    // Handle Notifications app quit
+    messaging().setBackgroundMessageHandler(async mess => {
+      return Alert.alert(
+        'Notification',
+        'Notification has been sent to the device via.',
+      );
+    });
 
     messaging()
       .getInitialNotification()
-      .then(remoteMessage => {
-        const {uid, userId} = remoteMessage?.data || {};
-        if (uid) {
-          handleNotify(uid, userId);
-        }
+      .then(async remoteMessage => {
+        await handleNotification(remoteMessage, true);
       });
 
     return unsubscribe;
-  }, [handleNotify]);
-
-  const handleOk = useCallback(() => {
-    const {uid, userId} = message || {};
-    if (uid) {
-      setMuid(undefined);
-      handleNotify(uid, userId);
-    }
-  }, [handleNotify, message]);
-
-  const handleQuit = useCallback(() => {
-    setMuid(undefined);
   }, []);
 
-  return {message, handleOk, handleQuit, body, uid: muid};
+  const hideNotify = useCallback(() => {
+    setNotify(null);
+  }, []);
+
+  const handleNotification = useCallback(
+    async (
+      remoteMessage: FirebaseMessagingTypes.RemoteMessage | null,
+      background?: boolean,
+    ) => {
+      const {id, tID} = remoteMessage?.data || {};
+      const {body, title, android} = remoteMessage?.notification || {};
+
+      if (id && body && title) {
+        let mess: TNotification = {
+          id,
+          body,
+          title,
+          background,
+          imageUrl: android?.imageUrl,
+        };
+
+        if (tID) {
+          mess = {
+            ...mess,
+            onReject: async () => {
+              await rejectAssign(tID);
+              setNotify(null);
+            },
+          };
+        }
+
+        setNotify(mess);
+      }
+    },
+    [],
+  );
+
+  return {notify, hideNotify};
 };
 
-export default useNotify;
+export default useNotification;

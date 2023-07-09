@@ -5,31 +5,38 @@ import {
   TextInput,
   TextStyle,
   View,
-  ViewStyle,
 } from 'react-native';
-import React, {forwardRef, useCallback} from 'react';
+import React, {forwardRef, useState, useCallback} from 'react';
 import CustomText from '../Text';
-import {DARK_GRAY_COLOR, TEXT_COLOR, WHITE_COLOR} from '@theme';
+import {
+  DARK_GRAY_COLOR,
+  EyeIcon,
+  HideIcon,
+  TEXT_COLOR,
+  WHITE_COLOR,
+} from '@theme';
+import CustomButton from '../Button';
 
-type CustomInputProps = {
+export type CustomInputProps = {
   title?: string;
   field: string;
   value?: string;
-  inputMode?: InputModeOptions;
+  inputMode?: InputModeOptions | 'password';
   errorMessage?: string;
   titleStyle?: TextStyle;
   errorMessageStyle?: StyleProp<TextStyle>;
   valueStyle?: StyleProp<TextStyle>;
   onChangeText?: (value: string, field: string) => void;
-  onBlur?: (field?: string) => void;
-  onFocus?: (field?: string) => void;
+  onBlur?: (field: string) => void;
+  onFocus?: (field: string) => void;
   maxLength?: number;
   placeholder?: string;
   onEndEditing?: (feild: string) => void;
-  customStyle?: ViewStyle;
+  nColumn?: number;
   border?: boolean;
   editable?: boolean;
-  flex?: 'row' | 'column';
+  width?: number;
+  row?: boolean;
 };
 const CustomInput: React.ForwardRefRenderFunction<
   TextInput,
@@ -50,69 +57,86 @@ const CustomInput: React.ForwardRefRenderFunction<
     onFocus,
     onEndEditing,
     editable,
-    customStyle,
+    width,
+    nColumn = 1,
     border,
-    flex = 'column',
+    row,
   } = props;
 
-  const _onChangeText = useCallback(
-    (_value: string) => {
-      onChangeText && onChangeText(_value, field);
-    },
-    [onChangeText, field],
+  const [secureTextEntry, setSecureTextEntry] = useState(
+    inputMode === 'password',
   );
 
-  const _onFocus = useCallback(() => {
+  const handleChangeText = useCallback((_value: string) => {
+    onChangeText && onChangeText(_value, field);
+  }, []);
+
+  const handleFocus = useCallback(() => {
     onFocus && onFocus(field);
   }, [onFocus, field]);
 
-  const _onBlur = useCallback(() => {
+  const handleBlur = useCallback(() => {
     onBlur && onBlur(field);
-  }, [onBlur, field]);
+  }, [field, onBlur]);
 
-  const _onEndEditing = useCallback(() => {
+  const handleEndEdit = useCallback(() => {
     onEndEditing && onEndEditing(field);
   }, [onEndEditing, field]);
 
+  const handleSecretPassword = useCallback(() => {
+    setSecureTextEntry(prev => !prev);
+  }, []);
+
   return (
-    <View
-      style={{
-        ...styles.inputgroup,
-        ...customStyle,
-        ...(flex === 'row' && styles.row),
-      }}>
-      {title && (
-        <CustomText
-          text={title}
-          type={flex === 'row' ? 'text_medium_24' : 'text_medium_14'}
-          customStyle={{
-            ...styles.title,
-            ...titleStyle,
-          }}
+    <View style={{width: width || `${100 / nColumn}%`}}>
+      <View
+        style={{
+          ...styles.inputgroup,
+          ...(row && styles.row),
+          ...(errorMessage && styles.error),
+        }}>
+        {title && (
+          <CustomText
+            text={title}
+            type={row ? 'text_medium_24' : 'text_medium_14'}
+            customStyle={{
+              ...styles.title,
+              ...titleStyle,
+            }}
+          />
+        )}
+        <TextInput
+          ref={ref}
+          value={value}
+          selectTextOnFocus
+          editable={editable}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          maxLength={maxLength}
+          placeholder={placeholder}
+          onChangeText={handleChangeText}
+          placeholderTextColor={DARK_GRAY_COLOR}
+          onEndEditing={handleEndEdit}
+          {...(inputMode === 'password' ? {secureTextEntry} : {inputMode})}
+          style={[
+            styles.input,
+            {...(!row && styles.column)},
+            {...(border ? styles.border : styles.default)},
+            valueStyle,
+          ]}
         />
+        {inputMode === 'password' && (
+          <CustomButton
+            icon={secureTextEntry ? EyeIcon : HideIcon}
+            type="secondary"
+            customStyle={styles.password}
+            onPress={handleSecretPassword}
+          />
+        )}
+      </View>
+      {errorMessage && (
+        <CustomText text={errorMessage} type="text_medium_14" color="red" />
       )}
-      <TextInput
-        value={value}
-        ref={ref}
-        editable={editable}
-        style={[
-          styles.input,
-          {...(flex === 'column' && styles.column)},
-          {...(border && styles.border)},
-          valueStyle,
-        ]}
-        onChangeText={_onChangeText}
-        onBlur={_onBlur}
-        onFocus={_onFocus}
-        inputMode={inputMode}
-        maxLength={maxLength}
-        selectTextOnFocus
-        placeholder={placeholder}
-        placeholderTextColor={DARK_GRAY_COLOR}
-        onEndEditing={_onEndEditing}
-        keyboardType="phone-pad"
-      />
-      {errorMessage && <CustomText text={errorMessage} />}
     </View>
   );
 };
@@ -121,21 +145,28 @@ export default forwardRef(CustomInput);
 
 const styles = StyleSheet.create({
   inputgroup: {
-    marginBottom: 10,
+    // marginBottom: 10,
+    position: 'relative',
+    zIndex: 1,
   },
   title: {
     marginRight: 10,
+  },
+  default: {
+    flex: 1,
   },
   border: {
     borderColor: TEXT_COLOR,
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
   },
   input: {
     color: DARK_GRAY_COLOR,
     fontSize: 20,
     fontWeight: '400',
+    paddingHorizontal: 10,
   },
   column: {
     borderColor: WHITE_COLOR,
@@ -147,7 +178,17 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomColor: WHITE_COLOR,
-    borderBottomWidth: 1,
+  },
+  error: {
+    borderBottomColor: 'red',
+  },
+  password: {
+    maxWidth: 30,
+    maxHeight: 30,
+    position: 'absolute',
+    zIndex: 2,
+    right: 10,
+    top: '50%',
+    transform: [{translateY: 5}],
   },
 });

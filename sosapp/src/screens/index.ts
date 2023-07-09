@@ -1,18 +1,26 @@
-import SplashScreen from './Slash';
+import MapScreen from './Map';
 import HomeScreen from './Home';
+import SplashScreen from './Slash';
+import WorkerScreen from './Workers';
+import MessagesScreen from './Messages';
+import SettingsScreen from './Settings';
+import SetupInfoScreen from './SetupInfo';
+import AddNewWorkerScreen from './AddNewWorker';
+import NotificationScreen from './Notification';
+import SignInByEmailScreen from './SignInByEmail';
+import ConfirmPolicyScreen from './ConfirmPolicy';
+import DetailMessageScreen from './DetailMessage';
+import SignupBySocialScreen from './SignupBySocial';
+import SendDistreeSignal from './SendDistressSignal';
 import ConfirmPhoneNumberScreen from './ConfirmPhoneNumber';
 import SignupByPhoneNumberScreen from './SignupByPhoneNumber';
-import SignupBySocialScreen from './SignupBySocial';
-import SetupInfoScreen from './SetupInfo';
-import ConfirmPolicyScreen from './ConfirmPolicy';
-import SettingsScreen from './Settings';
-import MapScreen from './Map';
-import SendDistreeSignal from './SendDistressSignal';
-import PendingMessageScreen from './PendingMessage';
-import MessagesScreen from './Messages';
-import DetailMessageScreen from './DetailMessage';
+import AssignScreen from './Assign';
 
 export {
+  NotificationScreen,
+  WorkerScreen,
+  AssignScreen,
+  AddNewWorkerScreen,
   SplashScreen,
   MapScreen,
   HomeScreen,
@@ -23,7 +31,7 @@ export {
   ConfirmPolicyScreen,
   SettingsScreen,
   SendDistreeSignal,
-  PendingMessageScreen,
   MessagesScreen,
   DetailMessageScreen,
+  SignInByEmailScreen,
 };

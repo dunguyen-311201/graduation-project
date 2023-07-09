@@ -1,67 +1,101 @@
-import {StyleSheet, FlatList, View} from 'react-native';
-import React, {useCallback} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import {
+  ScreenBase,
+  MessageInfo,
+  CustomButton,
+  EmptyListComponent,
+} from '@components';
+import {TMessage} from '@types';
+import React, {useCallback, useContext} from 'react';
+import {Alert, FlatList, StyleSheet, View} from 'react-native';
+import {useNavigation, RouteProp, useRoute} from '@react-navigation/native';
 
-import {CustomText, Loading, MessageInfo, ScreenBase} from '@components';
 import {EScreen} from '@enums';
-import {Location, TMessage} from '@types';
+import {NewIcon} from '@theme';
+import {Context} from '@context';
+import {isFreeUser} from '@utils';
 import {useMessages} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
+import {RootParamList} from '@navigation/RootNavigation';
+
+type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 
 const Messages = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
+  const {workerID} = useRoute<ConfirmRoute>().params || {};
 
-  const {messages, loading} = useMessages(1);
+  const {currentUser} = useContext(Context);
 
-  const handleGoMap = useCallback((location: Location) => {
-    if (location) {
-      navigate(EScreen.MAP, {to: location});
-    }
+  const {messages, onDelete, onNew, loading} = useMessages(workerID);
+
+  const handleNavigateDetail = useCallback((id: string) => {
+    navigate(EScreen.DETAIL_MESSAGE, {id, onDelete});
   }, []);
 
-  const handleNavigateDetail = useCallback((uid: string) => {
-    navigate(EScreen.DETAIL_MESSAGE, {uid});
+  const renderItem = useCallback(({item}: {item: TMessage}) => {
+    return <MessageInfo item={item} onPress={handleNavigateDetail} />;
   }, []);
 
-  const renderItem = useCallback(({item}: {index: number; item: TMessage}) => {
-    return (
-      <MessageInfo
-        data={item}
-        onMap={handleGoMap}
-        onLongPress={handleNavigateDetail}
-      />
-    );
-  }, []);
-
-  const keyExtractor = useCallback(
-    (item: TMessage, index: number) => item.uid || index + '',
-    [],
-  );
+  const keyExtractor = useCallback((item: TMessage) => item.id, []);
 
   const ItemSeparatorComponent = useCallback(
     () => <View style={styles.separator} />,
     [],
   );
 
-  return (
-    <>
-      {loading && <Loading />}
+  const handleback = useCallback(() => {
+    navigate(EScreen.DRAWER);
+  }, []);
 
-      <ScreenBase padding={10} customStyle={styles.container}>
-        <View style={styles.content}>
-          {messages && messages.length > 0 && (
-            <FlatList
-              data={messages}
-              renderItem={renderItem}
-              keyExtractor={keyExtractor}
-              ItemSeparatorComponent={ItemSeparatorComponent}
-            />
-          )}
-          {!messages && <CustomText text="List Message is empty!" />}
-        </View>
-      </ScreenBase>
-    </>
+  const handleSendRescue = useCallback(async () => {
+    if (await isFreeUser()) {
+      navigate(EScreen.SEND_DISTRESS_SIGNAL, {onNew});
+      return;
+    }
+
+    Alert.alert(
+      'Unable to Add Request',
+      'There is already a request in progress. Please wait until the current request is completed.',
+      [
+        {
+          text: 'OK',
+          onPress: () => {},
+        },
+      ],
+    );
+  }, []);
+
+  return (
+    <ScreenBase
+      customStyle={styles.container}
+      title="Requests"
+      onBack={handleback}
+      loading={loading}
+      padding={20}
+      flexHeader="row">
+      <View style={styles.content}>
+        {messages.length > 0 ? (
+          <FlatList
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            ItemSeparatorComponent={ItemSeparatorComponent}
+          />
+        ) : (
+          <View style={styles.content}>
+            <EmptyListComponent />
+          </View>
+        )}
+        {currentUser?.role === 'user' && (
+          <CustomButton
+            icon={NewIcon}
+            type="secondary"
+            customStyle={styles.btnNew}
+            onPress={handleSendRescue}
+          />
+        )}
+      </View>
+    </ScreenBase>
   );
 };
 
@@ -69,12 +103,18 @@ export default Messages;
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 10,
+    flex: 1,
   },
   content: {
     flex: 1,
+    marginTop: 20,
   },
   separator: {
-    height: 5,
+    height: 2,
+  },
+  btnNew: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
   },
 });

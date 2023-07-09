@@ -30,8 +30,8 @@ type SearchProps = {
   customStyle?: StyleProp<ViewStyle>;
   isDirection?: boolean;
   field?: string;
-  origin?: Location;
   placeholder: string;
+  region?: Location | null;
   icon?: ImageSourcePropType;
   onToDirection?: () => void;
   zIndex?: number;
@@ -43,33 +43,32 @@ const SearchInput = ({
   field,
   placeholder,
   icon,
-  origin,
+  region,
   isDirection = false,
   onToDirection,
   zIndex,
 }: SearchProps) => {
-  const [location, setLocation] = useState<Location>();
+  const [search, setSearch] = useState<string>('');
 
   useEffect(() => {
-    if (origin) {
-      setLocation(origin);
+    if (region?.description) {
+      setSearch(region.description);
     }
-  }, [origin]);
+  }, [region]);
 
   const handleSearch = useCallback(
     async (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
-      const _location = detail?.geometry?.location;
-      if (_location) {
-        const {lat, lng} = _location;
-
-        const currentLocation: Location = {
+      const {lat, lng} = detail?.geometry?.location || {};
+      if (lat && lng) {
+        const searchLocation: Location = {
           latitude: lat,
           city: data.terms?.at(-2).value,
           longitude: lng,
           description: data.description,
         };
 
-        await onSearch(currentLocation, field);
+        await onSearch(searchLocation, field);
+        setSearch(data.description);
       }
     },
     [field, onSearch],
@@ -90,16 +89,12 @@ const SearchInput = ({
           fetchDetails={true}
           onPress={handleSearch}
           keepResultsAfterBlur={false}
+          onFail={error => console.log(error)}
           textInputProps={{
-            value: location?.description || '',
+            value: search,
             selectTextOnFocus: true,
             onChangeText: (value: string) => {
-              setLocation({
-                latitude: 0,
-                longitude: 0,
-                ...location,
-                description: value,
-              });
+              setSearch(value);
             },
           }}
           query={query}
@@ -109,7 +104,7 @@ const SearchInput = ({
         />
         <View style={styles.rightButton}>
           {!isDirection && (
-            <Pressable style={styles.buttondirection} onPress={onToDirection}>
+            <Pressable onPress={onToDirection}>
               <Image source={DirectionIcon} style={styles.directionIcon} />
             </Pressable>
           )}
@@ -136,6 +131,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
+    flex: 10,
   },
   buttonLogo: {
     position: 'absolute',
@@ -156,8 +152,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: 50,
     zIndex: 5,
-    right: 20,
-    top: 10,
+    right: -32,
+    top: 14,
   },
   buttonClear: {
     borderRadius: 8,
@@ -169,11 +165,6 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     backgroundColor: TEXT_COLOR,
-  },
-
-  buttondirection: {
-    borderLeftWidth: 1,
-    paddingHorizontal: 7,
   },
   directionIcon: {
     width: 30,
@@ -187,7 +178,7 @@ const inputSearch = StyleSheet.create({
     position: 'absolute',
     left: 0,
     top: 15,
-    right: 15,
+    right: 0,
     zIndex: 5,
   },
   textInput: {

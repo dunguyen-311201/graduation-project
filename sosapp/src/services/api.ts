@@ -1,22 +1,24 @@
 import {Config} from 'react-native-config';
-import {API_ENDPOINT_TEST, API_ENDPOINT, ERROR_CODE} from '@constants';
+import {API_ENDPOINT_TEST, API_ENDPOINT_TEST1, ERROR_CODE} from '@constants';
 
 type API = {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT';
-  data: any;
+  data?: any;
   route: string;
 };
 
 const callAPI = async ({data, method, route}: API) => {
   try {
-    let url = (Config.ENV === 'dev' ? API_ENDPOINT_TEST : API_ENDPOINT) + route;
+    let url =
+      (Config.ENV === 'dev' ? API_ENDPOINT_TEST : API_ENDPOINT_TEST1) + route;
     let options = {};
 
     switch (method) {
       case 'POST':
+      case 'DELETE':
       case 'PUT':
         options = {
-          body: JSON.stringify(data),
+          ...(data && {body: JSON.stringify(data)}),
           method,
           headers: {'Content-Type': 'application/json'},
         };

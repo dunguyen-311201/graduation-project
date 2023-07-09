@@ -1,142 +1,130 @@
 import {useNavigation} from '@react-navigation/native';
-import {View, Image, StyleSheet} from 'react-native';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {Image, StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState, useContext} from 'react';
 
-import {getUserByID, requestLocationPermission} from '@utils';
 import {
-  ScreenBase,
+  BellIcon,
+  GoMapIcon,
+  LIGHT_BLUE_COLOR,
+  MWorkerIcon,
+  MapImage,
+  MessageIcon,
+  SOSIcon,
+} from '@theme';
+import {
   Card,
-  CustomText,
   CustomButton,
+  CustomText,
+  MenuButton,
+  ScreenBase,
   SearchInput,
-  Loading,
-  Notify,
 } from '@components';
-import {EScreen} from '@enums';
-import {useNotifiCation} from '@hooks';
-import {MenuButton} from './components';
-import {RootScreenNavigationProps} from '@navigation';
-import {GoMapIcon, LIGHT_BLUE_COLOR, MapImage, SOSIcon} from '@theme';
+import {ERole, EScreen} from '@enums';
 import {Context} from '@context';
-import UpgradeForm from './components/UpgradeForm';
+import {Location} from '@types';
+import {CURRENT_LOCATION} from '@constants';
+import {RootScreenNavigationProps} from '@navigation';
+import {getAsyncStorage, requestLocationPermission} from '@utils';
 
 const HomeScreen = () => {
-  const {navigate, openDrawer, setOptions} =
+  const {navigate, openDrawer} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   const {currentUser} = useContext(Context);
-
-  const {message, handleQuit, handleOk, body} = useNotifiCation({
-    navigate,
-  });
-
-  const [onLocation, setOnLocation] = useState(false);
-
-  const [isVisible, setVisible] = useState(false);
-
+  const [_location, setLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
 
-  requestLocationPermission();
-
-  useEffect(() => {
-    const setup = async () => {
-      if (currentUser) {
-        setLoading(true);
-        const user = await getUserByID(currentUser.uid);
-        if (user?.location) {
-          setOnLocation(true);
-        } else {
-          setOnLocation(false);
-        }
-
-        setLoading(false);
-      }
-    };
-
-    setOptions({headerShown: false});
-
-    setup();
-  }, []);
-
-  let {displayName, uid, email, phoneNumber} = currentUser || {};
-
-  const handleUpgrade = useCallback(() => {
-    setVisible(true);
+  const handleUpgrade = useCallback(async () => {
+    setLoading(true);
+    await requestLocationPermission();
+    const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+    cacheLocation && setLocation(cacheLocation);
+    setLoading(false);
   }, []);
 
   const handleMap = useCallback(async () => {
-    navigate(EScreen.MAP, {});
+    navigate(EScreen.MAP);
   }, []);
 
-  const handleSendRescue = useCallback(() => {
-    navigate(EScreen.SEND_DISTRESS_SIGNAL);
+  const handleManagementWorker = useCallback(() => {
+    navigate(EScreen.WORKER);
   }, []);
 
-  const handleCloseModal = useCallback(() => {
-    setVisible(false);
+  const handleNotify = useCallback(() => {
+    navigate(EScreen.NOTIFICATION);
+  }, []);
+
+  const handleRequests = useCallback(() => {
+    navigate(EScreen.MESSAGES);
   }, []);
 
   return (
-    <>
-      {loading && <Loading />}
-      {displayName && uid && phoneNumber && isVisible && (
-        <UpgradeForm
-          user={{displayName, uid, email, phoneNumber}}
-          handleClose={handleCloseModal}
-        />
-      )}
-
-      {/* Handle Show Notifications */}
-
-      {message && (
-        <Notify
-          message={message}
-          onOk={handleOk}
-          onQuit={handleQuit}
-          body={body}
-        />
-      )}
-
-      {/* Handle Show Notifications */}
-
-      <ScreenBase customStyle={styles.container} padding={1}>
-        <View style={styles.homeHeader}>
-          <MenuButton onPress={openDrawer} marginTop={32} />
+    <ScreenBase customStyle={styles.container} padding={1} loading={loading}>
+      <View style={styles.header}>
+        <View style={styles.content}>
+          <View style={styles.nav}>
+            <MenuButton onPress={openDrawer} />
+            <CustomButton
+              icon={BellIcon}
+              onPress={handleNotify}
+              type="secondary"
+            />
+          </View>
           <CustomText
             text={
-              'Are you having your\nproblems with vehicle?\nImmediately connect to\nthe rescue service.'
+              'Are you having your problems with vehicle? Immediately connect to the rescue service.'
             }
             type="text_medium_30"
             customStyle={styles.title}
           />
           <CustomButton
-            label={onLocation ? 'Upgrade' : 'Dropdown'}
+            label={_location ? 'Location is on' : 'Turn on location'}
             type="outline"
             onPress={handleUpgrade}
           />
         </View>
+      </View>
+
+      <View style={styles.content}>
         <View style={styles.options}>
-          <Card icon={SOSIcon} title="Rescue" onPress={handleSendRescue} />
+          {currentUser?.role === ERole.USER && (
+            <Card icon={SOSIcon} title="Rescue" onPress={handleRequests} />
+          )}
+
+          {currentUser?.role === ERole.CENTER && (
+            <Card
+              icon={MWorkerIcon}
+              title="Workers"
+              onPress={handleManagementWorker}
+            />
+          )}
+
+          {currentUser?.role === ERole.WORKER && (
+            <Card
+              icon={MessageIcon}
+              title="Requests"
+              onPress={handleRequests}
+            />
+          )}
+
           <Card icon={GoMapIcon} title="Map" onPress={handleMap} />
         </View>
-        <View>
-          <View style={styles.map}>
-            <SearchInput
-              placeholder="Enter pickup location"
-              field="from"
-              isDirection
-              onSearch={handleMap}
-            />
-            <CustomText
-              text="Around you"
-              type="text_medium_20"
-              customStyle={styles.mapTitle}
-            />
-            <Image source={MapImage} />
-          </View>
+        <View style={styles.map}>
+          <SearchInput
+            placeholder="Enter pickup location"
+            field="from"
+            isDirection
+            onSearch={handleMap}
+          />
+          <CustomText
+            text="Around you"
+            type="text_medium_20"
+            customStyle={styles.mapTitle}
+          />
+          <Image source={MapImage} />
         </View>
-      </ScreenBase>
-    </>
+      </View>
+    </ScreenBase>
   );
 };
 
@@ -144,26 +132,34 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 0,
+    flex: 1,
   },
-  homeHeader: {
+  header: {
     backgroundColor: LIGHT_BLUE_COLOR,
-    paddingHorizontal: 32,
     paddingBottom: 34,
+    width: '100%',
+  },
+  nav: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   title: {
     marginTop: 33,
     marginBottom: 27,
   },
+  content: {
+    paddingTop: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 32,
+  },
   options: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    paddingHorizontal: 32,
     paddingTop: 30,
+    width: '100%',
   },
   map: {
-    marginHorizontal: 32,
     marginTop: 23,
     paddingTop: 70,
     paddingBottom: 30,

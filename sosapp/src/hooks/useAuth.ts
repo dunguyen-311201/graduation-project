@@ -1,67 +1,158 @@
-import auth from '@react-native-firebase/auth';
+import {useState, useEffect, useCallback} from 'react';
 import firebase from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
+import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+
+import {ERole} from '@enums';
 import {TUser} from '@types';
-import {useCallback} from 'react';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
+import {FIRST_INSTALLED, USER_CACHE} from '@constants';
 
 const useAuth = () => {
-  // const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
-  //   auth().currentUser,
-  // );
+  const [user, setUser] = useState<TUser>();
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
+    auth().currentUser,
+  );
 
-  // useEffect(() => {
-  //   const subscriber = auth().onAuthStateChanged(user => {
-  //     setCurrentUser(user);
-  //   });
+  useEffect(() => {
+    const unSubscribe = auth().onAuthStateChanged(_user => {
+      if (_user && _user.displayName) {
+        setCurrentUser(_user);
+        setIsAuthenticated(true);
+      }
+    });
 
-  //   return subscriber;
-  // }, []);
+    return () => unSubscribe();
+  }, [isAuthenticated]);
 
-  const updateProfile = async (name: string) => {
-    await auth().currentUser?.updateProfile({displayName: name});
-  };
+  useEffect(() => {
+    const setup = async () => {
+      if (currentUser && currentUser.displayName && isAuthenticated) {
+        try {
+          setLoading(true);
+          const {displayName, uid, email, photoURL, phoneNumber} = currentUser;
+          const snap = await firebase()
+            .doc('users/' + uid)
+            .get();
 
-  const signOut = async () => {
-    await auth().signOut();
-  };
+          if (snap.exists) {
+            const data: any = {
+              ...snap.data(),
+              displayName,
+              id: uid,
+              email,
+              photoURL,
+              phoneNumber,
+            };
+            setUser(data);
+          }
+        } catch (error) {}
+      }
+      setLoading(false);
+    };
 
-  const upgrade = useCallback(async (user: TUser) => {
-    const {email, phoneNumber, uid, citizenIdentification} = user;
-    if (email) {
-      await auth().currentUser?.updateEmail(email);
-      await firebase()
-        .doc('users/' + uid)
-        .update({citizenIdentification, email});
-    } else if (phoneNumber) {
-      // const snapshot = await auth().verifyPhoneNumber(phoneNumber);
-      // const credential = auth.PhoneAuthProvider.credential(
-      //   snapshot.verificationId,
-      //   snapshot.code,
-      // );
+    setup();
+  }, [currentUser, isAuthenticated]);
+
+  const signOut = useCallback(async () => {
+    try {
+      if (user) {
+        setLoading(true);
+
+        const update = {
+          lastLogin: null,
+          ...(user.role === ERole.WORKER &&
+            user.status === 'free' && {status: 'unavailable'}),
+        };
+        await firebase()
+          .doc('users/' + user.id)
+          .update(update);
+        await auth().signOut();
+      }
+    } catch (err) {}
+    setIsAuthenticated(false);
+    setLoading(false);
+  }, [user]);
+
+  const signUp = useCallback(async () => {
+    const {uid, phoneNumber} = auth().currentUser || {};
+
+    if (phoneNumber && uid) {
+      try {
+        setLoading(true);
+        const token = await messaging().getToken();
+
+        const data = await getAsyncStorage<TUser>(USER_CACHE);
+        let u: TUser;
+        if (data) {
+          await auth().currentUser?.updateProfile({
+            displayName: data.displayName,
+          });
+
+          u = {
+            ...data,
+            role: ERole.USER,
+            token,
+            lastLogin: Date.now(),
+            status: 'free',
+            phoneNumber,
+          };
+
+          if (data.role === ERole.CENTER) {
+            u = {
+              ...u,
+              role: ERole.CENTER,
+              timeRegistration: Date.now(),
+              status: 'unavailable',
+              statusRegistration: 'pending',
+            };
+          }
+
+          await firebase()
+            .doc('users/' + uid)
+            .set(u);
+
+          await setAsyncStorage(FIRST_INSTALLED, 1);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        setLoading(false);
+      }
     }
   }, []);
 
-  const signInByPhoneNumber = async (phoneNumber: string) => {
-    return await auth().signInWithPhoneNumber(phoneNumber);
-  };
-
-  const verification = async (verificationId: string, code: string) => {
+  const signIn = useCallback(async (id: string) => {
     try {
-      const credential = auth.PhoneAuthProvider.credential(
-        verificationId,
-        code,
-      );
+      setLoading(true);
+      const token = await messaging().getToken();
+      const doc = firebase().doc('users/' + id);
+      const data = (await doc.get()).data();
 
-      const userCredential = await auth().signInWithCredential(credential);
-      return userCredential;
+      if (data) {
+        await doc.update({
+          token,
+          lastLogin: Date.now(),
+          ...(data.role === ERole.WORKER &&
+            data.status === 'unavailable' &&
+            !data.disable && {status: 'free'}),
+        });
+
+        await setAsyncStorage(FIRST_INSTALLED, 1);
+        setIsAuthenticated(true);
+      }
     } catch (error) {}
-  };
+    setLoading(false);
+  }, []);
 
   return {
-    updateProfile,
+    isAuthenticated,
+    signIn,
+    signUp,
     signOut,
-    signInByPhoneNumber,
-    verification,
-    upgrade,
+    currentUser: user,
+    loading,
   };
 };
 

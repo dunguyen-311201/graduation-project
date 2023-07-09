@@ -1,16 +1,19 @@
 import {
-  StyleSheet,
   View,
+  Keyboard,
   Platform,
-  ViewStyle,
-  KeyboardAvoidingView,
   StyleProp,
+  ViewStyle,
+  StyleSheet,
+  KeyboardAvoidingView,
   TouchableWithoutFeedback,
 } from 'react-native';
-import React, {memo} from 'react';
-
+import React, {memo, useCallback} from 'react';
+import Loading from '../Loading';
+import BackButton from '../BackButton';
+import {BACKGROUND_COLOR} from '@theme';
 import {CustomButton, CustomText} from '../common';
-import {BACKGROUND_COLOR, WHITE_COLOR} from '@theme';
+import Notification from '../Notification';
 
 type ScreenBaseProps = {
   title?: string;
@@ -19,8 +22,11 @@ type ScreenBaseProps = {
   onNext?: () => void;
   customStyle?: StyleProp<ViewStyle>;
   padding?: number;
-  onTouchOutside?: () => void;
   disableNext?: boolean;
+  nextTitle?: string;
+  onBack?: () => void;
+  flexHeader?: 'row' | 'column';
+  loading?: boolean;
 };
 
 const ScreenBase = ({
@@ -28,65 +34,84 @@ const ScreenBase = ({
   children,
   desc,
   onNext,
-  customStyle,
+  onBack,
   padding,
-  onTouchOutside,
+  loading,
+  customStyle,
   disableNext,
+  flexHeader = 'column',
+  nextTitle = 'Next',
 }: ScreenBaseProps) => {
-  return (
-    <TouchableWithoutFeedback onPress={onTouchOutside}>
-      <View style={[styles.container, {paddingHorizontal: padding || 32}]}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={[styles.keyboard, customStyle]}>
-          {title && (
-            <CustomText
-              text={title}
-              customStyle={styles.header}
-              type="text_medium_30"
-            />
-          )}
-          {desc && (
-            <CustomText
-              text={desc}
-              customStyle={styles.header}
-              type="text_medium_24"
-            />
-          )}
+  const handleTouchOutside = useCallback(() => {
+    Keyboard.dismiss();
+  }, []);
 
-          {children}
-        </KeyboardAvoidingView>
-        {onNext && (
-          <CustomButton onPress={onNext} label="Next" disabled={disableNext} />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={[styles.keyboard, {paddingHorizontal: padding || 32}]}>
+      <TouchableWithoutFeedback onPress={handleTouchOutside}>
+        <View
+          style={[
+            customStyle,
+            styles.container,
+            {...(onBack && {paddingTop: 20})},
+          ]}>
+          <Notification />
+
+          <View
+            style={{
+              ...(onBack && styles.header),
+              ...(flexHeader === 'row'
+                ? {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }
+                : {...(onBack && {marginTop: 36, marginBottom: 31})}),
+            }}>
+            {onBack && <BackButton onPress={onBack} />}
+            {title && (
+              <CustomText
+                text={title}
+                type="text_medium_30"
+                customStyle={{
+                  ...(flexHeader === 'column' && styles.title),
+                }}
+              />
+            )}
+
+            {desc && <CustomText text={desc} type="text_medium_24" />}
+          </View>
+          {loading ? <Loading /> : children}
+        </View>
+      </TouchableWithoutFeedback>
+      {onNext && (
+        <CustomButton
+          onPress={onNext}
+          label={nextTitle}
+          disabled={disableNext}
+        />
+      )}
+    </KeyboardAvoidingView>
   );
 };
 
 export default memo(ScreenBase);
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: BACKGROUND_COLOR,
-    justifyContent: 'space-between',
+  keyboard: {
     flex: 1,
+    backgroundColor: BACKGROUND_COLOR,
     paddingBottom: 62,
   },
-  keyboard: {
+  container: {
     flex: 1,
   },
   header: {
-    marginBottom: 20,
-    marginTop: 15,
+    columnGap: 20,
+    // alignItems: 'center',
   },
-  message: {
-    backgroundColor: WHITE_COLOR,
-    width: '80%',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    alignSelf: 'center',
-    marginTop: 5,
-    borderRadius: 10,
+  title: {
+    marginTop: 35,
   },
 });

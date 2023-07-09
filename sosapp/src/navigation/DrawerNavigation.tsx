@@ -1,21 +1,26 @@
 import {
-  DrawerContentComponentProps,
-  createDrawerNavigator,
-} from '@react-navigation/drawer';
-import React, {useCallback} from 'react';
-import {StyleSheet} from 'react-native';
-
-import {EScreen} from '@enums';
-import DrawerContent from './DrawerContent';
-import {
   BACKGROUND_COLOR,
   DARK_GRAY_COLOR,
   TEXT_COLOR,
   WHITE_COLOR,
 } from '@theme';
-import {SettingsScreen, HomeScreen} from '@screens';
+import {
+  DrawerContentComponentProps,
+  createDrawerNavigator,
+} from '@react-navigation/drawer';
+import {HomeScreen, SettingsScreen} from '@screens';
+import React, {useCallback} from 'react';
 
-const Drawer = createDrawerNavigator();
+import DrawerContent from './DrawerContent';
+import {EScreen} from '@enums';
+import {StyleSheet} from 'react-native';
+
+export type DrawerParamList = {
+  [EScreen.HOME]: undefined;
+  [EScreen.SETTINGS]: undefined;
+};
+
+const Drawer = createDrawerNavigator<DrawerParamList>();
 
 const DrawerNavigation = () => {
   const renderContent = useCallback(
@@ -32,24 +37,27 @@ const DrawerNavigation = () => {
           fontWeight: '500',
           fontSize: 22,
         },
+        unmountOnBlur: true,
         headerTintColor: DARK_GRAY_COLOR,
         title: '',
         headerStyle: {
           backgroundColor: BACKGROUND_COLOR,
         },
+        headerShown: false,
       }}>
       <Drawer.Screen
         name={EScreen.HOME}
         options={{
-          title: EScreen.HOME.split('-')[0],
+          title: 'Home',
           drawerLabelStyle: {...styles.title},
         }}
         component={HomeScreen}
       />
+
       <Drawer.Screen
         name={EScreen.SETTINGS}
         options={{
-          title: EScreen.SETTINGS.split('-')[0],
+          title: 'Setting',
           drawerLabelStyle: {...styles.title},
         }}
         component={SettingsScreen}

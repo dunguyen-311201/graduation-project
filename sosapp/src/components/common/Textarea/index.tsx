@@ -14,6 +14,7 @@ interface TextareaProps extends TextInputProps {
   title: string;
   value?: string;
   onChangeText?: (value: string, field: string) => void;
+  editable?: boolean;
 }
 
 export interface TextareaRef {

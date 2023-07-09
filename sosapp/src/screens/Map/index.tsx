@@ -5,7 +5,7 @@ import MapView, {
 } from 'react-native-maps';
 import Config from 'react-native-config';
 import MapViewDirections from 'react-native-maps-directions';
-import React, {useEffect, useCallback, useState, useContext} from 'react';
+import React, {useEffect, useCallback, useRef, useState, useMemo} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
 
@@ -20,82 +20,83 @@ import {
 } from '@theme';
 import {EScreen} from '@enums';
 import {Location} from '@types';
-import {useNotifiCation} from '@hooks';
 import {CustomMarker} from './components';
 import {CURRENT_LOCATION} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
 import {
   fetchDistanceAndTime,
+  formatTime,
   getAsyncStorage,
   requestLocationPermission,
 } from '@utils';
-import {BackIcon, CustomText, Notify, SearchInput} from '@components';
-import {Context} from '@context';
+import {BackButton, CustomText, Notification, SearchInput} from '@components';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
 type SearchLocation = {
-  from?: Location;
-  to?: Location;
-  distance?: string;
-  timeout?: string;
+  from?: Location | null;
+  to?: Location | null;
+  distance?: number;
+  timeout?: number;
 };
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MAP>;
 
 const MapScreen = () => {
-  const {setOptions, goBack, navigate} =
+  const {setOptions, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
 
-  const {message, handleQuit, handleOk, body} = useNotifiCation({
-    navigate,
-  });
+  const mapRef = useRef<MapView | null>(null);
 
-  const {currentUser} = useContext(Context);
-
-  const {from, to} = useRoute<ConfirmRoute>().params || {};
+  let {to} = useRoute<ConfirmRoute>().params || {};
 
   const [isDirection, setIsDirection] = useState(false);
 
   const [locations, setLocations] = useState<SearchLocation>();
 
-  requestLocationPermission();
-
   useEffect(() => {
     setOptions({headerShown: false});
+    const timeID = setInterval(async () => {
+      await requestLocationPermission();
+    }, 5000);
+
+    return () => clearInterval(timeID);
   }, []);
 
   useEffect(() => {
     const setup = async () => {
-      if (currentUser) {
-        const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      console.log(70, to, cacheLocation);
+      if (to && cacheLocation) {
+        const data = await fetchDistanceAndTime({to, from: cacheLocation});
+        if (data) {
+          setLocations(data);
+        }
 
-        if (cacheLocation) {
-          setLocations({
-            from: from || cacheLocation,
-            ...(to && {to}),
-          });
+        return;
+      }
+
+      setLocations({from: cacheLocation});
+    };
+
+    setup();
+  }, [to]);
+
+  useEffect(() => {
+    const getDistance = async () => {
+      const dTo = locations?.to;
+      const dFrom = locations?.from;
+      if (dTo && dFrom) {
+        const data = await fetchDistanceAndTime({to: dTo, from: dFrom});
+
+        if (data) {
+          setLocations(data);
         }
       }
     };
-    setup();
-  }, [currentUser, from, to]);
 
-  useEffect(() => {
-    const _to = locations?.to;
-    const _from = locations?.from;
-    if (_to && _from) {
-      fetchDistanceAndTime(
-        {to: _to, from: _from},
-        (distance: string, timeout: string) =>
-          setLocations({
-            ...locations,
-            distance,
-            timeout,
-          }),
-      );
-    }
+    getDistance();
   }, [locations]);
 
   const handleSearch = useCallback(
@@ -116,32 +117,78 @@ const MapScreen = () => {
 
   const handleChangeLocation = useCallback(() => {}, []);
 
+  const map = useMemo(() => {
+    if (locations?.from) {
+      return (
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          ref={mapRef}
+          region={{
+            ...locations.from,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}>
+          {locations?.to && GOOGLE_MAPS_API_KEY && (
+            <MapViewDirections
+              origin={locations?.from}
+              destination={locations?.to}
+              apikey={GOOGLE_MAPS_API_KEY}
+              strokeWidth={8}
+              strokeColor="#3A4C11"
+            />
+          )}
+          <View>
+            <CustomMarker
+              coordinate={locations.from}
+              title={locations?.to ? 'Begin' : 'Location'}
+              field="from"
+              onChangeLocation={handleChangeLocation}
+            />
+            <Circle
+              center={locations.from}
+              radius={500}
+              fillColor="#42ff22"
+              strokeWidth={2}
+            />
+          </View>
+          {locations?.to && (
+            <View>
+              <CustomMarker
+                coordinate={locations.to}
+                title="End"
+                field="from"
+                onChangeLocation={handleChangeLocation}
+              />
+              <Circle
+                center={locations.to}
+                radius={500}
+                fillColor="#42ff22"
+                strokeWidth={2}
+              />
+            </View>
+          )}
+        </MapView>
+      );
+    }
+    return <></>;
+  }, [handleChangeLocation, locations?.from, locations?.to]);
+
   return (
     <>
-      {/* Handle Show Notifications */}
-
-      {message && (
-        <Notify
-          message={message}
-          onOk={handleOk}
-          onQuit={handleQuit}
-          body={body}
-        />
-      )}
-
-      {/* Handle Show Notifications */}
+      <Notification />
       <View style={styles.container}>
         {!isDirection ? (
           <View style={styles.navbar}>
             <View style={styles.iconBack}>
-              <BackIcon onPress={goBack} />
+              <BackButton onPress={goBack} />
             </View>
             <View style={styles.single}>
               <SearchInput
-                origin={locations?.from}
                 onSearch={handleSearch}
                 placeholder="Search"
                 field="from"
+                region={locations?.from}
                 onToDirection={handleToDirectionandSearch}
                 isDirection={isDirection}
               />
@@ -151,11 +198,11 @@ const MapScreen = () => {
           <View style={[styles.navbar, styles.direction]}>
             <View style={styles.group}>
               <SearchInput
-                origin={locations?.from}
                 icon={FromLocationIcon}
                 onSearch={handleSearch}
                 placeholder="From"
                 field="from"
+                region={locations?.from}
                 onToDirection={handleToDirectionandSearch}
                 isDirection={isDirection}
                 zIndex={3}
@@ -164,7 +211,6 @@ const MapScreen = () => {
                 icon={ToLocationIcon}
                 onSearch={handleSearch}
                 placeholder="Where to"
-                origin={locations?.to}
                 field="to"
                 onToDirection={handleToDirectionandSearch}
                 isDirection={isDirection}
@@ -180,73 +226,27 @@ const MapScreen = () => {
           </View>
         )}
 
-        {locations?.from && (
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            region={{
-              ...locations?.from,
-              latitudeDelta: 0.009,
-              longitudeDelta: 0.009,
-            }}>
-            {locations?.to && GOOGLE_MAPS_API_KEY && (
-              <MapViewDirections
-                origin={locations?.from}
-                destination={locations?.to}
-                apikey={GOOGLE_MAPS_API_KEY}
-                strokeWidth={8}
-                strokeColor="#3A4C11"
-              />
-            )}
-            <View>
-              <CustomMarker
-                coordinate={locations.from}
-                title={locations?.to ? 'Begin' : 'Location'}
-                field="from"
-                onChangeLocation={handleChangeLocation}
-              />
-              <Circle
-                center={locations.from}
-                radius={500}
-                fillColor="#42ff22"
-                strokeWidth={2}
-              />
-            </View>
-            {locations?.to && (
-              <View>
-                <CustomMarker
-                  coordinate={locations.to}
-                  title="End"
-                  field="from"
-                  onChangeLocation={handleChangeLocation}
-                />
-                <Circle
-                  center={locations.to}
-                  radius={500}
-                  fillColor="#42ff22"
-                  strokeWidth={2}
-                />
-              </View>
-            )}
-          </MapView>
-        )}
-        {locations?.distance && (
+        {map}
+
+        {locations?.timeout && locations?.distance ? (
           <View style={styles.distanceInfo}>
-            {locations?.timeout && (
-              <CustomText
-                text={`Time: ${locations?.timeout}`}
-                type="text_medium_16"
-                color="blue"
-              />
-            )}
-            {locations?.distance && (
-              <CustomText
-                text={`Distance: ${locations.distance} km`}
-                type="text_medium_16"
-                color="blue"
-              />
-            )}
+            <CustomText
+              text={'Time: ' + formatTime(locations.timeout)}
+              type="text_medium_16"
+              color="blue"
+            />
+            <CustomText
+              text={
+                !locations?.distance
+                  ? '0 km'
+                  : `Distance: ${locations.distance} km`
+              }
+              type="text_medium_16"
+              color="blue"
+            />
           </View>
+        ) : (
+          <View />
         )}
       </View>
     </>

@@ -1,75 +1,144 @@
-import {useState, useContext, useEffect} from 'react';
-import database from '@react-native-firebase/database';
+import {
+  CURRENT_LOCATION,
+  MESSAGE_COMPLETED,
+  MESSAGE_IN_PROGRESS,
+  MESSAGE_PENDING,
+} from '@constants';
+import {Location, TMessage} from '@types';
+import firebase from '@react-native-firebase/firestore';
+import {useCallback, useContext, useEffect, useState} from 'react';
 
-import {TMessage} from '@types';
-import {EMessage} from '@enums/EMessage';
-import {callAPI} from '@services/api';
-import {Route} from '@constants/api';
 import {Context} from '@context';
+import {EStatusUser} from '@enums';
+import {getAsyncStorage, fetchDistanceAndTime} from '@utils';
 
-const useMessage = (uid?: string) => {
+const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const {removeMessage, currentUser} = useContext(Context);
+  const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    const fethMessage = async () => {
+    const unsubcribe = firebase()
+      .doc('messages/' + id)
+      .onSnapshot(snap => {
+        const mess: any = {id: snap.id, ...snap.data()};
+        setMessage(mess);
+      });
+
+    return () => unsubcribe();
+  }, [currentUser, id]);
+
+  const onComplete = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const update = {
+        status: MESSAGE_COMPLETED,
+        endAt: Date.now(),
+        userCompleted: currentUser?.id,
+      };
+
+      await firebase()
+        .doc('messages/' + id)
+        .update(update);
+    } catch (err: any) {
+      setError(err);
+    }
+
+    setLoading(false);
+  }, [currentUser?.id, id]);
+
+  const onComfirm = useCallback(async () => {
+    if (message) {
       setLoading(true);
-      if (uid) {
-        database()
-          .ref('/messages/' + uid)
-          .on('value', snapshot => {
-            const data = snapshot.val();
-            if (data) {
-              setMessage({...data});
-            } else {
-              database()
-                .ref('/messages/' + uid)
-                .off('value');
+      try {
+        const from = await getAsyncStorage<Location>(CURRENT_LOCATION);
+        const to = message.location;
+        if (from && to) {
+          const res = await fetchDistanceAndTime({to, from});
 
-              uid && removeMessage(uid);
+          if (res) {
+            const {distance, timeout} = res;
 
-              setMessage(undefined);
-            }
-          });
-      } else {
-        setMessage(undefined);
+            const update = {
+              status: MESSAGE_IN_PROGRESS,
+              workerID: currentUser?.id,
+              startAt: Date.now(),
+              distance,
+              timeout,
+            };
+
+            await firebase()
+              .doc('users/' + currentUser?.id)
+              .update({
+                location: from,
+                status: EStatusUser.BUSY,
+                startAt: Date.now(),
+              });
+
+            await firebase()
+              .doc('messages/' + id)
+              .update(update);
+          }
+        }
+      } catch (err: any) {
+        setError(err);
       }
 
       setLoading(false);
-    };
-
-    fethMessage();
-  }, [removeMessage, uid]);
-
-  const onComfirm = async () => {
-    if (uid) {
-      return await callAPI({
-        data: {
-          status: EMessage.MESSAGE_IN_PROGRESS,
-          serviceId: currentUser?.uid,
-        },
-        method: 'PUT',
-        route: `${Route.MESSAGE}/${uid}`,
-      });
     }
-  };
+  }, [currentUser?.id, id, message]);
 
-  const onComplete = async () => {
-    if (uid) {
-      return await callAPI({
-        data: {
-          status: EMessage.MESSAGE_COMPLETED,
-          serviverId: currentUser?.uid,
-        },
-        method: 'PUT',
-        route: `${Route.MESSAGE}/${uid}`,
-      });
+  const onAssign = useCallback(async (workerID: string) => {
+    setLoading(true);
+
+    await firebase()
+      .collection('assigns')
+      .add({workerID, messID: id, time: Date.now(), status: MESSAGE_PENDING});
+
+    setLoading(false);
+  }, []);
+
+  const onReject = useCallback(async () => {
+    if (currentUser) {
+      try {
+        setLoading(true);
+        const document = await firebase()
+          .collection('assigns')
+          .where('userID', '==', currentUser.id)
+          .where('messID', '==', id)
+          .get();
+        const nId = document.docs.at(0)?.id;
+        await firebase()
+          .doc('assigns/' + nId)
+          .update({status: 'reject'});
+      } catch (err) {}
+      setLoading(false);
     }
-  };
+  }, [currentUser, id]);
 
-  return {message, onComfirm, loading, onComplete};
+  const onDelete = useCallback(async () => {
+    setLoading(true);
+
+    await firebase()
+      .doc('messages/' + id)
+      .delete();
+
+    setLoading(false);
+  }, [id]);
+
+  return {
+    message,
+    error,
+    loading,
+    onComfirm,
+    onComplete,
+    onReject,
+    onDelete,
+    onAssign,
+  };
 };
 
 export default useMessage;

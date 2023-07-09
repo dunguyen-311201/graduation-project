@@ -1,61 +1,57 @@
 // import StorybookUIRoot from './.ondevice/Storybook';
-import React, {useMemo, useEffect, useState} from 'react';
-import {StyleSheet} from 'react-native';
+import React, {useState, useEffect} from 'react';
 import 'react-native-gesture-handler';
+import {StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {useAuth, useNotification} from './hooks';
 import {RootNavigation} from './navigation';
 import {Context, ContextProps} from './context';
-import auth from '@react-native-firebase/auth';
+import {getAsyncStorage} from './utils';
+import {FIRST_INSTALLED} from './constants';
 
 function App() {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [currentUser, setCurrentUser] = useState(auth().currentUser);
+  const {currentUser, isAuthenticated, signIn, signOut, signUp, loading} =
+    useAuth();
+  const [firstSignedIn, setFirstSignedIn] = useState(false);
+  const [_loading, setLoading] = useState(loading);
 
-  const isAuth = useMemo(
-    () => currentUser?.displayName !== undefined,
-    [currentUser?.displayName],
-  );
+  const {notify, hideNotify} = useNotification();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(isAuth);
+  useEffect(() => {
+    const setup = async () => {
+      setLoading(true);
+      const cache = await getAsyncStorage(FIRST_INSTALLED);
+      if (!cache) {
+        setFirstSignedIn(true);
+        return;
+      }
+      setLoading(false);
+    };
+
+    setup();
+  }, [isAuthenticated]);
 
   const store: ContextProps = {
     isAuthenticated,
-    onAuthenticated: setIsAuthenticated,
-    muids: messages,
+    loading: _loading,
     currentUser,
-    addMessage: (uid: string) => {
-      setMessages(prev => {
-        if (!prev.includes(uid)) {
-          return [...prev, uid];
-        }
-        return prev;
-      });
-    },
-    removeMessage: (uid: string) => {
-      setMessages(prev => {
-        if (prev.includes(uid)) {
-          return prev.filter(item => item !== uid);
-        }
-        return prev;
-      });
-    },
+    signIn,
+    signOut,
+    signUp,
+    notify,
+    hideNotify,
+    firstSignedIn,
   };
 
-  useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(user => {
-      setCurrentUser(user);
-    });
-
-    return subscriber;
-  }, []);
-
   return (
-    <Context.Provider value={store}>
-      <SafeAreaView style={styles.container}>
-        <RootNavigation />
-      </SafeAreaView>
-    </Context.Provider>
+    <View style={styles.container}>
+      <Context.Provider value={store}>
+        <SafeAreaView style={styles.container}>
+          <RootNavigation />
+        </SafeAreaView>
+      </Context.Provider>
+    </View>
   );
 }
 

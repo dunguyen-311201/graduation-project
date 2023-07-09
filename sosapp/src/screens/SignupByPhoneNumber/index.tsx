@@ -1,98 +1,76 @@
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
+import {BackHandler, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 
-import {Nation} from '@types';
 import {EScreen} from '@enums';
-import {PHONE, PHONES} from '@constants';
-import {getAsyncStorage} from '@utils';
 import {ArrowRightBlueIcon} from '@theme';
 import PhoneInput from './components/PhoneInput';
+import {CustomButton, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {ScreenBase, CustomText, Loading, Error} from '@components';
 
 const SignupByPhoneNumberScreen = () => {
-  const {navigate} =
+  const {navigate, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string>();
 
-  const [nation, setNation] = useState<Nation>({...PHONES[0]});
-
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState<string>('');
 
   useEffect(() => {
-    const setup = async () => {
-      const _phone = await getAsyncStorage<string>(PHONE);
-      if (_phone !== null) {
-        setPhone(_phone);
-      }
-    };
-
-    setup();
+    setOptions({headerShown: false});
   }, []);
 
   const handleNext = useCallback(async () => {
-    if (phone.replace(/\s/g, '').length !== 9) {
-      setError(true);
+    if (!phone) {
+      setError('Please enter a phone number');
       return;
     }
-    setLoading(true);
-    const phoneNumber = `${nation.code}${phone}`.replace(/\s/g, '');
+    try {
+      setLoading(true);
 
-    const result = await auth().signInWithPhoneNumber(phoneNumber);
+      const result = await auth().signInWithPhoneNumber(phone);
 
+      if (result.verificationId) {
+        navigate(EScreen.CONFIRM_PHONE_NUMBER, {
+          phone,
+          verificationId: result.verificationId,
+        });
+      }
+    } catch (err) {
+      setError('Please verify your phone number!');
+    }
     setLoading(false);
-    navigate(EScreen.CONFIRM_PHONE_NUMBER, {
-      phone: phoneNumber,
-      verificationId: result.verificationId,
-    });
-  }, [nation.code, navigate, phone]);
+  }, [phone]);
 
   const handleNavigateSocial = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_SOCIAL);
   }, [navigate]);
 
-  const handleChangePhone = useCallback(
-    (value: string) => {
-      if (error) {
-        setError(false);
-      }
-
-      const formattedValue = value.replace(/[^0-9]/g, '');
-      let formattedPhoneNumber = formattedValue.replace(
-        /(\d{3})(\d{3})(\d{3})/,
-        '$1 $2 $3',
-      );
-      setPhone(formattedPhoneNumber);
-    },
-    [error],
-  );
+  const handleChangePhone = useCallback((value: string) => {
+    setPhone(value);
+  }, []);
 
   return (
-    <ScreenBase title="Enter your phone number" onNext={handleNext}>
-      {loading && <Loading />}
+    <ScreenBase
+      title="Enter your phone number"
+      onNext={handleNext}
+      loading={loading}
+      disableNext={phone.length !== 12}
+      onBack={() => BackHandler.exitApp()}>
       <PhoneInput
-        nation={nation}
-        phone={phone}
-        onEndEditing={handleNext}
-        onChangeNation={setNation}
-        onChangePhone={handleChangePhone}
+        field="phone"
+        onEndEditing={handleChangePhone}
+        errorMessage={error}
       />
-      <TouchableOpacity
-        style={styles.buttonToSocial}
+      <CustomButton
+        label="Or connect with social"
+        type="secondary"
+        icon={ArrowRightBlueIcon}
         onPress={handleNavigateSocial}
-        disabled={phone.length === 9}>
-        <CustomText
-          text="Or connect with social"
-          type="text_medium_24"
-          color="blue"
-        />
-        <Image source={ArrowRightBlueIcon} style={styles.iconSocial} />
-      </TouchableOpacity>
-      {error && <Error message="Please check your phone number!" />}
+        customStyle={styles.button}
+      />
     </ScreenBase>
   );
 };
@@ -100,12 +78,7 @@ const SignupByPhoneNumberScreen = () => {
 export default SignupByPhoneNumberScreen;
 
 const styles = StyleSheet.create({
-  buttonToSocial: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  button: {
     marginTop: 22,
-  },
-  iconSocial: {
-    marginLeft: 10,
   },
 });

@@ -14,8 +14,25 @@
   ],
   "emulators": {
     "functions": {
-      "host": "192.168.1.106",
+      "host": "192.168.1.7",
       "port": "3000"
+    },
+    "singleProjectMode": true,
+    "database": {
+      "port": "9000"
+    },
+    "ui": {
+      "enabled": true
+    },
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
     }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

@@ -1,76 +1,74 @@
+import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
+import {CustomButton, CustomText, Loading} from '@components';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {Image, StyleSheet, View} from 'react-native';
-import React, {useContext, useMemo} from 'react';
+import React, {useContext, useState, useCallback} from 'react';
 
 import {Context} from '@context';
-import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
-import {handleLogout} from '@utils';
-import {CustomButton, CustomText} from '@components';
 import {EScreen} from '@enums';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
-  const {onAuthenticated, currentUser} = useContext(Context);
+  const {currentUser, signOut} = useContext(Context);
+  const [loading, setLoading] = useState(false);
 
-  const [icon, displayName] = useMemo(() => {
-    let _icon = ProfileIcon,
-      _displayName = 'User';
-
-    if (currentUser && currentUser !== null) {
-      if (currentUser.photoURL !== null) {
-        _icon = {uri: currentUser.photoURL};
-      }
-      if (currentUser.displayName !== null) {
-        _displayName = currentUser?.displayName;
-      }
+  const handleLogout = useCallback(async () => {
+    if (currentUser) {
+      setLoading(true);
+      await signOut();
+      setLoading(false);
     }
-    return [_icon, _displayName];
-  }, [currentUser]);
-
-  const _handleLogout = async () => {
-    await handleLogout();
-    onAuthenticated(false);
-  };
+  }, [currentUser, signOut]);
 
   const handleGoMessage = async () => {
     props.navigation.navigate(EScreen.MESSAGES);
   };
 
   return (
-    <View style={styles.container}>
-      <DrawerContentScrollView
-        {...props}
-        contentContainerStyle={styles.drawerContent}>
-        <View style={styles.profile}>
-          <View style={styles.content}>
-            <View style={styles.avatar}>
-              <Image source={icon} style={styles.img} />
+    <>
+      {loading && <Loading />}
+      <View style={styles.container}>
+        <DrawerContentScrollView
+          {...props}
+          contentContainerStyle={styles.drawerContent}>
+          <View style={styles.profile}>
+            <View style={styles.content}>
+              <View style={styles.avatar}>
+                <Image
+                  source={
+                    currentUser?.photoURL
+                      ? {uri: currentUser.photoURL}
+                      : ProfileIcon
+                  }
+                  style={styles.img}
+                />
+              </View>
+              <CustomText
+                text={currentUser?.displayName || 'User'}
+                customStyle={styles.name}
+                type="text_large_20"
+                color="white"
+              />
             </View>
-            <CustomText
-              text={displayName}
-              customStyle={styles.name}
-              type="text_large_20"
-              color="white"
+            <CustomButton
+              label="Notifications"
+              type="secondary"
+              customStyle={styles.buttonMessage}
+              onPress={handleGoMessage}
             />
           </View>
-          <CustomButton
-            label="Messages"
-            type="secondary"
-            customStyle={styles.buttonMessage}
-            onPress={handleGoMessage}
-          />
+          <View style={styles.list}>
+            <DrawerItemList {...props} />
+          </View>
+        </DrawerContentScrollView>
+        <View style={styles.bottom}>
+          <CustomButton label="Sign out" onPress={handleLogout} />
         </View>
-        <View style={styles.list}>
-          <DrawerItemList {...props} />
-        </View>
-      </DrawerContentScrollView>
-      <View style={styles.bottom}>
-        <CustomButton label="Sign out" onPress={_handleLogout} />
       </View>
-    </View>
+    </>
   );
 };
 

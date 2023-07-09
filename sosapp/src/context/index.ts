@@ -1,20 +1,26 @@
 import {createContext} from 'react';
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+
+import {TNotification, TUser} from '@types';
 
 export type ContextProps = {
-  onAuthenticated: (state: boolean) => void;
   isAuthenticated: boolean;
-  muids: string[];
-  addMessage: (uid: string) => void;
-  removeMessage: (uid: string) => void;
-  currentUser: FirebaseAuthTypes.User | null;
+  currentUser?: TUser;
+  loading: boolean;
+  signIn: (id: string) => Promise<void>;
+  signUp: () => Promise<void>;
+  signOut: () => Promise<void>;
+  notify: TNotification | null;
+  hideNotify: () => void;
+  firstSignedIn: boolean;
 };
 
 export const Context = createContext<ContextProps>({
-  onAuthenticated: () => {},
   isAuthenticated: false,
-  muids: [],
-  addMessage: () => {},
-  removeMessage: () => {},
-  currentUser: null,
+  loading: false,
+  signIn: async () => {},
+  signOut: async () => {},
+  signUp: async () => {},
+  notify: null,
+  hideNotify: () => {},
+  firstSignedIn: false,
 });

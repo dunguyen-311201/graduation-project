@@ -19,9 +19,9 @@ const NationSelect = ({nation, onSelect}: NationSelectProps) => {
     <Pressable style={styles.nationOption} onPress={onSelectNation}>
       <View style={styles.nationInfo}>
         <Image source={{uri: nation.url}} style={styles.flag} />
-        <CustomText text={nation.name} type="text_medium_24" />
+        <CustomText text={nation.name} type="text_medium_20" color="black" />
       </View>
-      <CustomText text={nation.code} type="text_medium_24" />
+      <CustomText text={nation.code} type="text_medium_20" color="black" />
     </Pressable>
   );
 };
@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
   nationInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    columnGap: 10,
   },
   name: {
     marginLeft: 10,

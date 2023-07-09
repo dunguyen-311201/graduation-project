@@ -1,17 +1,19 @@
 import CustomButton from './Button';
 import CustomInput from './Input';
+import CustomModal from './Modal';
+import CustomSwitch from './Switch';
 import CustomText from './Text';
 import DropDown from './DropDown';
-import Notify from '../Notify';
+import DropDown2 from './DropDown2';
 import Textreae from './Textarea';
-import CustomModal from './Modal';
 
 export {
   CustomButton,
   CustomInput,
   CustomText,
   DropDown,
-  Notify,
   Textreae,
   CustomModal,
+  CustomSwitch,
+  DropDown2,
 };

@@ -1,5 +1,6 @@
 export enum EMessage {
-  MESSAGE_PENDING = 'Pending',
-  MESSAGE_COMPLETED = 'Completed',
-  MESSAGE_IN_PROGRESS = 'In Progress',
+  MESSAGE_PENDING = 'pending',
+  MESSAGE_COMPLETED = 'completed',
+  MESSAGE_IN_PROGRESS = 'in progress',
+  EXPIRED = 'expired',
 }

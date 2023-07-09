@@ -6,4 +6,8 @@ export type Location = {
   altitudeAccuracy?: number;
   description?: string;
   city?: string;
+  nation?: string;
+  district?: string;
+  latitudeDelta?: number;
+  longitudeDelta?: number;
 };

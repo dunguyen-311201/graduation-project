@@ -1,6 +1,6 @@
+const API_ENDPOINT_TEST1 =
+  'http://192.168.1.7:3000/sosapp-386606/us-central1/app/';
 const API_ENDPOINT_TEST =
-  'http://192.168.1.106:3000/sosapp-386606/us-central1/app/';
-const API_ENDPOINT =
   'https://us-central1-sosapp-386606.cloudfunctions.net/app/';
 const Route = {
   MESSAGE: 'messages',
@@ -9,4 +9,4 @@ const Route = {
 
 const ERROR_CODE = 404;
 
-export {Route, API_ENDPOINT, API_ENDPOINT_TEST, ERROR_CODE};
+export {Route, API_ENDPOINT_TEST1, API_ENDPOINT_TEST, ERROR_CODE};

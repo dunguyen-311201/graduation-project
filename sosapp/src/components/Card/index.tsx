@@ -3,13 +3,14 @@ import React, {memo} from 'react';
 import {LIGHT_BLUE_COLOR, WHITE_COLOR} from '@theme/color';
 import {ImageSourcePropType} from 'react-native';
 
-import CustomText from '../common/Text';
+import {CustomText} from '../common';
 
 export type CardProps = {
   title: string;
   icon: ImageSourcePropType;
   onPress: () => void;
 };
+
 const Card = ({title, icon, onPress}: CardProps) => {
   return (
     <View style={styles.card}>

@@ -202,6 +202,12 @@ export const styles = StyleSheet.create({
     fontFamily: 'Roboto',
     color: GRAY_COLOR,
   },
+  text_medium_10: {
+    fontSize: 10,
+    fontWeight: '500',
+    fontFamily: 'Roboto',
+    color: GRAY_COLOR,
+  },
 });
 
 export const colors = StyleSheet.create({

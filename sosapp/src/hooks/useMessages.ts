@@ -1,70 +1,64 @@
-import {useContext, useEffect, useState} from 'react';
-import database, {FirebaseDatabaseTypes} from '@react-native-firebase/database';
+import firebase from '@react-native-firebase/firestore';
+import {useContext, useEffect, useState, useCallback} from 'react';
 
-import {TMessage} from '@types';
 import {Context} from '@context';
+import {TMessage} from '@types';
 
-const useMessages = (type: number = 0) => {
+const useMessages = (workerID?: string) => {
   const [messages, setMessages] = useState<TMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    const handleSubcribeData = async (
-      snapshot: FirebaseDatabaseTypes.DataSnapshot,
-    ) => {
-      if (snapshot.val()) {
-        let val;
-        let message;
-        const resutls = await Promise.all(
-          Object.keys(snapshot.val()).map(async key => {
-            val = (
-              await database()
-                .ref('/messages/' + key)
-                .once('value')
-            ).val();
-
-            message = {
-              uid: val.uid,
-              type: val.type,
-              description: val.description,
-              userId: val.userId,
-              location: val.location,
-              status: val.status,
-              serviceId: val.serviceId,
-            };
-            return message;
-          }),
-        );
-        setMessages(resutls);
-        setLoading(false);
-      }
-    };
-    const getData = async () => {
-      setLoading(true);
-
+    if (currentUser) {
       try {
-        if (currentUser?.uid) {
-          setLoading(true);
-          const ref = database().ref(
-            '/user-messages/' + currentUser.uid + '/' + type,
+        const collection = firebase().collection('messages');
+
+        let query;
+        if (workerID) {
+          query = collection.where('workerID', '==', workerID);
+        } else {
+          query = collection.where(
+            currentUser.role + 'ID',
+            '==',
+            currentUser.id,
           );
-
-          ref.on('value', handleSubcribeData);
-          ref.on('child_removed', handleSubcribeData);
         }
-      } catch (err: any) {
-        setError(err);
-      }
-      setLoading(false);
-    };
 
-    getData();
-  }, [currentUser?.uid, type]);
+        const unsubcribe = query.onSnapshot(snap => {
+          const newData: TMessage[] = [];
+          snap?.docs.forEach(doc => {
+            const id = doc.id;
+            const data = doc.data() as TMessage;
+            newData.push({...data, id});
+          });
 
-  return {messages, loading, error};
+          setMessages(newData.sort((a, b) => b.time - a.time));
+        });
+
+        return () => unsubcribe();
+      } catch (error) {}
+    }
+  }, [currentUser, workerID]);
+
+  const onDelete = useCallback(async (id: string) => {
+    setLoading(true);
+    await firebase()
+      .doc('messages/' + id)
+      .delete();
+    setMessages(prev => prev.filter(msg => msg.id !== id));
+    setLoading(false);
+  }, []);
+
+  const onNew = useCallback(async (mess: TMessage) => {
+    setLoading(true);
+    const docRef = await firebase().collection('messages').add(mess);
+    setMessages(prev => [{...mess, id: docRef.id}, ...prev]);
+    setLoading(false);
+  }, []);
+
+  return {messages, onDelete, onNew, loading};
 };
 
 export default useMessages;
