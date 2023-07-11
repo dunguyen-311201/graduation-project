@@ -6,8 +6,8 @@ import React, {
 } from 'react';
 import {StyleSheet, View, TextInput, TextInputProps} from 'react-native';
 
-import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
 import CustomText from '../Text';
+import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
 
 interface TextareaProps extends TextInputProps {
   field: string;

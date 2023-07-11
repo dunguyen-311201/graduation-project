@@ -1,7 +1,3 @@
-import {useNavigation} from '@react-navigation/native';
-import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useEffect, useState, useContext} from 'react';
-
 import {
   BellIcon,
   GoMapIcon,
@@ -20,21 +16,34 @@ import {
   SearchInput,
 } from '@components';
 import {ERole, EScreen} from '@enums';
+import {Image, StyleSheet, View} from 'react-native';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {getAsyncStorage, requestLocationPermission} from '@utils';
+
+import {CURRENT_LOCATION} from '@constants';
 import {Context} from '@context';
 import {Location} from '@types';
-import {CURRENT_LOCATION} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
-import {getAsyncStorage, requestLocationPermission} from '@utils';
+import {useNavigation} from '@react-navigation/native';
 
 const HomeScreen = () => {
   const {navigate, openDrawer} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   const {currentUser} = useContext(Context);
-  const [_location, setLocation] = useState<Location | null>(null);
+  const [location, setLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = useCallback(async () => {
+  useEffect(() => {
+    const setup = async () => {
+      const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
+      cacheLocation && setLocation(cacheLocation);
+    };
+
+    setup();
+  }, []);
+
+  const handleTurnOnLocation = useCallback(async () => {
     setLoading(true);
     await requestLocationPermission();
     const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
@@ -55,7 +64,7 @@ const HomeScreen = () => {
   }, []);
 
   const handleRequests = useCallback(() => {
-    navigate(EScreen.MESSAGES);
+    navigate(EScreen.MESSAGES, {mode: true});
   }, []);
 
   return (
@@ -78,9 +87,9 @@ const HomeScreen = () => {
             customStyle={styles.title}
           />
           <CustomButton
-            label={_location ? 'Location is on' : 'Turn on location'}
+            label={location ? 'Location is on' : 'Turn on location'}
             type="outline"
-            onPress={handleUpgrade}
+            onPress={handleTurnOnLocation}
           />
         </View>
       </View>

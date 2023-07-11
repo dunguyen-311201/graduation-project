@@ -40,7 +40,6 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-const rdb = admin.database();
 const auth = admin.auth();
 
 const app = express();
@@ -50,6 +49,7 @@ app.use(cors({ origin: true }));
 const messColection = db.collection(ROUTE_MESSAGES);
 const userColection = db.collection(ROUTE_USERS);
 const assignColection = db.collection(ROUTE_ASSIGNS);
+const notifyColection = db.collection(ROUTE_NOTIFICATIONS);
 
 app.post(`/${ROUTE_USERS}/new-worker`, async (req, res) => {
   try {
@@ -112,6 +112,7 @@ exports.newRequest = functions.firestore
         row = doc.data();
 
         if (
+          row.lastLogin !== null &&
           row.location.city === location.city &&
           geolib.isPointWithinRadius(
             { ...row.location },
@@ -143,7 +144,6 @@ exports.newRequest = functions.firestore
           token: user.token,
         };
 
-        // batch.update(userColection.doc(userID), { status: USER_FREE });
         batch.update(messColection.doc(id), { status: MESSAGE_EXRIPED });
 
         await batch.commit();
@@ -175,16 +175,13 @@ exports.newRequest = functions.firestore
         time: Date.now(),
       };
 
-      const refs = rdb.ref("/" + ROUTE_NOTIFICATIONS);
-
-      const updates = {};
+      const updates = [];
 
       ids.forEach((id) => {
-        const ref = refs.child("/" + id).push();
-        updates[id + "/" + ref.key] = notification;
+        const docRef = notifyColection.doc();
+        batch.create(docRef, { ...notification, userID: id });
+        updates.push(docRef);
       });
-
-      await refs.update(updates);
 
       //////
 
@@ -194,7 +191,7 @@ exports.newRequest = functions.firestore
 
       /////// Handle Timeout
 
-      const timeout = 1000 * 60;
+      const timeout = 10000 * 60;
 
       const timeID = setTimeout(async () => {
         const batch = db.batch();
@@ -221,12 +218,12 @@ exports.newRequest = functions.firestore
           batch.update(messColection.doc(id), { status: MESSAGE_EXRIPED });
           batch.update(userColection.doc(userID), { status: USER_FREE });
 
-          Object.keys(updates).forEach((key) => {
-            updates[key] = null;
+          updates.forEach((ref) => {
+            batch.delete(ref);
           });
-          await refs.child("/" + userID).push(notification);
 
-          await refs.update(updates);
+          const docRefU = notifyColection.doc();
+          batch.create(docRefU, { ...notification, userID });
 
           await admin.messaging().send(message);
           await batch.commit();
@@ -257,7 +254,6 @@ exports.handleRequest = functions.firestore
       ).data();
 
       if (user && worker && service && status) {
-        console.log(260, "pass");
         const ids = [];
         const tokens = [];
         let actual;
@@ -296,7 +292,6 @@ exports.handleRequest = functions.firestore
         ).data().count;
 
         if (status === MESSAGE_IN_PROGRESS) {
-          console.log(299, MESSAGE_IN_PROGRESS);
           if (countWorkerInAvailableCenter === 0) {
             batch.update(userColection.doc(worker.centerID), {
               status: USER_UNAVAILABLE,
@@ -323,13 +318,10 @@ exports.handleRequest = functions.firestore
             status: MESSAGE_IN_PROGRESS,
           });
 
-          console.log(324, assignID);
-
           ////
 
           actual = "comfirmed the request!";
         } else {
-          console.log(332, MESSAGE_COMPLETED);
           let time = worker.time || 0;
           let wDistance = worker.distance || 0;
           if (worker.startAt) {
@@ -351,7 +343,6 @@ exports.handleRequest = functions.firestore
               .get()
           ).docs.at(0).id;
 
-          console.log(354, assignID);
           batch.update(assignColection.doc(assignID), {
             status: MESSAGE_COMPLETED,
           });
@@ -384,9 +375,6 @@ exports.handleRequest = functions.firestore
           tokens,
         };
 
-        // handle Send Notification
-        ///////
-
         const notification = {
           body: `${name} ${actual}`,
           title: type,
@@ -394,15 +382,10 @@ exports.handleRequest = functions.firestore
           time: Date.now(),
         };
 
-        const refs = rdb.ref("/" + ROUTE_NOTIFICATIONS);
-        const update = {};
-
         ids.forEach((id) => {
-          const ref = refs.child("/" + id).push();
-          update[id + "/" + ref.key] = notification;
+          const docRef = notifyColection.doc();
+          batch.create(docRef, { ...notification, userID: id });
         });
-
-        await refs.update(update);
 
         /////////
 
@@ -432,11 +415,10 @@ exports.serviceAssign = functions.firestore
           data: { id: messID, tID: id },
           body: "You are assigned to rescue from the center.",
           time: Date.now(),
+          userID: workerID,
         };
 
-        const ref = await rdb
-          .ref(ROUTE_NOTIFICATIONS + "/" + workerID)
-          .push(notification);
+        const docRef = await notifyColection.add(notification);
 
         let message = {
           notification: {
@@ -460,7 +442,7 @@ exports.serviceAssign = functions.firestore
               await userColection.doc(worker.centerID).get()
             ).data();
 
-            await ref.remove();
+            await docRef.delete();
 
             message = {
               notification: {
@@ -477,11 +459,10 @@ exports.serviceAssign = functions.firestore
               data: { id: messID },
               body: "Not Found " + worker.displayName + " response!",
               time: Date.now(),
+              userID: worker.centerID,
             };
 
-            await rdb
-              .ref("/" + ROUTE_NOTIFICATIONS + "/" + worker.centerID)
-              .push(notification);
+            await notifyColection.add(notification);
 
             await admin.messaging().send(message);
           }
@@ -492,9 +473,7 @@ exports.serviceAssign = functions.firestore
           };
         }, timeout);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
 
     return null;
   });
@@ -533,15 +512,14 @@ exports.workerReject = functions.firestore
               title: "REJECT ASSIGN",
               time: Date.now(),
               data: { id: messID },
+              userID: centerID,
             };
 
             await userColection
               .doc(workerID)
               .update({ status: USER_UNAVAILABLE });
 
-            await rdb
-              .ref("/" + ROUTE_NOTIFICATIONS + "/" + centerID)
-              .push(notification);
+            await notifyColection.add(notification);
             await admin.messaging().send(message);
           }
         }
@@ -581,7 +559,7 @@ exports.workers = functions.firestore
     return null;
   });
 
-exports.Authentication = functions.firestore
+exports.signIn = functions.firestore
   .document(`${ROUTE_USERS}/{id}`)
   .onUpdate(async (snap, context) => {
     try {
@@ -604,3 +582,19 @@ exports.Authentication = functions.firestore
     } catch (error) {}
     return null;
   });
+
+// exports.signUp = functions.firestore
+//   .document(`${ROUTE_USERS}/{id}`)
+//   .onCreate(async (snap, context) => {
+//     try {
+//       const { role, centerID, displayName } = snap.data();
+//       const id = context.params.id;
+
+//       if (centerID) {
+//        admin.auth().createUser({displayName, uid:id,email: })
+//       }
+//     } catch (error) {
+//       console.log(598, error);
+//     }
+//     return null;
+//   });

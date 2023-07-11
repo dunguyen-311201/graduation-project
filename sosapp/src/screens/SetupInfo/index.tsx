@@ -1,5 +1,7 @@
+import {CURRENT_LOCATION, USER_CACHE} from '@constants';
 import {CustomInput, CustomSwitch, ScreenBase} from '@components';
 import {EScreen, EUser} from '@enums';
+import {Location, TRole} from '@types';
 import React, {
   useCallback,
   useContext,
@@ -8,17 +10,15 @@ import React, {
   useState,
 } from 'react';
 import {StyleSheet, TextInput, View} from 'react-native';
+import {
+  getAsyncStorage,
+  requestLocationPermission,
+  setAsyncStorage,
+} from '@utils';
 
 import {Context} from '@context';
 import {RootScreenNavigationProps} from '@navigation';
-import {
-  getAsyncStorage,
-  setAsyncStorage,
-  requestLocationPermission,
-} from '@utils';
 import {useNavigation} from '@react-navigation/native';
-import {Location, TRole} from '@types';
-import {CURRENT_LOCATION, USER_CACHE} from '@constants';
 
 type FormData = {
   [EUser.displayName]?: string;
@@ -69,17 +69,19 @@ const SetupInfoScreen = () => {
       let newCache = {
         ...db,
         displayName: `${firstName} ${lastName}`,
+        role: 'user',
       };
 
       if (isCenter) {
         newCache = {...newCache, role: 'center'};
       }
+
       const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
       if (cache) {
         newCache = {...newCache, location: cache};
       }
 
-      firstName && lastName && (await setAsyncStorage(USER_CACHE, newCache));
+      await setAsyncStorage(USER_CACHE, newCache);
 
       navigate(EScreen.CONFIRM_POLICY);
     } catch (_error) {}

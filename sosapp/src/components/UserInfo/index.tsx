@@ -1,10 +1,17 @@
-import React, {memo} from 'react';
-import {StyleSheet, Pressable, View, ViewStyle} from 'react-native';
-
+import {
+  Alert,
+  Linking,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
+import {CustomButton, CustomText} from '../common';
 import {GRAY_COLOR, TEXT_COLOR} from '@theme';
-import {CustomText} from '../common';
-import useUsers from '@hooks/useUsers';
-import {StyleProp} from 'react-native';
+import React, {memo, useCallback} from 'react';
+
+import {useUsers} from '@hooks';
 
 type UserInfoProps = {
   id?: string;
@@ -23,6 +30,23 @@ const UserInfo = ({
 }: UserInfoProps) => {
   const {user} = useUsers(id);
 
+  const makePhoneCall = useCallback((phoneNumber: string) => {
+    const phoneUrl = `tel:${phoneNumber}`;
+
+    Linking.canOpenURL(phoneUrl)
+      .then(supported => {
+        if (supported) {
+          return Linking.openURL(phoneUrl);
+        } else {
+          Alert.alert(
+            'Phone Call Not Supported',
+            'Please try contacting through alternative methods.',
+          );
+        }
+      })
+      .catch(error => console.log(error));
+  }, []);
+
   return (
     <Pressable
       style={[
@@ -37,18 +61,19 @@ const UserInfo = ({
         <View style={styles.row}>
           <CustomText
             text={user.displayName}
-            type="text_medium_14"
-            color="blue"
+            type="text_medium_16"
+            color="black"
           />
         </View>
       )}
 
       {user?.phoneNumber ? (
         <View style={styles.row}>
-          <CustomText
-            text={user.phoneNumber || ''}
-            type="text_medium_14"
-            color="black"
+          <CustomButton
+            label={user.phoneNumber}
+            onPress={makePhoneCall}
+            type="secondary"
+            customStyle={styles.phone}
           />
         </View>
       ) : (
@@ -56,7 +81,7 @@ const UserInfo = ({
           <CustomText
             text={user?.email || ''}
             type="text_medium_14"
-            color="black"
+            color="blue"
           />
         </View>
       )}
@@ -80,5 +105,8 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+  },
+  phone: {
+    fontSize: 14,
   },
 });

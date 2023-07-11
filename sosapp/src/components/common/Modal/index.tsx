@@ -2,8 +2,8 @@ import {
   Keyboard,
   Modal,
   StyleSheet,
-  TouchableWithoutFeedback,
   View,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useCallback} from 'react';
 

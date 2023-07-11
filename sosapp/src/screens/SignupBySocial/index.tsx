@@ -1,11 +1,11 @@
-import {FacebookIcon, GmailIcon, GoogleIcon} from '@theme';
-import React, {useCallback, useEffect} from 'react';
-import {ScreenBase, Social} from '@components';
+import React, {useCallback} from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import {EScreen} from '@enums';
+import {ScreenBase, Social} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {useNavigation} from '@react-navigation/native';
+import {FacebookIcon, GmailIcon, GoogleIcon} from '@theme';
 
 const SignupBySocialScreen = () => {
   const {navigate, goBack} =

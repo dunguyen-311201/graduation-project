@@ -1,29 +1,29 @@
+import {DARK_GRAY_COLOR, DropDownIcon, WHITE_COLOR} from '@theme';
 import {
   FlatList,
-  TextInput,
   Image,
   Pressable,
   StyleSheet,
+  TextInput,
   View,
 } from 'react-native';
-import React, {memo, useCallback, useState} from 'react';
+import React, {memo, useCallback, useRef, useState} from 'react';
 
-import {Nation} from '@types';
-import {PHONES} from '@constants';
 import {CustomText} from '@components';
+import {Nation} from '@types';
 import NationSelect from './NationSelect';
-import {WHITE_COLOR, DropDownIcon, DARK_GRAY_COLOR} from '@theme';
+import {PHONES} from '@constants';
 
 type PhoneInputProps = {
-  field: string;
   errorMessage?: string;
-  onEndEditing: (value: string, field: string) => void;
+  onEndEditing: (value: string) => void;
 };
 
-const PhoneInput = ({field, onEndEditing, errorMessage}: PhoneInputProps) => {
+const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
   const [phone, setPhone] = useState('');
-  const [national, setNational] = useState<Nation>(PHONES.at(0));
+  const refInput = useRef<TextInput>();
+  const [national, setNational] = useState<Nation | undefined>(PHONES.at(0));
 
   const handleSelectNation = useCallback((code: string) => {
     const _nation = PHONES.find(item => item.code === code);
@@ -31,6 +31,26 @@ const PhoneInput = ({field, onEndEditing, errorMessage}: PhoneInputProps) => {
       setNational(_nation);
       setIsvisible(false);
     }
+  }, []);
+
+  const handleChangePhone = useCallback((value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    let formatted;
+
+    if (value.length < 6) {
+      formatted = cleaned.replace(/(\d{3})(\d{1})/, '$1 $2');
+    } else if (value.length === 6) {
+      formatted = cleaned.replace(/(\d{3})(\d{3})/, '$1 $2');
+    } else {
+      formatted = cleaned.replace(/(\d{3})(\d{3})(\d{1})/, '$1 $2 $3');
+    }
+
+    if (formatted.length === 11) {
+      refInput.current?.blur();
+      onEndEditing(national?.code + cleaned);
+    }
+
+    setPhone(formatted);
   }, []);
 
   const _renderItem = useCallback(
@@ -47,12 +67,6 @@ const PhoneInput = ({field, onEndEditing, errorMessage}: PhoneInputProps) => {
     [],
   );
 
-  const handleEndEdit = useCallback(() => {
-    if (national && phone) {
-      onEndEditing(national.code + phone, field);
-    }
-  }, [national, phone]);
-
   return (
     <View style={styles.container}>
       <View style={styles.phoneInput}>
@@ -67,19 +81,19 @@ const PhoneInput = ({field, onEndEditing, errorMessage}: PhoneInputProps) => {
         )}
         <View style={styles.nation}>
           <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
-            <Image source={{uri: national.url}} style={styles.flag} />
+            <Image source={{uri: national?.url}} style={styles.flag} />
             <Image source={DropDownIcon} style={styles.dropDown} />
           </Pressable>
-          <CustomText text={national.code} type="text_medium_24" />
+          <CustomText text={national?.code} type="text_medium_24" />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
             style={styles.input}
             value={phone}
-            onChangeText={setPhone}
-            onEndEditing={handleEndEdit}
+            onChangeText={handleChangePhone}
             inputMode="numeric"
-            maxLength={9}
+            maxLength={11}
+            ref={refInput}
             selectTextOnFocus
           />
           {errorMessage && (

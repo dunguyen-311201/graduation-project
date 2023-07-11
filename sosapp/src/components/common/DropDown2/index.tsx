@@ -1,8 +1,8 @@
-import {BLACK_COLOR, WHITE_COLOR} from '@theme';
-import {FlatList, Pressable, StyleSheet, View} from 'react-native';
 import React, {useCallback, useMemo, useState} from 'react';
+import {FlatList, Pressable, StyleSheet, View} from 'react-native';
 
 import CustomText from '../Text';
+import {BLACK_COLOR, WHITE_COLOR} from '@theme';
 
 export type TDataDropDown = {id: string; value: string};
 

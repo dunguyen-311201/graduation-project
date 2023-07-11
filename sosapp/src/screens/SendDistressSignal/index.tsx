@@ -1,15 +1,4 @@
-import React, {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import {useNavigation, RouteProp, useRoute} from '@react-navigation/native';
-import firebase from '@react-native-firebase/firestore';
-import {StyleSheet, TextInput, View} from 'react-native';
-
+import {CURRENT_LOCATION, MESSAGE_PENDING, types} from '@constants';
 import {
   CustomText,
   DropDown,
@@ -18,13 +7,23 @@ import {
   SearchInput,
   Textreae,
 } from '@components';
-import {EScreen} from '@enums';
-import {Location} from '@types';
-import {Context} from '@context';
+import {ERole, EScreen} from '@enums';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {StyleSheet, TextInput, View} from 'react-native';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
-import {CURRENT_LOCATION, MESSAGE_PENDING, types} from '@constants';
-import {RootScreenNavigationProps} from '@navigation';
+
+import {Context} from '@context';
+import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation';
 
 type FormData = {
   description?: string;
@@ -52,9 +51,11 @@ const SendDistreeSignal = () => {
     location: null,
   });
 
-  requestLocationPermission(0);
-
   useEffect(() => {
+    currentUser?.role === ERole.WORKER
+      ? requestLocationPermission(1)
+      : requestLocationPermission();
+
     const setup = async () => {
       const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
       if (cache) {
@@ -63,7 +64,7 @@ const SendDistreeSignal = () => {
     };
 
     setup();
-  }, []);
+  }, [currentUser]);
 
   const sendSignal = useCallback(async () => {
     if (currentUser) {

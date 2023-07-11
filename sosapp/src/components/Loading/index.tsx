@@ -1,4 +1,4 @@
-import {Modal, View, StyleSheet, ActivityIndicator} from 'react-native';
+import {ActivityIndicator, Modal, StyleSheet, View} from 'react-native';
 import React, {memo} from 'react';
 
 const Loading = () => {

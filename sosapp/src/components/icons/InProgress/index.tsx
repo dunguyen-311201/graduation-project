@@ -1,7 +1,6 @@
 import {Image} from 'react-native';
-import React from 'react';
-
 import {InProgressIcon} from '@theme';
+import React from 'react';
 
 const InProgress = () => {
   return <Image source={InProgressIcon} />;

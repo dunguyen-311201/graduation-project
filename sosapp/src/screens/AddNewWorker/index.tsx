@@ -1,14 +1,14 @@
 import {StyleSheet, View} from 'react-native';
-import {Field, validate} from '@utils';
-import {CustomInput, ScreenBase} from '@components';
 import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 
-import {Context} from '@context';
-import {DARK_GRAY_COLOR} from '@theme';
 import {EScreen} from '@enums';
+import {Context} from '@context';
+import {callAPI} from '@services';
+import {DARK_GRAY_COLOR} from '@theme';
+import {Field, validate} from '@utils';
+import {CustomInput, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {callAPI} from '@services/api';
 
 type TWorker = {
   id?: string;

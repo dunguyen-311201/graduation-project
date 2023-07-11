@@ -5,12 +5,12 @@ import {
   MESSAGE_PENDING,
 } from '@constants';
 import {Location, TMessage} from '@types';
-import firebase from '@react-native-firebase/firestore';
+import {fetchDistanceAndTime, getAsyncStorage} from '@utils';
 import {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
 import {EStatusUser} from '@enums';
-import {getAsyncStorage, fetchDistanceAndTime} from '@utils';
+import firebase from '@react-native-firebase/firestore';
 
 const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
@@ -23,8 +23,11 @@ const useMessage = (id: string) => {
     const unsubcribe = firebase()
       .doc('messages/' + id)
       .onSnapshot(snap => {
-        const mess: any = {id: snap.id, ...snap.data()};
-        setMessage(mess);
+        const data = snap.data() as TMessage;
+        if (data) {
+          const mess: any = {...data, id};
+          setMessage(mess);
+        }
       });
 
     return () => unsubcribe();

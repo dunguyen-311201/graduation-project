@@ -1,5 +1,6 @@
-import {FlatList, StyleSheet, View, Pressable} from 'react-native';
 import React, {memo, useCallback, useState} from 'react';
+import {FlatList, StyleSheet, View, Pressable} from 'react-native';
+
 import CustomText from '../Text';
 import {BLACK_COLOR, WHITE_COLOR} from '@theme';
 

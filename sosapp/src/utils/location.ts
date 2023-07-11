@@ -2,12 +2,12 @@ import {Alert, Linking, PermissionsAndroid, Platform} from 'react-native';
 import Geolocation, {
   GeolocationResponse,
 } from '@react-native-community/geolocation';
-import {Location} from '@types';
 import {getAsyncStorage, setAsyncStorage} from './asyncStorage';
 
 import {CURRENT_LOCATION} from '@constants';
 import Config from 'react-native-config';
 import DeviceInfo from 'react-native-device-info';
+import {Location} from '@types';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -87,7 +87,6 @@ const requestLocationPermission = async (c: 0 | 1 = 1) => {
           location && (await setAsyncStorage(CURRENT_LOCATION, location));
           return;
         }
-        // await setAsyncStorage(CURRENT_LOCATION, position.coords);
 
         return;
       }

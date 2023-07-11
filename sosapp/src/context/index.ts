@@ -1,17 +1,17 @@
-import {createContext} from 'react';
-
 import {TNotification, TUser} from '@types';
+
+import {createContext} from 'react';
 
 export type ContextProps = {
   isAuthenticated: boolean;
-  currentUser?: TUser;
+  currentUser: TUser | null;
   loading: boolean;
   signIn: (id: string) => Promise<void>;
   signUp: () => Promise<void>;
   signOut: () => Promise<void>;
   notify: TNotification | null;
   hideNotify: () => void;
-  firstSignedIn: boolean;
+  updateProfile: (update: TUser) => Promise<void>;
 };
 
 export const Context = createContext<ContextProps>({
@@ -22,5 +22,6 @@ export const Context = createContext<ContextProps>({
   signUp: async () => {},
   notify: null,
   hideNotify: () => {},
-  firstSignedIn: false,
+  updateProfile: async () => {},
+  currentUser: null,
 });

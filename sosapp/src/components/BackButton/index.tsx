@@ -1,8 +1,8 @@
 import React, {memo} from 'react';
+import {StyleSheet, View} from 'react-native';
 
 import {BackIcon} from '@theme';
 import {CustomButton} from '../common';
-import {StyleSheet} from 'react-native';
 
 type Iconprops = {
   onPress?: () => void;
@@ -10,12 +10,14 @@ type Iconprops = {
 
 const BackButton = ({onPress}: Iconprops) => {
   return (
-    <CustomButton
-      icon={BackIcon}
-      type="secondary"
-      customStyle={styles.button}
-      onPress={onPress}
-    />
+    <>
+      <CustomButton
+        icon={BackIcon}
+        type="secondary"
+        customStyle={styles.button}
+        onPress={onPress}
+      />
+    </>
   );
 };
 

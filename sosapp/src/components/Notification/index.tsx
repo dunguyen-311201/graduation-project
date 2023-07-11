@@ -1,11 +1,11 @@
-import React, {memo, useCallback, useEffect, useRef} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import {Animated, Easing, StyleSheet} from 'react-native';
+import React, {memo, useCallback, useEffect, useRef} from 'react';
 
 import {EScreen} from '@enums';
 import NotifyCard from './NotifyCard';
-import {useNotification} from '@hooks';
 import {RootScreenNavigationProps} from '@navigation';
+import {useNavigation} from '@react-navigation/native';
+import {useNotification} from '@hooks';
 
 const Notification = () => {
   const hideAnim = useRef(new Animated.Value(0)).current;
@@ -42,8 +42,6 @@ const Notification = () => {
   const handleAction = useCallback(() => {
     notify && navigate(EScreen.DETAIL_MESSAGE, notify);
   }, [notify]);
-
-  console.log(46, notify);
 
   return (
     <>

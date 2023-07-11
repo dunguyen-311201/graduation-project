@@ -1,7 +1,7 @@
-import React from 'react';
-import {Pressable, Image} from 'react-native';
+import {Image, Pressable} from 'react-native';
 
 import {MenuIcon} from '@theme';
+import React from 'react';
 
 type MenuButtonProps = {
   marginTop?: number;

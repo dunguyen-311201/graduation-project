@@ -14,24 +14,28 @@ const useWorker = (free?: boolean) => {
 
   const subscribeChanges = useCallback(() => {
     if (currentUser) {
-      const {id} = currentUser;
+      try {
+        const {id} = currentUser;
 
-      const collection = firebase().collection('users');
+        const collection = firebase().collection('users');
 
-      let query = collection.where('centerID', '==', id);
-      if (free) {
-        query = query.where('status', '==', 'free');
-      }
-
-      return query.onSnapshot(snap => {
-        if (snap?.docs.length > 0) {
-          const newData: any[] = [];
-          snap.docs.forEach(doc => {
-            newData.push({id: doc.id, ...doc.data()});
-          });
-          setData(newData);
+        let query = collection.where('centerID', '==', id);
+        if (free) {
+          query = query.where('status', '==', 'free');
         }
-      });
+
+        return query.onSnapshot(snap => {
+          if (snap?.docs.length > 0) {
+            const newData: any[] = [];
+            snap?.docs.forEach(doc => {
+              newData.push({id: doc.id, ...doc.data()});
+            });
+            setData(newData);
+          }
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
   }, [currentUser, free]);
 

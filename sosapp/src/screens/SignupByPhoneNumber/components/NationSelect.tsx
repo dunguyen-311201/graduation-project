@@ -1,9 +1,8 @@
-import {StyleSheet, View} from 'react-native';
 import React, {memo, useCallback} from 'react';
-import {Pressable} from 'react-native';
-import {Image} from 'react-native';
-import {CustomText} from '@components/common';
+import {StyleSheet, View, Image, Pressable} from 'react-native';
+
 import {Nation} from '@types';
+import {CustomText} from '@components';
 
 type NationSelectProps = {
   nation: Nation;

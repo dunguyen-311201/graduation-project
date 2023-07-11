@@ -1,18 +1,9 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import {Alert, StyleSheet, View} from 'react-native';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-
 import {
   ActiveIcon,
   CustomButton,
   DropDown,
   DropDown2,
+  EmptyListComponent,
   ExpiredIcon,
   InProgressIcon,
   PendingIcon,
@@ -20,13 +11,22 @@ import {
   Textreae,
   UserInfo,
 } from '@components';
-import {Context} from '@context';
+import {Alert, StyleSheet, View} from 'react-native';
 import {EMessage, ERole, EScreen} from '@enums';
-import {requestLocationPermission} from '@utils';
-import {RootScreenNavigationProps} from '@navigation';
-import {useMessage, useUsers, useWorker} from '@hooks';
-import {RootParamList} from '@navigation/RootNavigation';
 import {MESSAGE_IN_PROGRESS, MESSAGE_PENDING, types} from '@constants';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {useMessage, useUsers, useWorker} from '@hooks';
+
+import {Context} from '@context';
+import {RootParamList} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.DETAIL_MESSAGE>;
 
@@ -54,10 +54,6 @@ const DetailMessage = () => {
       })),
     [workers],
   );
-
-  currentUser?.role === ERole.WORKER
-    ? requestLocationPermission(1)
-    : requestLocationPermission();
 
   useEffect(() => {
     if (message?.status) {
@@ -141,88 +137,92 @@ const DetailMessage = () => {
             }
           : {}),
       })}>
-      <View style={styles.content}>
-        <View>
-          <View style={styles.row}>
-            <UserInfo
-              id={message?.userID}
-              onLongPress={() => {}}
-              customStyle={styles.item}
-            />
+      {message && currentUser ? (
+        <View style={styles.content}>
+          <View>
+            <View style={styles.row}>
+              <UserInfo
+                id={message.userID}
+                onLongPress={() => {}}
+                customStyle={styles.item}
+              />
 
-            <UserInfo id={message?.workerID} customStyle={styles.item} />
+              <UserInfo id={message.workerID} customStyle={styles.item} />
+            </View>
+          </View>
+
+          <DropDown
+            data={types}
+            initValue={message.type}
+            onSelect={() => {}}
+            field="type"
+            title="Type"
+            zIndex={1}
+            disabled={true}
+          />
+
+          <Textreae
+            title="Description"
+            field="description"
+            onChangeText={handleMap}
+            value={message.description}
+            editable={currentUser?.role !== 'user'}
+          />
+
+          <CustomButton
+            type="secondary"
+            onPress={handleMap}
+            customStyle={styles.seeMapButton}
+            label="See location on Map"
+          />
+
+          {currentUser.role === ERole.CENTER &&
+            message.status === MESSAGE_PENDING && (
+              <DropDown2
+                data={workerDropdown}
+                value={workerID}
+                onSelect={handleSelect}
+              />
+            )}
+
+          <View style={styles.options}>
+            {currentUser.role === ERole.WORKER && (
+              <>
+                {message.status === MESSAGE_PENDING && (
+                  <>
+                    <CustomButton
+                      onPress={onComfirm}
+                      customStyle={styles.seeMapButton}
+                      label="Comfirm"
+                    />
+                    {onReject && (
+                      <CustomButton
+                        onPress={handleReject}
+                        customStyle={styles.seeMapButton}
+                        label="Reject"
+                      />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {currentUser.role !== ERole.CENTER && (
+              <>
+                {message.status === MESSAGE_IN_PROGRESS && (
+                  <CustomButton
+                    onPress={onComplete}
+                    customStyle={styles.seeMapButton}
+                    label="Complete"
+                  />
+                )}
+              </>
+            )}
           </View>
         </View>
-
-        <DropDown
-          data={types}
-          initValue={message?.type}
-          onSelect={() => {}}
-          field="type"
-          title="Type"
-          zIndex={1}
-          disabled={true}
-        />
-
-        <Textreae
-          title="Description"
-          field="description"
-          onChangeText={handleMap}
-          value={message?.description}
-          editable={currentUser?.role !== 'user'}
-        />
-
-        <CustomButton
-          type="secondary"
-          onPress={handleMap}
-          customStyle={styles.seeMapButton}
-          label="See location on Map"
-        />
-
-        {currentUser?.role === ERole.CENTER &&
-          message?.status === MESSAGE_PENDING && (
-            <DropDown2
-              data={workerDropdown}
-              value={workerID}
-              onSelect={handleSelect}
-            />
-          )}
-
-        <View style={styles.options}>
-          {currentUser?.role === ERole.WORKER && (
-            <>
-              {message?.status === MESSAGE_PENDING && (
-                <>
-                  <CustomButton
-                    onPress={onComfirm}
-                    customStyle={styles.seeMapButton}
-                    label="Comfirm"
-                  />
-                  {onReject && (
-                    <CustomButton
-                      onPress={handleReject}
-                      customStyle={styles.seeMapButton}
-                      label="Reject"
-                    />
-                  )}
-                </>
-              )}
-            </>
-          )}
-
-          {currentUser?.role !== ERole.CENTER && (
-            <>
-              {message?.status === MESSAGE_IN_PROGRESS && (
-                <CustomButton
-                  onPress={onComplete}
-                  customStyle={styles.seeMapButton}
-                  label="Complete"
-                />
-              )}
-            </>
-          )}
-        </View>
-      </View>
+      ) : (
+        <EmptyListComponent text="Not Found Request!" />
+      )}
     </ScreenBase>
   );
 };

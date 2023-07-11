@@ -17,11 +17,11 @@ import {
 } from '@screens';
 import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
 import {ERole, EScreen} from '@enums';
-import {Location, TMessage} from '@types';
 import React, {useContext} from 'react';
 
 import {Context} from '@context';
 import DrawerNavigation from './DrawerNavigation';
+import {Location} from '@types';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
@@ -49,7 +49,7 @@ export type RootParamList = {
   [EScreen.SIGNIN_BY_EMAIL]: undefined;
   [EScreen.WORKER]: undefined;
   [EScreen.NEW_WORKER]: undefined;
-  [EScreen.MESSAGES]?: {workerID: string};
+  [EScreen.MESSAGES]?: {workerID?: string; mode?: boolean};
   [EScreen.PENDING_MESSAGE]: undefined;
   [EScreen.SPLASH]: undefined;
   [EScreen.NOTIFICATION]: undefined;
@@ -127,7 +127,11 @@ const RootNavigation = () => {
               options={{headerShown: false}}
             />
 
-            <Stack.Screen name={EScreen.MAP} component={MapScreen} />
+            <Stack.Screen
+              name={EScreen.MAP}
+              component={MapScreen}
+              options={{headerShown: false}}
+            />
             <Stack.Screen
               name={EScreen.SEND_DISTRESS_SIGNAL}
               component={SendDistreeSignal}

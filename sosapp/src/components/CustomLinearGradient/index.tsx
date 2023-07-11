@@ -1,6 +1,7 @@
-import {StyleProp, ViewStyle} from 'react-native';
 import React from 'react';
+import {StyleProp, ViewStyle} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+
 import {DARK_BLUE_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 
 type CustomLinearGradientProps = {

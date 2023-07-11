@@ -1,19 +1,19 @@
 import {
+  DrawerContentComponentProps,
+  createDrawerNavigator,
+} from '@react-navigation/drawer';
+import {StyleSheet} from 'react-native';
+import React, {useCallback} from 'react';
+import {HomeScreen, SettingsScreen} from '@screens';
+
+import {
   BACKGROUND_COLOR,
   DARK_GRAY_COLOR,
   TEXT_COLOR,
   WHITE_COLOR,
 } from '@theme';
-import {
-  DrawerContentComponentProps,
-  createDrawerNavigator,
-} from '@react-navigation/drawer';
-import {HomeScreen, SettingsScreen} from '@screens';
-import React, {useCallback} from 'react';
-
 import DrawerContent from './DrawerContent';
 import {EScreen} from '@enums';
-import {StyleSheet} from 'react-native';
 
 export type DrawerParamList = {
   [EScreen.HOME]: undefined;

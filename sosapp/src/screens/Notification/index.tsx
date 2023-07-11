@@ -1,25 +1,25 @@
-import React, {useCallback, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import {
-  FlatList,
-  Modal,
-  StyleSheet,
-  View,
-  TouchableWithoutFeedback,
-} from 'react-native';
-
-import {EScreen} from '@enums';
-import {CloseBlackIcon, WHITE_COLOR, OpenIcon} from '@theme';
-import {TNotification} from '@types';
-import {useNotifications} from '@hooks';
-import {RootScreenNavigationProps} from '@navigation';
+import {CloseBlackIcon, OpenIcon, WHITE_COLOR} from '@theme';
 import {
   CustomButton,
   EmptyListComponent,
   NotifyCard,
   ScreenBase,
 } from '@components';
+import {
+  FlatList,
+  Modal,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import React, {useCallback, useState} from 'react';
+
+import {EScreen} from '@enums';
+import {RootScreenNavigationProps} from '@navigation';
+import {TNotification} from '@types';
 import {rejectAssign} from '@utils';
+import {useNavigation} from '@react-navigation/native';
+import {useNotifications} from '@hooks';
 
 const Notification = () => {
   const {notifications, loading, onDelete} = useNotifications();
@@ -73,7 +73,7 @@ const Notification = () => {
       padding={20}
       loading={loading}
       onBack={goBack}
-      flexHeader="row">
+      flexDirection="row">
       <View style={styles.container}>
         {notifications && notifications.length > 0 ? (
           <FlatList

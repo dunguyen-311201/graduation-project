@@ -1,6 +1,7 @@
 import MapScreen from './Map';
 import HomeScreen from './Home';
 import SplashScreen from './Slash';
+import AssignScreen from './Assign';
 import WorkerScreen from './Workers';
 import MessagesScreen from './Messages';
 import SettingsScreen from './Settings';
@@ -14,7 +15,6 @@ import SignupBySocialScreen from './SignupBySocial';
 import SendDistreeSignal from './SendDistressSignal';
 import ConfirmPhoneNumberScreen from './ConfirmPhoneNumber';
 import SignupByPhoneNumberScreen from './SignupByPhoneNumber';
-import AssignScreen from './Assign';
 
 export {
   NotificationScreen,

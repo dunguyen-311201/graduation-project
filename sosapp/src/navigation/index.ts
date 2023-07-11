@@ -1,11 +1,8 @@
-import RootNavigation, {RootParamList} from './RootNavigation';
-
-import {BottomParamList} from './TabBottomNavigation';
-import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {CompositeNavigationProp} from '@react-navigation/native';
-import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {DrawerParamList} from './DrawerNavigation';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {DrawerNavigationProp} from '@react-navigation/drawer';
+import RootNavigation, {RootParamList} from './RootNavigation';
+import {CompositeNavigationProp} from '@react-navigation/native';
 
 export type RootScreenNavigationProps<T extends keyof RootParamList> =
   CompositeNavigationProp<
@@ -14,9 +11,6 @@ export type RootScreenNavigationProps<T extends keyof RootParamList> =
   >;
 
 export type RootTabScreenNavigationProps<T extends keyof RootParamList> =
-  CompositeNavigationProp<
-    StackNavigationProp<RootParamList, T>,
-    BottomTabNavigationProp<BottomParamList>
-  >;
+  StackNavigationProp<RootParamList, T>;
 
 export {RootNavigation};

@@ -1,32 +1,36 @@
+import {Alert, FlatList, StyleSheet, View} from 'react-native';
 import {
-  ScreenBase,
-  MessageInfo,
   CustomButton,
   EmptyListComponent,
+  MessageInfo,
+  ScreenBase,
 } from '@components';
-import {TMessage} from '@types';
-import React, {useCallback, useContext} from 'react';
-import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {useNavigation, RouteProp, useRoute} from '@react-navigation/native';
+import React, {useCallback, useContext, useLayoutEffect} from 'react';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
+import {Context} from '@context';
 import {EScreen} from '@enums';
 import {NewIcon} from '@theme';
-import {Context} from '@context';
+import {RootParamList} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation';
+import {TMessage} from '@types';
 import {isFreeUser} from '@utils';
 import {useMessages} from '@hooks';
-import {RootScreenNavigationProps} from '@navigation';
-import {RootParamList} from '@navigation/RootNavigation';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 
 const Messages = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
-  const {workerID} = useRoute<ConfirmRoute>().params || {};
+  const {workerID, mode} = useRoute<ConfirmRoute>().params || {};
 
   const {currentUser} = useContext(Context);
 
   const {messages, onDelete, onNew, loading} = useMessages(workerID);
+
+  useLayoutEffect(() => {
+    mode && navigate(EScreen.SEND_DISTRESS_SIGNAL, {onNew});
+  }, []);
 
   const handleNavigateDetail = useCallback((id: string) => {
     navigate(EScreen.DETAIL_MESSAGE, {id, onDelete});
@@ -72,7 +76,7 @@ const Messages = () => {
       onBack={handleback}
       loading={loading}
       padding={20}
-      flexHeader="row">
+      flexDirection="row">
       <View style={styles.content}>
         {messages.length > 0 ? (
           <FlatList

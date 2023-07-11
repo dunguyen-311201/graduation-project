@@ -1,11 +1,12 @@
 import {
   Image,
   ImageSourcePropType,
-  StyleSheet,
   Pressable,
+  StyleSheet,
   ViewStyle,
 } from 'react-native';
 import React, {memo} from 'react';
+
 import {CustomText} from '../common';
 
 type SocialProps = {

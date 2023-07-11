@@ -1,12 +1,12 @@
-import {StyleSheet, Switch, View} from 'react-native';
 import React from 'react';
-import CustomText from '../Text';
+import {StyleSheet, Switch, View} from 'react-native';
 import {
   DARK_BLUE_COLOR,
   LIGHT_BLUE_COLOR,
   DARK_GRAY_COLOR,
   TEXT_COLOR,
 } from '@theme/color';
+import CustomText from '../Text';
 
 type SwitchProps = {
   value: boolean;

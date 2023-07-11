@@ -1,8 +1,8 @@
 import firebase from '@react-native-firebase/firestore';
 import {useContext, useEffect, useState, useCallback} from 'react';
 
-import {Context} from '@context';
 import {TMessage} from '@types';
+import {Context} from '@context';
 
 const useMessages = (workerID?: string) => {
   const [messages, setMessages] = useState<TMessage[]>([]);

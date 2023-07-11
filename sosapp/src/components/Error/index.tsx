@@ -1,5 +1,6 @@
-import {StyleSheet, View} from 'react-native';
 import React, {memo} from 'react';
+import {StyleSheet, View} from 'react-native';
+
 import {CustomText} from '../common';
 
 const Error = ({message}: {message: string}) => {

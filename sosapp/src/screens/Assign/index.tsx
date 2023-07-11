@@ -2,13 +2,13 @@ import React, {useCallback} from 'react';
 import {StyleSheet, FlatList, View} from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
+import {TTask} from '@types';
 import {EScreen} from '@enums';
+import {useTasks} from '@hooks';
+import {TaskItem} from './components';
+import {ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
-import {useTasks} from '@hooks';
-import {ScreenBase} from '@components';
-import {TTask} from '@types';
-import {TaskItem} from './components';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.ASSIGN>;
 

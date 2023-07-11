@@ -1,7 +1,8 @@
-import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
 import React, {memo} from 'react';
+import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
+
+import {BLACK_COLOR} from '@theme';
 import CustomLinearGradient from '../CustomLinearGradient';
-import {BLACK_COLOR} from '@theme/color';
 
 type ShadowProps = {
   customStyle?: StyleProp<ViewStyle>;

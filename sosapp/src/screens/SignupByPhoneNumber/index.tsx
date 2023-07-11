@@ -1,13 +1,13 @@
-import auth from '@react-native-firebase/auth';
-import {useNavigation} from '@react-navigation/native';
-import {BackHandler, StyleSheet} from 'react-native';
+import {BackHandler, StyleSheet, View} from 'react-native';
+import {CustomButton, ScreenBase} from '@components';
 import React, {useCallback, useEffect, useState} from 'react';
 
-import {EScreen} from '@enums';
 import {ArrowRightBlueIcon} from '@theme';
+import {EScreen} from '@enums';
 import PhoneInput from './components/PhoneInput';
-import {CustomButton, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
+import auth from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate, setOptions} =
@@ -30,7 +30,9 @@ const SignupByPhoneNumberScreen = () => {
     try {
       setLoading(true);
 
-      const result = await auth().signInWithPhoneNumber(phone);
+      const result = await auth().signInWithPhoneNumber(
+        phone.split(' ').join(''),
+      );
 
       if (result.verificationId) {
         navigate(EScreen.CONFIRM_PHONE_NUMBER, {
@@ -59,18 +61,16 @@ const SignupByPhoneNumberScreen = () => {
       loading={loading}
       disableNext={phone.length !== 12}
       onBack={() => BackHandler.exitApp()}>
-      <PhoneInput
-        field="phone"
-        onEndEditing={handleChangePhone}
-        errorMessage={error}
-      />
-      <CustomButton
-        label="Or connect with social"
-        type="secondary"
-        icon={ArrowRightBlueIcon}
-        onPress={handleNavigateSocial}
-        customStyle={styles.button}
-      />
+      <View style={styles.container}>
+        <PhoneInput onEndEditing={handleChangePhone} errorMessage={error} />
+
+        <CustomButton
+          label="Or connect with social"
+          type="secondary"
+          icon={ArrowRightBlueIcon}
+          onPress={handleNavigateSocial}
+        />
+      </View>
     </ScreenBase>
   );
 };
@@ -78,7 +78,7 @@ const SignupByPhoneNumberScreen = () => {
 export default SignupByPhoneNumberScreen;
 
 const styles = StyleSheet.create({
-  button: {
-    marginTop: 22,
+  container: {
+    rowGap: 22,
   },
 });

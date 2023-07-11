@@ -1,6 +1,7 @@
-import {Location} from '@types';
 import React, {memo} from 'react';
 import {Marker, MarkerDragStartEndEvent} from 'react-native-maps';
+
+import {Location} from '@types';
 
 type MarkerProps = {
   coordinate: Location;

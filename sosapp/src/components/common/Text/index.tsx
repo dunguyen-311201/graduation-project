@@ -1,8 +1,8 @@
 import React, {memo} from 'react';
 import {Text, TextStyle, StyleSheet, GestureResponderEvent} from 'react-native';
 
-import {colors, styles} from '@utils';
 import {WHITE_COLOR} from '@theme';
+import {colors, styles} from '@utils';
 
 type CustomTextProps = {
   text?: string;

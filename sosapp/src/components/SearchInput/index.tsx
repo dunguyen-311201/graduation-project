@@ -1,22 +1,22 @@
-import {
-  StyleSheet,
-  View,
-  ViewStyle,
-  StyleProp,
-  Image,
-  Pressable,
-  ImageSourcePropType,
-} from 'react-native';
-import React, {useCallback, memo, useEffect, useState} from 'react';
+import {DirectionIcon, TEXT_COLOR} from '@theme';
 import {
   GooglePlaceData,
   GooglePlaceDetail,
   GooglePlacesAutocomplete,
 } from 'react-native-google-places-autocomplete';
-import Config from 'react-native-config';
+import {
+  Image,
+  ImageSourcePropType,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
+import React, {memo, useCallback, useEffect, useState} from 'react';
 
+import Config from 'react-native-config';
 import {Location} from '@types';
-import {DirectionIcon, TEXT_COLOR} from '@theme';
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 

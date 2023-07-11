@@ -1,15 +1,11 @@
 import {
-  StyleSheet,
-  View,
-  Modal,
   Alert,
   FlatList,
+  Modal,
+  StyleSheet,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useMemo, useState} from 'react';
-
-import {EScreen} from '@enums';
 import {
   CloseBlackIcon,
   DARK_GRAY_COLOR,
@@ -19,17 +15,21 @@ import {
   UnlockIcon,
   WHITE_COLOR,
 } from '@theme';
-import {TUser} from '@types';
-import {useWorker} from '@hooks';
-import {WorkerItem} from './components';
 import {CustomButton, CustomText, ScreenBase} from '@components';
-import {RootScreenNavigationProps} from '@navigation';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
   formatDistance,
   formatTime,
   formatTimeAgo,
   isApprovedCenter,
 } from '@utils';
+
+import {EScreen} from '@enums';
+import {RootScreenNavigationProps} from '@navigation';
+import {TUser} from '@types';
+import {WorkerItem} from './components';
+import {useNavigation} from '@react-navigation/native';
+import {useWorker} from '@hooks';
 
 const Worker = () => {
   const {navigate, goBack} =
@@ -122,7 +122,7 @@ const Worker = () => {
       loading={loading}
       padding={10}
       onBack={goBack}
-      flexHeader="row">
+      flexDirection="row">
       <View style={styles.container}>
         <FlatList
           data={workers}

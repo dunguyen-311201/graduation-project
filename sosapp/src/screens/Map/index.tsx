@@ -1,36 +1,44 @@
+import {BackButton, CustomText, Notification, SearchInput} from '@components';
+import {
+  CloseIcon,
+  FromLocationIcon,
+  TEXT_COLOR,
+  ToLocationIcon,
+  WHITE_COLOR,
+} from '@theme';
+import {Dimensions, Image, Pressable, StyleSheet, View} from 'react-native';
+import {ERole, EScreen} from '@enums';
 import MapView, {
   Circle,
   PROVIDER_GOOGLE,
   enableLatestRenderer,
 } from 'react-native-maps';
-import Config from 'react-native-config';
-import MapViewDirections from 'react-native-maps-directions';
-import React, {useEffect, useCallback, useRef, useState, useMemo} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {Dimensions, StyleSheet, View, Image, Pressable} from 'react-native';
-
-enableLatestRenderer();
-
-import {
-  FromLocationIcon,
-  ToLocationIcon,
-  CloseIcon,
-  TEXT_COLOR,
-  WHITE_COLOR,
-} from '@theme';
-import {EScreen} from '@enums';
-import {Location} from '@types';
-import {CustomMarker} from './components';
-import {CURRENT_LOCATION} from '@constants';
-import {RootScreenNavigationProps} from '@navigation';
-import {RootParamList} from '@navigation/RootNavigation';
 import {
   fetchDistanceAndTime,
   formatTime,
   getAsyncStorage,
   requestLocationPermission,
 } from '@utils';
-import {BackButton, CustomText, Notification, SearchInput} from '@components';
+
+import {CURRENT_LOCATION} from '@constants';
+import Config from 'react-native-config';
+import {Context} from '@context';
+import {CustomMarker} from './components';
+import {Location} from '@types';
+import MapViewDirections from 'react-native-maps-directions';
+import {RootParamList} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation';
+
+enableLatestRenderer();
 
 const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
 
@@ -44,10 +52,10 @@ type SearchLocation = {
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MAP>;
 
 const MapScreen = () => {
-  const {setOptions, goBack} =
-    useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
+  const {goBack} = useNavigation<RootScreenNavigationProps<EScreen.MAP>>();
 
   const mapRef = useRef<MapView | null>(null);
+  const {currentUser} = useContext(Context);
 
   let {to} = useRoute<ConfirmRoute>().params || {};
 
@@ -56,60 +64,44 @@ const MapScreen = () => {
   const [locations, setLocations] = useState<SearchLocation>();
 
   useEffect(() => {
-    setOptions({headerShown: false});
-    const timeID = setInterval(async () => {
-      await requestLocationPermission();
-    }, 5000);
-
-    return () => clearInterval(timeID);
-  }, []);
+    currentUser?.role === ERole.WORKER
+      ? requestLocationPermission(1)
+      : requestLocationPermission();
+  }, [currentUser]);
 
   useEffect(() => {
     const setup = async () => {
       const cacheLocation = await getAsyncStorage<Location>(CURRENT_LOCATION);
-      console.log(70, to, cacheLocation);
-      if (to && cacheLocation) {
-        const data = await fetchDistanceAndTime({to, from: cacheLocation});
-        if (data) {
-          setLocations(data);
+
+      if (cacheLocation) {
+        if (to) {
+          const data = await fetchDistanceAndTime({to, from: cacheLocation});
+          if (data) {
+            setLocations(data);
+          }
+
+          return;
         }
 
-        return;
+        setLocations({from: cacheLocation});
       }
-
-      setLocations({from: cacheLocation});
     };
 
     setup();
   }, [to]);
 
-  useEffect(() => {
-    const getDistance = async () => {
-      const dTo = locations?.to;
-      const dFrom = locations?.from;
-      if (dTo && dFrom) {
-        const data = await fetchDistanceAndTime({to: dTo, from: dFrom});
-
-        if (data) {
-          setLocations(data);
-        }
-      }
-    };
-
-    getDistance();
-  }, [locations]);
-
   const handleSearch = useCallback(
     async (_location: Location, _field?: string) => {
-      if (_field === 'to') {
+      if (_field === 'to' && locations?.from) {
         setLocations(prev => ({...prev, to: _location}));
       }
-      if (_field === 'from') {
+      if (_field === 'from' && locations?.to) {
         setLocations(prev => ({...prev, from: _location}));
       }
     },
-    [],
+    [locations],
   );
+
 
   const handleToDirectionandSearch = useCallback(() => {
     setIsDirection(prev => !prev);
@@ -228,7 +220,7 @@ const MapScreen = () => {
 
         {map}
 
-        {locations?.timeout && locations?.distance ? (
+        {locations?.timeout ? (
           <View style={styles.distanceInfo}>
             <CustomText
               text={'Time: ' + formatTime(locations.timeout)}
@@ -236,11 +228,7 @@ const MapScreen = () => {
               color="blue"
             />
             <CustomText
-              text={
-                !locations?.distance
-                  ? '0 km'
-                  : `Distance: ${locations.distance} km`
-              }
+              text={`Distance: ${locations.distance + 0.001} km`}
               type="text_medium_16"
               color="blue"
             />

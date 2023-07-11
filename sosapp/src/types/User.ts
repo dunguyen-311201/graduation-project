@@ -1,5 +1,4 @@
 import {EUser} from '@enums';
-
 import {Location} from './Location';
 
 export interface Roles {
@@ -23,10 +22,10 @@ export interface TUser {
   [EUser.id]: string;
   [EUser.phoneNumber]: string | null;
   [EUser.photoURL]: string | null;
-  [EUser.token]?: string | null;
-  [EUser.location]?: Location | null;
+  [EUser.token]: string | null;
+  [EUser.location]: Location | null;
   [EUser.status]: 'free' | 'busy' | 'available' | 'unavailable';
-  [EUser.email]?: string | null;
+  [EUser.email]: string | null;
   [EUser.citizenIdentification]?: string;
   [EUser.isActive]?: boolean;
   [EUser.timeRegistration]?: number;

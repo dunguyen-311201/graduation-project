@@ -1,9 +1,14 @@
-import {Image, StyleSheet, Pressable, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Pressable,
+  View,
+  ImageSourcePropType,
+} from 'react-native';
 import React, {memo} from 'react';
-import {LIGHT_BLUE_COLOR, WHITE_COLOR} from '@theme/color';
-import {ImageSourcePropType} from 'react-native';
 
 import {CustomText} from '../common';
+import {LIGHT_BLUE_COLOR, WHITE_COLOR} from '@theme';
 
 export type CardProps = {
   title: string;

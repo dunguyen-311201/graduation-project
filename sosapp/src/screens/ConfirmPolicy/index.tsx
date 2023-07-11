@@ -1,29 +1,24 @@
+import {CustomText, ScreenBase} from '@components';
 import {Image, StyleSheet, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect} from 'react';
 
+import {Context} from '@context';
 import {EScreen} from '@enums';
 import {ProfileIcon} from '@theme';
-import {CustomText, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {Context} from '@context';
+import {useNavigation} from '@react-navigation/native';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
-  const {signUp} = useContext(Context);
-  const [loading, setLoading] = useState(false);
+  const {signUp, loading} = useContext(Context);
 
   useEffect(() => {
     setOptions({headerShown: false});
   }, [setOptions]);
 
   const handleNext = useCallback(async () => {
-    setLoading(true);
-    try {
-      await signUp();
-    } catch (error) {}
-    setLoading(false);
+    await signUp();
   }, []);
 
   return (

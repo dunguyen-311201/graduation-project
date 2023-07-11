@@ -1,15 +1,15 @@
-import {View, StyleSheet} from 'react-native';
-import React, {useCallback, useEffect, useContext, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import firebase from '@react-native-firebase/firestore';
+import {StyleSheet, View} from 'react-native';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
-import {EScreen} from '@enums';
-import {Context} from '@context';
-import {ScreenBase} from '@components';
 import ComfirmInput from './components/ComfirmInput';
-import {RootScreenNavigationProps} from '@navigation';
+import {Context} from '@context';
+import {EScreen} from '@enums';
 import {RootParamList} from '@navigation/RootNavigation';
+import {RootScreenNavigationProps} from '@navigation';
+import {ScreenBase} from '@components';
+import firebase from '@react-native-firebase/firestore';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -30,16 +30,13 @@ const ConfirmPhoneNumberScreen = () => {
       try {
         setLoading(true);
         if (user) {
-          const u = await firebase()
-            .doc('users/' + user.uid)
-            .get();
-
-          if (!u.exists) {
-            navigate(EScreen.SIGNUP_INFO);
-          } else {
+          if (user?.displayName && user.metadata.lastSignInTime) {
             await signIn(user.uid);
+            return;
           }
+          navigate(EScreen.SIGNUP_INFO);
         }
+
         setLoading(false);
       } catch (err) {}
     },

@@ -1,48 +1,39 @@
-// import StorybookUIRoot from './.ondevice/Storybook';
-import React, {useState, useEffect} from 'react';
 import 'react-native-gesture-handler';
+
+import {Context, ContextProps} from './context';
 import {StyleSheet, View} from 'react-native';
+import {useAuth, useNotification} from './hooks';
+
+// import StorybookUIRoot from './.ondevice/Storybook';
+import React from 'react';
+import {RootNavigation} from './navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
-import {useAuth, useNotification} from './hooks';
-import {RootNavigation} from './navigation';
-import {Context, ContextProps} from './context';
-import {getAsyncStorage} from './utils';
-import {FIRST_INSTALLED} from './constants';
-
 function App() {
-  const {currentUser, isAuthenticated, signIn, signOut, signUp, loading} =
-    useAuth();
-  const [firstSignedIn, setFirstSignedIn] = useState(false);
-  const [_loading, setLoading] = useState(loading);
+  const {
+    currentUser,
+    isAuthenticated,
+    updateProfile,
+    signIn,
+    signOut,
+    signUp,
+    loading,
+  } = useAuth();
 
   const {notify, hideNotify} = useNotification();
 
-  useEffect(() => {
-    const setup = async () => {
-      setLoading(true);
-      const cache = await getAsyncStorage(FIRST_INSTALLED);
-      if (!cache) {
-        setFirstSignedIn(true);
-        return;
-      }
-      setLoading(false);
-    };
-
-    setup();
-  }, [isAuthenticated]);
-
   const store: ContextProps = {
     isAuthenticated,
-    loading: _loading,
+    loading,
     currentUser,
     signIn,
     signOut,
     signUp,
     notify,
     hideNotify,
-    firstSignedIn,
+    updateProfile,
   };
+
 
   return (
     <View style={styles.container}>

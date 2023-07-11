@@ -1,7 +1,7 @@
-import {StyleSheet, Pressable, Image} from 'react-native';
-import React from 'react';
+import {Image, Pressable, StyleSheet} from 'react-native';
 
 import {OptionIcon} from '@theme';
+import React from 'react';
 
 type OptionsButtonProps = {
   onPress?: () => void;

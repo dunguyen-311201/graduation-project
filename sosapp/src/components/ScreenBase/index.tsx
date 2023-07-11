@@ -1,18 +1,19 @@
+import {CustomButton, CustomText} from '../common';
 import {
-  View,
   Keyboard,
+  KeyboardAvoidingView,
   Platform,
   StyleProp,
-  ViewStyle,
   StyleSheet,
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  View,
+  ViewStyle,
 } from 'react-native';
 import React, {memo, useCallback} from 'react';
-import Loading from '../Loading';
-import BackButton from '../BackButton';
+
 import {BACKGROUND_COLOR} from '@theme';
-import {CustomButton, CustomText} from '../common';
+import BackButton from '../BackButton';
+import Loading from '../Loading';
 import Notification from '../Notification';
 
 type ScreenBaseProps = {
@@ -25,7 +26,7 @@ type ScreenBaseProps = {
   disableNext?: boolean;
   nextTitle?: string;
   onBack?: () => void;
-  flexHeader?: 'row' | 'column';
+  flexDirection?: 'row' | 'column';
   loading?: boolean;
 };
 
@@ -39,7 +40,7 @@ const ScreenBase = ({
   loading,
   customStyle,
   disableNext,
-  flexHeader = 'column',
+  flexDirection = 'column',
   nextTitle = 'Next',
 }: ScreenBaseProps) => {
   const handleTouchOutside = useCallback(() => {
@@ -47,71 +48,79 @@ const ScreenBase = ({
   }, []);
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.keyboard, {paddingHorizontal: padding || 32}]}>
-      <TouchableWithoutFeedback onPress={handleTouchOutside}>
-        <View
-          style={[
-            customStyle,
-            styles.container,
-            {...(onBack && {paddingTop: 20})},
-          ]}>
-          <Notification />
+    <TouchableWithoutFeedback onPress={handleTouchOutside}>
+      <View
+        style={[
+          styles.container,
+          {paddingHorizontal: padding || 32},
+          {
+            ...(onBack && {paddingTop: 36, paddingBottom: 31}),
 
-          <View
-            style={{
-              ...(onBack && styles.header),
-              ...(flexHeader === 'row'
-                ? {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }
-                : {...(onBack && {marginTop: 36, marginBottom: 31})}),
-            }}>
+            // ...(onBack && styles.header),
+          },
+        ]}>
+        {loading && <Loading />}
+        <Notification />
+        <View style={styles.header}>
+          <View style={[styles.nav, {flexDirection}]}>
             {onBack && <BackButton onPress={onBack} />}
             {title && (
               <CustomText
                 text={title}
                 type="text_medium_30"
                 customStyle={{
-                  ...(flexHeader === 'column' && styles.title),
+                  ...(flexDirection === 'column' && styles.title),
                 }}
               />
             )}
-
-            {desc && <CustomText text={desc} type="text_medium_24" />}
           </View>
-          {loading ? <Loading /> : children}
+          {desc && <CustomText text={desc} type="text_medium_24" />}
         </View>
-      </TouchableWithoutFeedback>
-      {onNext && (
-        <CustomButton
-          onPress={onNext}
-          label={nextTitle}
-          disabled={disableNext}
-        />
-      )}
-    </KeyboardAvoidingView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboard}>
+          <View
+            style={[
+              customStyle,
+              styles.container,
+              {...(onBack && {paddingTop: 20})},
+            ]}>
+            {children}
+          </View>
+        </KeyboardAvoidingView>
+        {onNext && (
+          <CustomButton
+            onPress={onNext}
+            label={nextTitle}
+            disabled={disableNext}
+            customStyle={styles.button}
+          />
+        )}
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 export default memo(ScreenBase);
 
 const styles = StyleSheet.create({
-  keyboard: {
+  container: {
     flex: 1,
     backgroundColor: BACKGROUND_COLOR,
     paddingBottom: 62,
   },
-  container: {
+  keyboard: {
     flex: 1,
   },
   header: {
     columnGap: 20,
-    // alignItems: 'center',
+  },
+  nav: {
+    flexDirection: 'row',
+    columnGap: 36,
   },
   title: {
     marginTop: 35,
   },
+  button: {},
 });

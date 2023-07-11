@@ -1,5 +1,3 @@
-import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
-import {CustomButton, CustomText, Loading} from '@components';
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -8,8 +6,10 @@ import {
 import {Image, StyleSheet, View} from 'react-native';
 import React, {useContext, useState, useCallback} from 'react';
 
-import {Context} from '@context';
 import {EScreen} from '@enums';
+import {Context} from '@context';
+import {CustomButton, CustomText, Loading} from '@components';
+import {BACKGROUND_COLOR, BLACK_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
 
 const DrawerContent = (props: DrawerContentComponentProps) => {
   const {currentUser, signOut} = useContext(Context);

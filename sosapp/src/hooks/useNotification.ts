@@ -1,14 +1,16 @@
+import {Alert, Linking, PermissionsAndroid} from 'react-native';
 import messaging, {
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
-import {useState, useEffect, useCallback} from 'react';
-import {PermissionsAndroid, Alert, Linking} from 'react-native';
+import {useCallback, useContext, useEffect, useState} from 'react';
 
-import {rejectAssign} from '@utils';
+import {Context} from '@context';
 import {TNotification} from '@types';
+import {rejectAssign} from '@utils';
 
 const useNotification = () => {
   const [notify, setNotify] = useState<TNotification | null>(null);
+  const {isAuthenticated} = useContext(Context);
 
   useEffect(() => {
     const setup = async () => {
@@ -38,28 +40,29 @@ const useNotification = () => {
       }
     };
 
-    setup();
+    if (isAuthenticated) {
+      setup();
 
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Notification');
-      await handleNotification(remoteMessage);
-    });
-
-    messaging().setBackgroundMessageHandler(async mess => {
-      return Alert.alert(
-        'Notification',
-        'Notification has been sent to the device via.',
-      );
-    });
-
-    messaging()
-      .getInitialNotification()
-      .then(async remoteMessage => {
-        await handleNotification(remoteMessage, true);
+      const unsubscribe = messaging().onMessage(async remoteMessage => {
+        await handleNotification(remoteMessage);
       });
 
-    return unsubscribe;
-  }, []);
+      messaging().setBackgroundMessageHandler(async mess => {
+        return Alert.alert(
+          'Notification',
+          'Notification has been sent to the device via.',
+        );
+      });
+
+      messaging()
+        .getInitialNotification()
+        .then(async remoteMessage => {
+          await handleNotification(remoteMessage, true);
+        });
+
+      return unsubscribe;
+    }
+  }, [isAuthenticated]);
 
   const hideNotify = useCallback(() => {
     setNotify(null);

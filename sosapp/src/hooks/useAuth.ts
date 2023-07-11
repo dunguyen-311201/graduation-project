@@ -1,99 +1,89 @@
-import {useState, useEffect, useCallback} from 'react';
-import firebase from '@react-native-firebase/firestore';
-import messaging from '@react-native-firebase/messaging';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {FIRST_INSTALLED, USER_CACHE} from '@constants';
+import {getAsyncStorage, setAsyncStorage} from '@utils';
+import {useCallback, useEffect, useState} from 'react';
 
 import {ERole} from '@enums';
 import {TUser} from '@types';
-import {getAsyncStorage, setAsyncStorage} from '@utils';
-import {FIRST_INSTALLED, USER_CACHE} from '@constants';
+import auth from '@react-native-firebase/auth';
+import firebase from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
 
 const useAuth = () => {
-  const [user, setUser] = useState<TUser>();
+  const [currentUser, setCurrentUser] = useState<TUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState<FirebaseAuthTypes.User | null>(
-    auth().currentUser,
-  );
 
   useEffect(() => {
-    const unSubscribe = auth().onAuthStateChanged(_user => {
-      if (_user && _user.displayName) {
-        setCurrentUser(_user);
-        setIsAuthenticated(true);
-      }
+    const unSubscribe = auth().onAuthStateChanged(async user => {
+      try {
+        if (user) {
+          await auth().currentUser?.reload();
+        } else {
+          setCurrentUser(null);
+        }
+      } catch (error) {}
     });
 
     return () => unSubscribe();
-  }, [isAuthenticated]);
+  }, []);
 
   useEffect(() => {
-    const setup = async () => {
-      if (currentUser && currentUser.displayName && isAuthenticated) {
-        try {
-          setLoading(true);
-          const {displayName, uid, email, photoURL, phoneNumber} = currentUser;
-          const snap = await firebase()
-            .doc('users/' + uid)
-            .get();
+    const unSubscribe = auth().onUserChanged(async user => {
+      try {
+        if (user && user.displayName) {
+          const data = (
+            await firebase()
+              .doc('users/' + user.uid)
+              .get()
+          ).data() as TUser;
 
-          if (snap.exists) {
-            const data: any = {
-              ...snap.data(),
-              displayName,
-              id: uid,
-              email,
-              photoURL,
-              phoneNumber,
-            };
-            setUser(data);
+          if (data) {
+            setCurrentUser({...data, id: user.uid});
+            await setAsyncStorage(FIRST_INSTALLED, 1);
+            setIsAuthenticated(true);
           }
-        } catch (error) {}
-      }
+        }
+      } catch (error) {}
       setLoading(false);
-    };
+    });
 
-    setup();
-  }, [currentUser, isAuthenticated]);
+    return () => unSubscribe();
+  }, []);
 
   const signOut = useCallback(async () => {
+    setLoading(true);
     try {
-      if (user) {
-        setLoading(true);
-
+      if (currentUser) {
         const update = {
           lastLogin: null,
-          ...(user.role === ERole.WORKER &&
-            user.status === 'free' && {status: 'unavailable'}),
+          ...(currentUser.role === ERole.WORKER &&
+            currentUser.status === 'free' && {status: 'unavailable'}),
         };
+
         await firebase()
-          .doc('users/' + user.id)
+          .doc('users/' + currentUser.id)
           .update(update);
+
         await auth().signOut();
+        setIsAuthenticated(false);
       }
     } catch (err) {}
-    setIsAuthenticated(false);
     setLoading(false);
-  }, [user]);
+  }, [currentUser]);
 
   const signUp = useCallback(async () => {
-    const {uid, phoneNumber} = auth().currentUser || {};
+    setLoading(true);
+    try {
+      const {uid, phoneNumber} = auth().currentUser || {};
 
-    if (phoneNumber && uid) {
-      try {
-        setLoading(true);
+      if (phoneNumber && uid) {
         const token = await messaging().getToken();
 
         const data = await getAsyncStorage<TUser>(USER_CACHE);
         let u: TUser;
         if (data) {
-          await auth().currentUser?.updateProfile({
-            displayName: data.displayName,
-          });
-
           u = {
             ...data,
-            role: ERole.USER,
             token,
             lastLogin: Date.now(),
             status: 'free',
@@ -103,7 +93,6 @@ const useAuth = () => {
           if (data.role === ERole.CENTER) {
             u = {
               ...u,
-              role: ERole.CENTER,
               timeRegistration: Date.now(),
               status: 'unavailable',
               statusRegistration: 'pending',
@@ -113,19 +102,16 @@ const useAuth = () => {
           await firebase()
             .doc('users/' + uid)
             .set(u);
-
-          await setAsyncStorage(FIRST_INSTALLED, 1);
-          setIsAuthenticated(true);
+          await auth().currentUser?.updateProfile({...u});
         }
-      } catch (error) {
-        setLoading(false);
       }
-    }
+    } catch (error) {}
+    setLoading(false);
   }, []);
 
   const signIn = useCallback(async (id: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const token = await messaging().getToken();
       const doc = firebase().doc('users/' + id);
       const data = (await doc.get()).data();
@@ -138,9 +124,22 @@ const useAuth = () => {
             data.status === 'unavailable' &&
             !data.disable && {status: 'free'}),
         });
+      }
+    } catch (error) {}
+    setLoading(false);
+  }, []);
 
-        await setAsyncStorage(FIRST_INSTALLED, 1);
-        setIsAuthenticated(true);
+  const updateProfile = useCallback(async (update: TUser) => {
+    setLoading(true);
+    try {
+      const current = auth().currentUser;
+
+      if (current) {
+        await firebase()
+          .doc('users/' + current.uid)
+          .update(update);
+
+        await current.updateProfile(update);
       }
     } catch (error) {}
     setLoading(false);
@@ -151,8 +150,9 @@ const useAuth = () => {
     signIn,
     signUp,
     signOut,
-    currentUser: user,
+    currentUser,
     loading,
+    updateProfile,
   };
 };
 

@@ -1,15 +1,14 @@
-import {TEXT_COLOR} from '@theme';
+import {CustomButton, CustomText} from '../common';
+import {Image, StyleSheet, View} from 'react-native';
 import React, {useCallback, useContext} from 'react';
-import {StyleSheet, View} from 'react-native';
 
 import CloseButton from '../CloseButton';
-import {CustomButton, CustomText} from '../common';
-import {TNotification} from '@types';
-import OptionsButton from '../OptionButton';
 import {Context} from '@context';
-import {ERole} from '@enums/EUser';
+import {ERole} from '@enums';
+import OptionsButton from '../OptionButton';
+import {TEXT_COLOR} from '@theme';
+import {TNotification} from '@types';
 import {TouchableWithoutFeedback} from 'react-native';
-import {Image} from 'react-native';
 
 const Notify = ({
   onClose,

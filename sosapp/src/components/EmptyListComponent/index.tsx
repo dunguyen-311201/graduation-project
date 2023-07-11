@@ -1,11 +1,12 @@
 import {StyleSheet, View} from 'react-native';
-import React from 'react';
-import {CustomText} from '../common';
 
-const EmptyListComponent = () => {
+import {CustomText} from '../common';
+import React from 'react';
+
+const EmptyListComponent = ({text}: {text?: string}) => {
   return (
     <View style={styles.container}>
-      <CustomText text="No items to display" color="blue" />
+      <CustomText text={text || 'No items to display'} color="blue" />
     </View>
   );
 };

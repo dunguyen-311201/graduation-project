@@ -1,27 +1,28 @@
 import {
+  ActivityIndicator,
+  Image,
+  ImageSourcePropType,
   StyleProp,
   StyleSheet,
-  Image,
+  TextStyle,
   TouchableOpacity,
-  ViewStyle,
-  ImageSourcePropType,
-  ActivityIndicator,
   View,
+  ViewStyle,
 } from 'react-native';
+import {GRAY_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 import React, {memo} from 'react';
 
+import CustomText from '../Text';
 import {EButton} from '@enums';
 import Shadow from '../../Shadow';
 import {Styles as st} from '@utils';
-import CustomText from '../Text';
-import {GRAY_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 
 type ButtonProps = {
   label?: string;
   children?: React.ReactNode;
   type?: keyof typeof EButton;
   icon?: ImageSourcePropType;
-  customStyle?: StyleProp<ViewStyle>;
+  customStyle?: StyleProp<ViewStyle> | StyleProp<TextStyle>;
   paddingVertical?: number;
   paddingHorizontal?: number;
   onPress?: () => void;
@@ -80,6 +81,7 @@ const CustomButton = ({
               : 'text_xLarge'
           }
           color={type === 'secondary' ? 'blue' : 'white'}
+          customStyle={customStyle}
         />
       )}
       {icon && (

@@ -1,17 +1,17 @@
-import {useNavigation} from '@react-navigation/native';
+import {ActiveIcon, ExpiredIcon, InProgressIcon, PendingIcon} from '../icons';
+import {CustomButton, CustomText} from '../common';
+import {EMessage, ERole, EScreen} from '@enums';
 import {Pressable, StyleSheet, View} from 'react-native';
 import React, {memo, useCallback, useContext, useMemo} from 'react';
 
-import {TMessage} from '@types';
-import {useUsers} from '@hooks';
 import {Context} from '@context';
-import {WHITE_COLOR} from '@theme';
-import {ActiveIcon, ExpiredIcon, InProgressIcon, PendingIcon} from '../icons';
-import {formatTimeAgo} from '@utils';
-import {EMessage, ERole, EScreen} from '@enums';
 import {MESSAGE_COMPLETED} from '@constants';
-import {CustomButton, CustomText} from '../common';
 import {RootScreenNavigationProps} from '@navigation';
+import {TMessage} from '@types';
+import {WHITE_COLOR} from '@theme';
+import {formatTimeAgo} from '@utils';
+import {useNavigation} from '@react-navigation/native';
+import {useUsers} from '@hooks';
 
 const MessageInfo = ({
   item,

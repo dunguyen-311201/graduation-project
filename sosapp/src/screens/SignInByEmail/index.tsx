@@ -1,12 +1,13 @@
 import auth from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
+import {StyleSheet, TextInput, View} from 'react-native';
 import React, {useCallback, useContext, useRef, useState} from 'react';
+
 import {Context} from '@context';
-import {CustomInput, ScreenBase} from '@components';
 import {EScreen} from '@enums';
 import {Field, validate} from '@utils';
+import {CustomInput, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
-import {StyleSheet, TextInput, View} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 
 type FormData = {
   email?: string;

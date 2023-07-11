@@ -5,41 +5,54 @@ import {
   CustomText,
   Shadow,
 } from '@components';
-import React, {useCallback, useEffect, memo, useContext} from 'react';
+import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
 import {SafeAreaView, StyleSheet, View} from 'react-native';
 
-import {EScreen} from '@enums';
-import {RootScreenNavigationProps} from '@navigation';
-import {useNavigation} from '@react-navigation/native';
 import {Context} from '@context';
+import {EScreen} from '@enums';
+import {FIRST_INSTALLED} from '@constants';
+import {RootScreenNavigationProps} from '@navigation';
+import {getAsyncStorage} from '@utils';
+import {useNavigation} from '@react-navigation/native';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
 
-  const {isAuthenticated, loading, notify, firstSignedIn} = useContext(Context);
+  const {isAuthenticated, loading, notify} = useContext(Context);
+  const [firstSignedIn, setFirstSignedIn] = useState(false);
 
   useEffect(() => {
     const setup = async () => {
-      if (!loading) {
-        console.log(27, notify);
-        if (notify) {
-          notify.background && navigate(EScreen.DETAIL_MESSAGE, notify);
-        } else {
-          if (isAuthenticated) {
-            navigate(EScreen.DRAWER);
-            return;
-          }
-          navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-        }
-      }
+      const cache = await getAsyncStorage(FIRST_INSTALLED);
+      setFirstSignedIn(cache === null);
     };
 
     setup();
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (firstSignedIn) {
+      return;
+    }
+
+    if (!loading) {
+      if (notify) {
+        notify.background && navigate(EScreen.DETAIL_MESSAGE, notify);
+        return;
+      }
+
+      if (isAuthenticated) {
+        navigate(EScreen.DRAWER);
+        return;
+      }
+      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
+    }
+  }, [firstSignedIn, isAuthenticated, loading]);
 
   const handlePressStart = useCallback(() => {
     navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
   }, []);
+
 
   return (
     <CustomLinearGradient customStyle={styles.flex}>
@@ -54,7 +67,6 @@ function SplashScreen() {
               label="More with safety"
               type="outline"
               icon={CheckShieldIcon}
-              customStyle={styles.topButton}
             />
           )}
         </View>
@@ -87,8 +99,8 @@ const styles = StyleSheet.create({
   },
   top: {
     alignItems: 'center',
+    rowGap: 41,
   },
-  topButton: {marginTop: 41},
   button: {
     flexDirection: 'row',
     borderRadius: 10,

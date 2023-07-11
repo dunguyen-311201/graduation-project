@@ -1,11 +1,11 @@
-import CustomButton from './Button';
-import CustomInput from './Input';
-import CustomModal from './Modal';
-import CustomSwitch from './Switch';
 import CustomText from './Text';
 import DropDown from './DropDown';
-import DropDown2 from './DropDown2';
+import CustomInput from './Input';
+import CustomModal from './Modal';
 import Textreae from './Textarea';
+import CustomButton from './Button';
+import CustomSwitch from './Switch';
+import DropDown2 from './DropDown2';
 
 export {
   CustomButton,

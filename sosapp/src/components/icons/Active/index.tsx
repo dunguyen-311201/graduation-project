@@ -1,5 +1,6 @@
-import {StyleSheet, Image} from 'react-native';
 import React from 'react';
+import {StyleSheet, Image} from 'react-native';
+
 import {ActiveIcon} from '@theme';
 
 const Active = () => {

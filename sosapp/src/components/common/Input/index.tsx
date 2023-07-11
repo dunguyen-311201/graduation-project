@@ -1,4 +1,11 @@
 import {
+  DARK_GRAY_COLOR,
+  EyeIcon,
+  HideIcon,
+  TEXT_COLOR,
+  WHITE_COLOR,
+} from '@theme';
+import {
   InputModeOptions,
   StyleProp,
   StyleSheet,
@@ -6,16 +13,10 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import React, {forwardRef, useState, useCallback} from 'react';
-import CustomText from '../Text';
-import {
-  DARK_GRAY_COLOR,
-  EyeIcon,
-  HideIcon,
-  TEXT_COLOR,
-  WHITE_COLOR,
-} from '@theme';
+import React, {forwardRef, useCallback, useState} from 'react';
+
 import CustomButton from '../Button';
+import CustomText from '../Text';
 
 export type CustomInputProps = {
   title?: string;
@@ -56,7 +57,7 @@ const CustomInput: React.ForwardRefRenderFunction<
     onBlur,
     onFocus,
     onEndEditing,
-    editable,
+    editable = true,
     width,
     nColumn = 1,
     border,
@@ -121,6 +122,7 @@ const CustomInput: React.ForwardRefRenderFunction<
           style={[
             styles.input,
             {...(!row && styles.column)},
+            {...(!editable && {opacity: 0.5})},
             {...(border ? styles.border : styles.default)},
             valueStyle,
           ]}
@@ -145,7 +147,6 @@ export default forwardRef(CustomInput);
 
 const styles = StyleSheet.create({
   inputgroup: {
-    // marginBottom: 10,
     position: 'relative',
     zIndex: 1,
   },
