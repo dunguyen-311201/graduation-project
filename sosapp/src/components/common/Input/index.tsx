@@ -13,6 +13,7 @@ import {
   TextStyle,
   View,
 } from 'react-native';
+import type {TextInputInstance} from 'react-native';
 import React, {forwardRef, useCallback, useState} from 'react';
 
 import CustomButton from '../Button';
@@ -40,7 +41,7 @@ export type CustomInputProps = {
   row?: boolean;
 };
 const CustomInput: React.ForwardRefRenderFunction<
-  TextInput,
+  TextInputInstance,
   CustomInputProps
 > = (props, ref) => {
   const {

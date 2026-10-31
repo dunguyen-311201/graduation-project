@@ -1,15 +1,18 @@
-import auth from '@react-native-firebase/auth';
+import {
+  getAuth,
+  PhoneAuthProvider,
+  signInWithCredential,
+  signInWithPhoneNumber,
+} from '@react-native-firebase/auth';
 
 const signInByPhoneNumber = async (phoneNumber: string) => {
-  return await auth().signInWithPhoneNumber(phoneNumber);
+  return await signInWithPhoneNumber(getAuth(), phoneNumber);
 };
 
 const verificationPhone = async (verificationId: string, code: string) => {
   try {
-    const credential = auth.PhoneAuthProvider.credential(verificationId, code);
-
-    const userCredential = await auth().signInWithCredential(credential);
-    return userCredential;
+    const credential = PhoneAuthProvider.credential(verificationId, code);
+    return await signInWithCredential(getAuth(), credential);
   } catch (error) {}
 };
 

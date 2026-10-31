@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {StyleSheet, TextInput, View} from 'react-native';
+import type {TextareaRef} from '../../components/common/Textarea';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 
 import {Context} from '@context';
@@ -42,7 +43,7 @@ const SendDistreeSignal = () => {
   const {currentUser} = useContext(Context);
   const [error, setError] = useState(null);
 
-  const textreaeRef = useRef<TextInput>(null);
+  const textreaeRef = useRef<TextareaRef>(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<FormData>({

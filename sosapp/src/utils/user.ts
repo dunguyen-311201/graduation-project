@@ -1,30 +1,21 @@
-import auth from '@react-native-firebase/auth';
-import firebase from '@react-native-firebase/firestore';
+import {doc, getDoc, getFirestore} from '@react-native-firebase/firestore';
+import {getAuth} from '@react-native-firebase/auth';
 
-const isFreeUser = async () => {
-  const currentUser = auth().currentUser;
+const getCurrentUserDoc = async () => {
+  const currentUser = getAuth().currentUser;
   if (currentUser) {
-    const doc = await firebase()
-      .doc('users/' + currentUser?.uid)
-      .get();
-
-    const data = doc.data();
-
-    return data?.status === 'free';
+    return (await getDoc(doc(getFirestore(), 'users', currentUser.uid))).data();
   }
 };
 
+const isFreeUser = async () => {
+  const data = await getCurrentUserDoc();
+  return data?.status === 'free';
+};
+
 const isApprovedCenter = async () => {
-  const currentUser = auth().currentUser;
-  if (currentUser) {
-    const doc = await firebase()
-      .doc('users/' + currentUser?.uid)
-      .get();
-
-    const data = doc.data();
-
-    return !(data && data.statusRegistration === 'approved');
-  }
+  const data = await getCurrentUserDoc();
+  return !(data && data.statusRegistration === 'approved');
 };
 
 export {isFreeUser, isApprovedCenter};

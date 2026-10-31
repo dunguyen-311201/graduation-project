@@ -5,11 +5,12 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import {StyleSheet, View, TextInput, TextInputProps} from 'react-native';
+import type {TextInputInstance} from 'react-native';
 
 import CustomText from '../Text';
 import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
 
-interface TextareaProps extends TextInputProps {
+interface TextareaProps extends Omit<TextInputProps, 'onChangeText'> {
   field: string;
   title: string;
   value?: string;
@@ -21,9 +22,11 @@ export interface TextareaRef {
   focusInput: () => void;
 }
 
-// const Textarea = forwardRef<TextareaRef, TextareaProps>((props, ref) => {
-const Textarea = (props, ref) => {
-  const textInputRef = useRef<TextInput>(null);
+const Textarea = (
+  props: TextareaProps,
+  ref: React.ForwardedRef<TextareaRef>,
+) => {
+  const textInputRef = useRef<TextInputInstance>(null);
 
   useImperativeHandle(ref, () => ({
     focusInput: () => {
@@ -34,7 +37,7 @@ const Textarea = (props, ref) => {
   }));
 
   const handleChangeText = useCallback((value: string) => {
-    props.onChangeText(value, props.field);
+    props.onChangeText?.(value, props.field);
   }, []);
 
   return (

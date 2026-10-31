@@ -1,6 +1,8 @@
-import auth from '@react-native-firebase/auth';
+import {signInWithEmailAndPassword} from '@react-native-firebase/auth';
+import {auth} from '@services';
 import {useNavigation} from '@react-navigation/native';
 import {StyleSheet, TextInput, View} from 'react-native';
+import type {TextInputInstance} from 'react-native';
 import React, {useCallback, useContext, useRef, useState} from 'react';
 
 import {Context} from '@context';
@@ -22,7 +24,7 @@ const SignInByEmail = () => {
 
   const {signIn} = useContext(Context);
 
-  const ref = useRef<TextInput>();
+  const ref = useRef<TextInputInstance>(null);
 
   const [data, setData] = useState<FormData>();
 
@@ -80,14 +82,14 @@ const SignInByEmail = () => {
           err = validate([rule]);
 
           setError(prev => {
-            let next;
+            let next: FormData | undefined;
             if (prev) {
               for (const key in prev) {
                 if (key !== field) {
                   if (!next) {
                     next = {};
                   }
-                  next[key] = prev[key];
+                  next[key as keyof FormData] = prev[key as keyof FormData];
                 }
               }
               if (next || err) {
@@ -114,7 +116,8 @@ const SignInByEmail = () => {
     try {
       const {email, password} = data || {};
       if (email && password) {
-        const userCredential = await auth().signInWithEmailAndPassword(
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
           email,
           password,
         );

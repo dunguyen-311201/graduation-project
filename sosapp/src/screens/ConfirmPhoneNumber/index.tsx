@@ -1,7 +1,12 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {StyleSheet, View} from 'react-native';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {
+  onAuthStateChanged as onAuthChanged,
+  PhoneAuthProvider,
+  signInWithCredential,
+} from '@react-native-firebase/auth';
+import type {User} from '@react-native-firebase/auth';
 
 import ComfirmInput from './components/ComfirmInput';
 import {Context} from '@context';
@@ -9,7 +14,8 @@ import {EScreen} from '@enums';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 import {ScreenBase} from '@components';
-import firebase from '@react-native-firebase/firestore';
+import {doc, getDoc} from '@react-native-firebase/firestore';
+import {auth, db} from '@services';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -25,26 +31,23 @@ const ConfirmPhoneNumberScreen = () => {
 
   const {signIn} = useContext(Context);
 
-  const onAuthStateChanged = useCallback(
-    async (user: FirebaseAuthTypes.User | null) => {
-      try {
-        setLoading(true);
-        if (user) {
-          if (user?.displayName && user.metadata.lastSignInTime) {
-            await signIn(user.uid);
-            return;
-          }
-          navigate(EScreen.SIGNUP_INFO);
+  const onAuthStateChanged = useCallback(async (user: User | null) => {
+    try {
+      setLoading(true);
+      if (user) {
+        if (user?.displayName && user.metadata.lastSignInTime) {
+          await signIn(user.uid);
+          return;
         }
+        navigate(EScreen.SIGNUP_INFO);
+      }
 
-        setLoading(false);
-      } catch (err) {}
-    },
-    [],
-  );
+      setLoading(false);
+    } catch (err) {}
+  }, []);
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    const subscriber = onAuthChanged(auth, onAuthStateChanged);
     return subscriber;
   }, [onAuthStateChanged]);
 
@@ -52,21 +55,16 @@ const ConfirmPhoneNumberScreen = () => {
     try {
       setLoading(true);
 
-      const credential = auth.PhoneAuthProvider.credential(
-        verificationId,
-        code,
-      );
+      const credential = PhoneAuthProvider.credential(verificationId, code);
 
-      const userCredential = await auth().signInWithCredential(credential);
+      const userCredential = await signInWithCredential(auth, credential);
 
       if (userCredential) {
         const {user} = userCredential;
 
-        const u = await firebase()
-          .doc('users/' + user.uid)
-          .get();
+        const u = await getDoc(doc(db, 'users', user.uid));
 
-        if (!u.exists) {
+        if (!u.exists()) {
           setLoading(false);
           navigate(EScreen.SIGNUP_INFO);
           return;

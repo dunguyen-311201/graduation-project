@@ -50,7 +50,7 @@ const DetailMessage = () => {
     () =>
       workers.map(worker => ({
         id: worker.id,
-        value: worker.displayName,
+        value: worker.displayName ?? '',
       })),
     [workers],
   );
@@ -130,12 +130,12 @@ const DetailMessage = () => {
               disableNext: !workerID,
             }
           : currentUser?.role === ERole.USER
-          ? {
-              onNext: handleDelete,
-              nextTitle: 'Remove',
-              disableNext: !isDelete,
-            }
-          : {}),
+            ? {
+                onNext: handleDelete,
+                nextTitle: 'Remove',
+                disableNext: !isDelete,
+              }
+            : {}),
       })}>
       {message && currentUser ? (
         <View style={styles.content}>

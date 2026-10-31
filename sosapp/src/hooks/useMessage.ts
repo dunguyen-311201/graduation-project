@@ -10,7 +10,18 @@ import {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
 import {EStatusUser} from '@enums';
-import firebase from '@react-native-firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from '@react-native-firebase/firestore';
+import {db} from '@services';
 
 const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
@@ -20,15 +31,13 @@ const useMessage = (id: string) => {
   const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    const unsubcribe = firebase()
-      .doc('messages/' + id)
-      .onSnapshot(snap => {
-        const data = snap.data() as TMessage;
-        if (data) {
-          const mess: any = {...data, id};
-          setMessage(mess);
-        }
-      });
+    const unsubcribe = onSnapshot(doc(db, 'messages', id), snap => {
+      const data = snap.data() as TMessage;
+      if (data) {
+        const mess: any = {...data, id};
+        setMessage(mess);
+      }
+    });
 
     return () => unsubcribe();
   }, [currentUser, id]);
@@ -43,9 +52,7 @@ const useMessage = (id: string) => {
         userCompleted: currentUser?.id,
       };
 
-      await firebase()
-        .doc('messages/' + id)
-        .update(update);
+      await updateDoc(doc(db, 'messages', id), update);
     } catch (err: any) {
       setError(err);
     }
@@ -73,17 +80,13 @@ const useMessage = (id: string) => {
               timeout,
             };
 
-            await firebase()
-              .doc('users/' + currentUser?.id)
-              .update({
-                location: from,
-                status: EStatusUser.BUSY,
-                startAt: Date.now(),
-              });
+            await updateDoc(doc(db, 'users', String(currentUser?.id)), {
+              location: from,
+              status: EStatusUser.BUSY,
+              startAt: Date.now(),
+            });
 
-            await firebase()
-              .doc('messages/' + id)
-              .update(update);
+            await updateDoc(doc(db, 'messages', id), update);
           }
         }
       } catch (err: any) {
@@ -97,9 +100,12 @@ const useMessage = (id: string) => {
   const onAssign = useCallback(async (workerID: string) => {
     setLoading(true);
 
-    await firebase()
-      .collection('assigns')
-      .add({workerID, messID: id, time: Date.now(), status: MESSAGE_PENDING});
+    await addDoc(collection(db, 'assigns'), {
+      workerID,
+      messID: id,
+      time: Date.now(),
+      status: MESSAGE_PENDING,
+    });
 
     setLoading(false);
   }, []);
@@ -108,15 +114,15 @@ const useMessage = (id: string) => {
     if (currentUser) {
       try {
         setLoading(true);
-        const document = await firebase()
-          .collection('assigns')
-          .where('userID', '==', currentUser.id)
-          .where('messID', '==', id)
-          .get();
+        const document = await getDocs(
+          query(
+            collection(db, 'assigns'),
+            where('userID', '==', currentUser.id),
+            where('messID', '==', id),
+          ),
+        );
         const nId = document.docs.at(0)?.id;
-        await firebase()
-          .doc('assigns/' + nId)
-          .update({status: 'reject'});
+        nId && (await updateDoc(doc(db, 'assigns', nId), {status: 'reject'}));
       } catch (err) {}
       setLoading(false);
     }
@@ -125,9 +131,7 @@ const useMessage = (id: string) => {
   const onDelete = useCallback(async () => {
     setLoading(true);
 
-    await firebase()
-      .doc('messages/' + id)
-      .delete();
+    await deleteDoc(doc(db, 'messages', id));
 
     setLoading(false);
   }, [id]);

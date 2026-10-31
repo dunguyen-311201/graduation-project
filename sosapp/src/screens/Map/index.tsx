@@ -8,11 +8,7 @@ import {
 } from '@theme';
 import {Dimensions, Image, Pressable, StyleSheet, View} from 'react-native';
 import {ERole, EScreen} from '@enums';
-import MapView, {
-  Circle,
-  PROVIDER_GOOGLE,
-  enableLatestRenderer,
-} from 'react-native-maps';
+import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
 import React, {
   useCallback,
   useContext,
@@ -30,7 +26,7 @@ import {
 } from '@utils';
 
 import {CURRENT_LOCATION} from '@constants';
-import Config from 'react-native-config';
+import {ENV} from '@constants';
 import {Context} from '@context';
 import {CustomMarker} from './components';
 import {Location} from '@types';
@@ -38,9 +34,7 @@ import MapViewDirections from 'react-native-maps-directions';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 
-enableLatestRenderer();
-
-const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_API_KEY = ENV.GOOGLE_MAPS_API_KEY;
 
 type SearchLocation = {
   from?: Location | null;
@@ -101,7 +95,6 @@ const MapScreen = () => {
     },
     [locations],
   );
-
 
   const handleToDirectionandSearch = useCallback(() => {
     setIsDirection(prev => !prev);
@@ -228,7 +221,7 @@ const MapScreen = () => {
               color="blue"
             />
             <CustomText
-              text={`Distance: ${locations.distance + 0.001} km`}
+              text={`Distance: ${(locations.distance ?? 0) + 0.001} km`}
               type="text_medium_16"
               color="blue"
             />

@@ -6,7 +6,8 @@ import {ArrowRightBlueIcon} from '@theme';
 import {EScreen} from '@enums';
 import PhoneInput from './components/PhoneInput';
 import {RootScreenNavigationProps} from '@navigation';
-import auth from '@react-native-firebase/auth';
+import {signInWithPhoneNumber} from '@react-native-firebase/auth';
+import {auth} from '@services';
 import {useNavigation} from '@react-navigation/native';
 
 const SignupByPhoneNumberScreen = () => {
@@ -30,7 +31,8 @@ const SignupByPhoneNumberScreen = () => {
     try {
       setLoading(true);
 
-      const result = await auth().signInWithPhoneNumber(
+      const result = await signInWithPhoneNumber(
+        auth,
         phone.split(' ').join(''),
       );
 

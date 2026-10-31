@@ -1,8 +1,17 @@
-import firebase from '@react-native-firebase/firestore';
 import {useContext, useEffect, useState, useCallback} from 'react';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  where,
+} from '@react-native-firebase/firestore';
 
 import {TMessage} from '@types';
 import {Context} from '@context';
+import {db} from '@services';
 
 const useMessages = (workerID?: string) => {
   const [messages, setMessages] = useState<TMessage[]>([]);
@@ -11,49 +20,40 @@ const useMessages = (workerID?: string) => {
   const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    if (currentUser) {
-      try {
-        const collection = firebase().collection('messages');
+    if (!currentUser) {
+      return;
+    }
 
-        let query;
-        if (workerID) {
-          query = collection.where('workerID', '==', workerID);
-        } else {
-          query = collection.where(
-            currentUser.role + 'ID',
-            '==',
-            currentUser.id,
-          );
-        }
+    const filter = workerID
+      ? where('workerID', '==', workerID)
+      : where(currentUser.role + 'ID', '==', currentUser.id);
 
-        const unsubcribe = query.onSnapshot(snap => {
-          const newData: TMessage[] = [];
-          snap?.docs.forEach(doc => {
-            const id = doc.id;
-            const data = doc.data() as TMessage;
-            newData.push({...data, id});
-          });
-
-          setMessages(newData.sort((a, b) => b.time - a.time));
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'messages'), filter),
+      snap => {
+        const newData: TMessage[] = [];
+        snap?.docs.forEach(d => {
+          newData.push({...(d.data() as TMessage), id: d.id});
         });
 
-        return () => unsubcribe();
-      } catch (error) {}
-    }
+        setMessages(newData.sort((a, b) => b.time - a.time));
+      },
+      err => console.log(err),
+    );
+
+    return () => unsubscribe();
   }, [currentUser, workerID]);
 
   const onDelete = useCallback(async (id: string) => {
     setLoading(true);
-    await firebase()
-      .doc('messages/' + id)
-      .delete();
+    await deleteDoc(doc(db, 'messages', id));
     setMessages(prev => prev.filter(msg => msg.id !== id));
     setLoading(false);
   }, []);
 
   const onNew = useCallback(async (mess: TMessage) => {
     setLoading(true);
-    const docRef = await firebase().collection('messages').add(mess);
+    const docRef = await addDoc(collection(db, 'messages'), mess);
     setMessages(prev => [{...mess, id: docRef.id}, ...prev]);
     setLoading(false);
   }, []);

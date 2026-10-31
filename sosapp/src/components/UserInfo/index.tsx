@@ -71,7 +71,7 @@ const UserInfo = ({
         <View style={styles.row}>
           <CustomButton
             label={user.phoneNumber}
-            onPress={makePhoneCall}
+            onPress={() => makePhoneCall(user.phoneNumber as string)}
             type="secondary"
             customStyle={styles.phone}
           />

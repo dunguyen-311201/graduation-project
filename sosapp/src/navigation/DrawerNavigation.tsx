@@ -37,7 +37,6 @@ const DrawerNavigation = () => {
           fontWeight: '500',
           fontSize: 22,
         },
-        unmountOnBlur: true,
         headerTintColor: DARK_GRAY_COLOR,
         title: '',
         headerStyle: {

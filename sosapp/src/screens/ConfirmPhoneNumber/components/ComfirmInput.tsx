@@ -1,4 +1,5 @@
 import {StyleSheet, View, TextInput} from 'react-native';
+import type {TextInputInstance} from 'react-native';
 import React, {useCallback, useEffect, useState, useRef, memo} from 'react';
 
 import {WHITE_COLOR} from '@theme';
@@ -6,13 +7,13 @@ import {CustomText} from '@components';
 
 type ComfirmInputProps = {
   code: string;
-  error: string;
+  error?: string;
   onChange: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
   const [code, setCode] = useState('');
-  const textInputRefs = useRef<Array<TextInput | null>>([]);
+  const textInputRefs = useRef<Array<TextInputInstance | null>>([]);
 
   useEffect(() => {
     textInputRefs.current.at(0)?.focus();
@@ -51,7 +52,9 @@ const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
         {Array.from({length: 6}, (_, index) => (
           <TextInput
             key={index}
-            ref={ref => (textInputRefs.current[index] = ref)}
+            ref={ref => {
+              textInputRefs.current[index] = ref;
+            }}
             maxLength={1}
             value={code.split(' ')[index]}
             inputMode="numeric"
@@ -61,7 +64,7 @@ const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
           />
         ))}
       </View>
-      <CustomText text={error} color="red" type="text_medium_12" />
+      <CustomText text={error} color="red" type="text_medium_14" />
     </View>
   );
 };

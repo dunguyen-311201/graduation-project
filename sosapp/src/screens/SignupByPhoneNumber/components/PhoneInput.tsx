@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import type {TextInputInstance} from 'react-native';
 import React, {memo, useCallback, useRef, useState} from 'react';
 
 import {CustomText} from '@components';
@@ -22,7 +23,7 @@ type PhoneInputProps = {
 const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
   const [phone, setPhone] = useState('');
-  const refInput = useRef<TextInput>();
+  const refInput = useRef<TextInputInstance>(null);
   const [national, setNational] = useState<Nation | undefined>(PHONES.at(0));
 
   const handleSelectNation = useCallback((code: string) => {

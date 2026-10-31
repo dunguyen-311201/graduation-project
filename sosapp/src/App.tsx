@@ -1,10 +1,7 @@
-import 'react-native-gesture-handler';
-
 import {Context, ContextProps} from './context';
 import {StyleSheet, View} from 'react-native';
 import {useAuth, useNotification} from './hooks';
 
-// import StorybookUIRoot from './.ondevice/Storybook';
 import React from 'react';
 import {RootNavigation} from './navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -34,7 +31,6 @@ function App() {
     updateProfile,
   };
 
-
   return (
     <View style={styles.container}>
       <Context.Provider value={store}>
@@ -47,8 +43,6 @@ function App() {
 }
 
 export default App;
-
-// export {StorybookUIRoot as default};
 
 const styles = StyleSheet.create({
   container: {flex: 1},

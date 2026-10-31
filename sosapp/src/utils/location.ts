@@ -1,15 +1,12 @@
-import {Alert, Linking, PermissionsAndroid, Platform} from 'react-native';
-import Geolocation, {
-  GeolocationResponse,
-} from '@react-native-community/geolocation';
+import {Alert, Linking} from 'react-native';
+import * as Device from 'expo-device';
+import * as ExpoLocation from 'expo-location';
 import {getAsyncStorage, setAsyncStorage} from './asyncStorage';
 
-import {CURRENT_LOCATION} from '@constants';
-import Config from 'react-native-config';
-import DeviceInfo from 'react-native-device-info';
+import {CURRENT_LOCATION, ENV} from '@constants';
 import {Location} from '@types';
 
-const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_API_KEY = ENV.GOOGLE_MAPS_API_KEY;
 
 const getLocationDetails = async ({
   latitude,
@@ -50,46 +47,40 @@ const getLocationDetails = async ({
 
 const requestLocationPermission = async (c: 0 | 1 = 1) => {
   try {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      );
+    const {status} = await ExpoLocation.requestForegroundPermissionsAsync();
 
-      let current = await getAsyncStorage<Location>(CURRENT_LOCATION);
+    if (status !== ExpoLocation.PermissionStatus.GRANTED) {
+      throw new Error('Location permission denied');
+    }
 
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        if (await DeviceInfo.isEmulator()) {
-          await setAsyncStorage(CURRENT_LOCATION, {
-            latitude: 16.0743022,
-            longitude: 108.1535358,
-            city: 'Da Nang',
-            description: 'Lien chieu, Da Nang, Vietnam',
-          });
-          return;
-        }
+    const current = await getAsyncStorage<Location>(CURRENT_LOCATION);
 
-        const position: GeolocationResponse = await new Promise(
-          (resolve, reject) => {
-            Geolocation.getCurrentPosition(resolve, reject);
-          },
-        );
+    // Emulators have no real GPS fix, so use a fixed location in Da Nang.
+    if (!Device.isDevice) {
+      await setAsyncStorage(CURRENT_LOCATION, {
+        latitude: 16.0743022,
+        longitude: 108.1535358,
+        city: 'Da Nang',
+        description: 'Lien chieu, Da Nang, Vietnam',
+      });
+      return;
+    }
 
-        const {latitude, longitude} = position.coords;
+    const position = await ExpoLocation.getCurrentPositionAsync({
+      accuracy: ExpoLocation.Accuracy.High,
+    });
 
-        if (
-          (current &&
-            Math.abs(current.latitude - latitude) > 0.001 &&
-            Math.abs(current.longitude - longitude) > 0.001 &&
-            c === 1) ||
-          current === null
-        ) {
-          const location = await getLocationDetails({latitude, longitude});
-          location && (await setAsyncStorage(CURRENT_LOCATION, location));
-          return;
-        }
+    const {latitude, longitude} = position.coords;
 
-        return;
-      }
+    if (
+      (current &&
+        Math.abs(current.latitude - latitude) > 0.001 &&
+        Math.abs(current.longitude - longitude) > 0.001 &&
+        c === 1) ||
+      current === null
+    ) {
+      const location = await getLocationDetails({latitude, longitude});
+      location && (await setAsyncStorage(CURRENT_LOCATION, location));
     }
   } catch (error) {
     await setAsyncStorage(CURRENT_LOCATION, null);

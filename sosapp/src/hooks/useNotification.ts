@@ -1,7 +1,11 @@
 import {Alert, Linking, PermissionsAndroid} from 'react-native';
-import messaging, {
-  FirebaseMessagingTypes,
+import {
+  getInitialNotification,
+  onMessage,
+  requestPermission,
 } from '@react-native-firebase/messaging';
+import type {RemoteMessage} from '@react-native-firebase/messaging';
+import {messaging} from '@services';
 import {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
@@ -18,9 +22,9 @@ const useNotification = () => {
         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
 
-      await messaging().requestPermission();
+      await requestPermission(messaging);
 
-      if (granted === PermissionsAndroid.RESULTS.DENY) {
+      if (granted === PermissionsAndroid.RESULTS.DENIED) {
         Alert.alert(
           'Notifications Permission',
           'This app needs access to your push notifications',
@@ -43,22 +47,15 @@ const useNotification = () => {
     if (isAuthenticated) {
       setup();
 
-      const unsubscribe = messaging().onMessage(async remoteMessage => {
+      const unsubscribe = onMessage(messaging, async remoteMessage => {
         await handleNotification(remoteMessage);
       });
 
-      messaging().setBackgroundMessageHandler(async mess => {
-        return Alert.alert(
-          'Notification',
-          'Notification has been sent to the device via.',
-        );
+      // The background handler is registered once in index.ts (it must run
+      // outside React, before the app component mounts).
+      getInitialNotification(messaging).then(async remoteMessage => {
+        await handleNotification(remoteMessage, true);
       });
-
-      messaging()
-        .getInitialNotification()
-        .then(async remoteMessage => {
-          await handleNotification(remoteMessage, true);
-        });
 
       return unsubscribe;
     }
@@ -69,11 +66,12 @@ const useNotification = () => {
   }, []);
 
   const handleNotification = useCallback(
-    async (
-      remoteMessage: FirebaseMessagingTypes.RemoteMessage | null,
-      background?: boolean,
-    ) => {
-      const {id, tID} = remoteMessage?.data || {};
+    async (remoteMessage: RemoteMessage | null, background?: boolean) => {
+      // FCM data values are strings; the server sends the message id and
+      // optional assignment id (tID).
+      const data = remoteMessage?.data || {};
+      const id = typeof data.id === 'string' ? data.id : undefined;
+      const tID = typeof data.tID === 'string' ? data.tID : undefined;
       const {body, title, android} = remoteMessage?.notification || {};
 
       if (id && body && title) {
@@ -82,6 +80,7 @@ const useNotification = () => {
           body,
           title,
           background,
+          time: Date.now(),
           imageUrl: android?.imageUrl,
         };
 

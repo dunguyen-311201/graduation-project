@@ -75,13 +75,13 @@ const CustomButton = ({
             type === 'notify'
               ? 'text_medium_14'
               : type === 'outline'
-              ? 'text_large_20'
-              : type === 'secondary'
-              ? 'text_medium_20'
-              : 'text_xLarge'
+                ? 'text_large_20'
+                : type === 'secondary'
+                  ? 'text_medium_20'
+                  : 'text_xLarge'
           }
           color={type === 'secondary' ? 'blue' : 'white'}
-          customStyle={customStyle}
+          customStyle={StyleSheet.flatten(customStyle) as TextStyle}
         />
       )}
       {icon && (

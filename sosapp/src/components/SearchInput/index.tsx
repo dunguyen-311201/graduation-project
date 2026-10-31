@@ -15,10 +15,10 @@ import {
 } from 'react-native';
 import React, {memo, useCallback, useEffect, useState} from 'react';
 
-import Config from 'react-native-config';
+import {ENV} from '@constants';
 import {Location} from '@types';
 
-const GOOGLE_MAPS_API_KEY = Config.GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_API_KEY = ENV.GOOGLE_MAPS_API_KEY;
 
 const query = {
   key: GOOGLE_MAPS_API_KEY,
@@ -62,7 +62,9 @@ const SearchInput = ({
       if (lat && lng) {
         const searchLocation: Location = {
           latitude: lat,
-          city: data.terms?.at(-2).value,
+          city: (
+            data as GooglePlaceData & {terms?: {value: string}[]}
+          ).terms?.at(-2)?.value,
           longitude: lng,
           description: data.description,
         };

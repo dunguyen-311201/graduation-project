@@ -17,5 +17,6 @@ Each ADR records one architectural decision: context, decision, options consider
 | [0011](0011-nestjs-api-replaces-cloud-functions.md) | A NestJS API replaces Cloud Functions | Proposed |
 | [0012](0012-durable-timers-bullmq.md) | Durable timers and background jobs with BullMQ | Proposed |
 | [0013](0013-firestore-as-data-store.md) | Keep Firestore as the data store behind the NestJS API | Proposed |
+| [0014](0014-expo-dev-client.md) | Move the mobile app to Expo with a development build | Proposed |
 
 New ADR template: copy [template.md](template.md).

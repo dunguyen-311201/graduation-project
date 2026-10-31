@@ -10,6 +10,7 @@ import React, {
   useState,
 } from 'react';
 import {StyleSheet, TextInput, View} from 'react-native';
+import type {TextInputInstance} from 'react-native';
 import {
   getAsyncStorage,
   requestLocationPermission,
@@ -32,9 +33,9 @@ const SetupInfoScreen = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
 
-  const inputFirstRef = useRef<TextInput>(null);
-  const inputLastRef = useRef<TextInput>(null);
-  const inputcitizenRef = useRef<TextInput>(null);
+  const inputFirstRef = useRef<TextInputInstance>(null);
+  const inputLastRef = useRef<TextInputInstance>(null);
+  const inputcitizenRef = useRef<TextInputInstance>(null);
 
   const [data, setData] = useState<FormData>();
   const [isCenter, setIsCenter] = useState(false);

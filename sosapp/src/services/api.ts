@@ -1,4 +1,4 @@
-import auth from '@react-native-firebase/auth';
+import {getAuth, getIdToken} from '@react-native-firebase/auth';
 import {API_URL, ERROR_CODE} from '@constants';
 
 type API = {
@@ -13,7 +13,8 @@ const callAPI = async ({data, method, route}: API) => {
     let options: RequestInit = {};
 
     // The API verifies the Firebase ID token of the signed-in user.
-    const idToken = await auth().currentUser?.getIdToken();
+    const user = getAuth().currentUser;
+    const idToken = user ? await getIdToken(user) : undefined;
     const authHeader: Record<string, string> = idToken
       ? {Authorization: `Bearer ${idToken}`}
       : {};

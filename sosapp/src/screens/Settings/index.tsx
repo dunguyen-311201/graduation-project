@@ -9,21 +9,24 @@ import React, {
   useLayoutEffect,
   useState,
 } from 'react';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 
 import {Context} from '@context';
 import {RootScreenNavigationProps} from '@navigation';
-import storage from '@react-native-firebase/storage';
+import {
+  getDownloadURL,
+  getStorage,
+  putFile,
+  ref,
+} from '@react-native-firebase/storage';
 import {useNavigation} from '@react-navigation/native';
 
 type FormData = {
-  [EUser.displayName]?: string;
-  [EUser.phoneNumber]?: string;
-  [EUser.citizenIdentification]?: string;
+  [EUser.displayName]?: string | null;
+  [EUser.phoneNumber]?: string | null;
+  [EUser.citizenIdentification]?: string | null;
   [EUser.photoURL]?: string | null;
 };
-
-const avatarRef = storage().ref('/avatars');
 
 const SettingsScreen = () => {
   const {goBack} = useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
@@ -55,17 +58,18 @@ const SettingsScreen = () => {
   }, [formData]);
 
   const handleChangeAvatar = useCallback(async () => {
-    const result = await launchImageLibrary({mediaType: 'photo', quality: 1});
+    // Avatar upload needs Firebase Storage, which requires the Blaze plan.
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 1,
+    });
 
-    if (result.didCancel) {
-      console.log("can't launch image library");
-    } else if (result.errorCode) {
-      console.log('failed to launch image library');
-    } else {
-      const uri = result.assets?.at(0)?.uri;
+    if (!result.canceled) {
+      const uri = result.assets.at(0)?.uri;
 
       if (uri) {
-        const task = avatarRef.child(Date.now() + '.png').putFile(uri);
+        const avatarRef = ref(getStorage(), `avatars/${Date.now()}.png`);
+        const task = putFile(avatarRef, uri);
 
         task.on(
           'state_changed',
@@ -78,7 +82,7 @@ const SettingsScreen = () => {
             console.log(error);
           },
           () => {
-            task.snapshot?.ref.getDownloadURL().then(async downloadURL => {
+            getDownloadURL(avatarRef).then(async downloadURL => {
               const update: any = {photoURL: downloadURL};
               await updateProfile(update);
             });
@@ -116,7 +120,7 @@ const SettingsScreen = () => {
           )}
         </Pressable>
         <CustomInput
-          value={formData?.displayName}
+          value={formData?.displayName ?? undefined}
           field={EUser.displayName}
           onChangeText={handleChangeText}
           border
@@ -124,7 +128,7 @@ const SettingsScreen = () => {
         />
 
         <CustomInput
-          value={formData?.phoneNumber}
+          value={formData?.phoneNumber ?? undefined}
           field={EUser.phoneNumber}
           onChangeText={handleChangeText}
           editable={false}
