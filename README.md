@@ -1,32 +1,35 @@
-# graduation-project
+# SOS App
 
-## OVERVIEW
+Rescue request app: people send an SOS with their location, the nearest rescue center dispatches a responder, and both sides follow the rescue in real time. Graduation project, being rebuilt with production practices (DDD, TDD, ADRs).
 
-- This document will describe detailed tasks to be implemented in version 1.
+## Repository layout (pnpm + Turborepo)
 
-#### TIMELINE 3 months
+| Path | What it is |
+| --- | --- |
+| [`apps/mobile`](apps/mobile) | Expo (React Native) app for users, responders and centers ([ADR-0014](docs/04-adr/0014-expo-dev-client.md)) |
+| [`services/api`](services/api) | NestJS API, the only writer of business state ([ADR-0011](docs/04-adr/0011-nestjs-api-replaces-cloud-functions.md)) |
+| [`packages/contracts`](packages/contracts) | Zod schemas, routes and error codes shared by the app and the API |
+| [`server`](server) | Legacy Firebase config: Firestore rules and indexes, old Cloud Functions (retired in G2) |
+| [`docs`](docs) | Plan, requirements, domain model, HLD, LLD, ADRs, test strategy |
 
-#### REQUIREMENT
-- Emergency alerts: The application should allow the user to send a distress signal or emergency alert to a pre-configured emergency contact or service with just one click.
-- Location tracking: The application should be able to track the user's current location and send it along with the emergency alert to the emergency contacts.
-- Panic button: A prominent panic button should be available on the application's user interface, allowing the user to quickly and easily activate the emergency alert.
-- User information: The application should be able to store user information like blood type, allergies, and medical conditions which can be shared with emergency services to help provide effective treatment in case of a medical emergency.
-- Settings: The application should allow users to customize emergency contacts and other settings according to their preference.
+The backend is a modular monolith, not microservices ([ADR-0015](docs/04-adr/0015-modular-monolith.md)).
 
-## TECHNICAL
+## Getting started
 
-- React native Firebase: [Link](https://rnfirebase.io/)
-- React native Map: [Link](https://github.com/react-native-maps/react-native-maps)
-- React Navigation: [Link](https://reactnavigation.org/)
-- React Native: [Link](https://reactnative.dev/)
-- React: [Link](https://reactjs.org/)
+Requirements: Node 22, pnpm 10 (`corepack enable`), Android Studio for the mobile app.
 
-## ENVIRONMENT
+```bash
+pnpm install          # installs every workspace
+pnpm build            # builds packages/contracts and the API
+pnpm test             # API tests
+pnpm typecheck        # all workspaces
+pnpm dev:api          # API on http://localhost:4000
+pnpm android          # build and install the mobile dev client
+pnpm dev:mobile       # Metro for the dev client
+```
 
-- Node.js 18.10.0
-- npm 8.19.2
-- React Native 0.71.4
+Each app has its own `.env.example`; see [`apps/mobile/README.md`](apps/mobile/README.md) and [`services/api/README.md`](services/api/README.md).
 
-#### Plan: [link](https://docs.google.com/document/d/1zgA5FcpYYCn7rdwO7kZlu3V-fIaiu0HroKYiqQab_b8/edit)
-#### Design: [link](https://www.figma.com/file/8EIGfelkPSUjRONTbKZ6ob/UBER-APP-DESIGN-%26-PROTOTYPE-(Community)?type=design&node-id=0-1&t=KjefdDUiLZpdOLJO-0)
+## Documentation
 
+Start at [docs/README.md](docs/README.md). The roadmap is in [docs/01-plan/roadmap.md](docs/01-plan/roadmap.md).

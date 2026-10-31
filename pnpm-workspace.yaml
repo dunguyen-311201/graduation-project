@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - services/*
+  - packages/*
+
+# React Native autolinking and Metro expect a flat node_modules.
+nodeLinker: hoisted
+
+# Postinstall scripts these packages do not need.
+ignoredBuiltDependencies:
+  - '@firebase/util'
+  - protobufjs
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - esbuild
