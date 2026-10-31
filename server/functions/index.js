@@ -7,8 +7,8 @@ const geolib = require("geolib");
 
 const DES = require("./descriptions.json");
 
-const img =
-  "https://firebasestorage.googleapis.com/v0/b/sosapp-386606.appspot.com/o/Group%203.png?alt=media&token=84308e18-de03-40f8-9124-aaf83c25f240";
+// Optional image shown in push notifications (public https URL).
+const img = process.env.NOTIFICATION_IMAGE_URL || null;
 
 const {
   MESSAGE_PENDING,
@@ -164,7 +164,7 @@ exports.newRequest = functions.firestore
           notification: {
             body: "There is no rescue service ready to save you!",
             title: "RESCUE REQUEST",
-            imageUrl: img,
+            ...(img && { imageUrl: img }),
           },
           data: { id },
           token: user.token,
@@ -182,7 +182,7 @@ exports.newRequest = functions.firestore
         notification: {
           body: `${user.displayName} ${DES[type]}`,
           title: type,
-          imageUrl: img,
+          ...(img && { imageUrl: img }),
         },
         data: { id },
         tokens,
@@ -235,7 +235,7 @@ exports.newRequest = functions.firestore
             notification: {
               body: "There is no rescue service ready to save you!",
               title: "RESCUE REQUEST",
-              imageUrl: img,
+              ...(img && { imageUrl: img }),
             },
             data: { id },
             token: user.token,
@@ -395,7 +395,7 @@ exports.handleRequest = functions.firestore
           notification: {
             body: `${name} ${actual}`,
             title: "NOTIFICATION",
-            imageUrl: img,
+            ...(img && { imageUrl: img }),
           },
           data: { id },
           tokens,
@@ -450,7 +450,7 @@ exports.serviceAssign = functions.firestore
           notification: {
             body: "You are assigned to rescue from the center.",
             title: mess.type,
-            imageUrl: img,
+            ...(img && { imageUrl: img }),
           },
           data: { id: messID, tID: id },
           token: worker.token,
@@ -474,7 +474,7 @@ exports.serviceAssign = functions.firestore
               notification: {
                 body: "Not Found " + worker.displayName + " response!",
                 title: mess.type,
-                imageUrl: img,
+                ...(img && { imageUrl: img }),
               },
               data: { id: messID },
               token: center.token,
@@ -527,7 +527,7 @@ exports.workerReject = functions.firestore
               notification: {
                 body: displayName + " rejected assign",
                 title: "REJECT ASSIGN",
-                imageUrl: img,
+                ...(img && { imageUrl: img }),
               },
               token: center.token,
               data: { id: messID },
