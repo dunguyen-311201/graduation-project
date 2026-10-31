@@ -5,8 +5,6 @@ const express = require("express");
 const cors = require("cors");
 const geolib = require("geolib");
 
-const uuid = require("uuid");
-
 const DES = require("./descriptions.json");
 
 const img =
@@ -31,13 +29,9 @@ const {
   ROUTE_ASSIGNS,
 } = require("./constant");
 
-const serviceAccount = require("./sosapp-386606-firebase-adminsdk-qd8q5-2a3ae2a35c.json");
-const { user } = require("firebase-functions/v1/auth");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://sosapp-386606-default-rtdb.firebaseio.com",
-});
+// Cloud Functions run with the project's default service account, so no key
+// file is needed. Never commit service account keys to the repository.
+admin.initializeApp();
 
 const db = admin.firestore();
 const auth = admin.auth();
@@ -51,8 +45,35 @@ const userColection = db.collection(ROUTE_USERS);
 const assignColection = db.collection(ROUTE_ASSIGNS);
 const notifyColection = db.collection(ROUTE_NOTIFICATIONS);
 
-app.post(`/${ROUTE_USERS}/new-worker`, async (req, res) => {
+// Verifies the Firebase ID token in "Authorization: Bearer <token>" and
+// attaches the decoded token to req.auth.
+const requireAuth = async (req, res, next) => {
+  const header = req.get("Authorization") || "";
+  const match = header.match(/^Bearer (.+)$/);
+  if (!match) {
+    return res.status(401).send({ message: "Missing ID token" });
+  }
   try {
+    req.auth = await admin.auth().verifyIdToken(match[1]);
+    return next();
+  } catch (error) {
+    return res.status(401).send({ message: "Invalid ID token" });
+  }
+};
+
+app.post(`/${ROUTE_USERS}/new-worker`, requireAuth, async (req, res) => {
+  try {
+    // Only an approved center may create workers, and only for itself.
+    const caller = (await userColection.doc(req.auth.uid).get()).data();
+    if (
+      !caller ||
+      caller.role !== ROLE_CENTER ||
+      caller.statusRegistration !== REGISTRATION_APPROVED ||
+      req.body.centerID !== req.auth.uid
+    ) {
+      return res.status(403).send({ message: "Forbidden" });
+    }
+
     const email = req.body.email;
     const password = req.body.password;
     const displayName = req.body.displayName;
@@ -77,7 +98,12 @@ app.post(`/${ROUTE_USERS}/new-worker`, async (req, res) => {
 
     return res.status(200).send(data);
   } catch (error) {
-    return res.status(500).send(error);
+    functions.logger.error("new-worker failed", error);
+    const known = ["auth/email-already-exists", "auth/invalid-email", "auth/invalid-password"];
+    if (known.includes(error.code)) {
+      return res.status(400).send({ code: error.code, message: error.message });
+    }
+    return res.status(500).send({ message: "Internal error" });
   }
 });
 

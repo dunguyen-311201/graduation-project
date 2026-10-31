@@ -1,9 +1,55 @@
 rules_version = '2';
+
+// G0 interim rules (see docs/01-plan/roadmap.md).
+// Closes anonymous access and role self-promotion while the app still writes
+// business state from the client. Replaced by the full rules in
+// docs/03-design/lld.md section 7 during G2.
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    match /{document=**} {
-      allow read, write: if true;
+    function signedIn() {
+      return request.auth != null;
     }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function changes(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+
+      // Self sign-up as a requester or as a center awaiting approval.
+      // Workers are created by the new-worker function (Admin SDK).
+      allow create: if isOwner(userId)
+        && request.resource.data.get('role', 'user') in ['user', 'center']
+        && request.resource.data.get('statusRegistration', 'pending') != 'approved';
+
+      // Users may edit their own profile but never their role or approval.
+      allow update: if isOwner(userId)
+        && !changes(['role', 'statusRegistration', 'centerID']);
+
+      // A center may re-enable or delete its own workers.
+      allow update: if signedIn()
+        && resource.data.get('centerID', null) == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['disabled']);
+      allow delete: if signedIn()
+        && resource.data.get('centerID', null) == request.auth.uid;
+    }
+
+    // Interim: any signed-in user. Moves to Callable Functions in G2.
+    match /messages/{id} {
+      allow read, write: if signedIn();
+    }
+    match /assigns/{id} {
+      allow read, write: if signedIn();
+    }
+    match /notifications/{id} {
+      allow read, write: if signedIn();
+    }
+
+    // Everything else is denied by default.
   }
 }
