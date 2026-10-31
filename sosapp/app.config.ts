@@ -29,7 +29,7 @@ export default ({config}: ConfigContext): ExpoConfig => ({
       'android.permission.POST_NOTIFICATIONS',
     ],
     config: {
-      googleMaps: {apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY},
+      googleMaps: {apiKey: process.env.GOOGLE_MAPS_ANDROID_API_KEY},
     },
   },
   ios: {
@@ -37,7 +37,7 @@ export default ({config}: ConfigContext): ExpoConfig => ({
     supportsTablet: false,
     googleServicesFile: process.env.GOOGLE_SERVICE_INFO_PLIST,
     config: {
-      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+      googleMapsApiKey: process.env.GOOGLE_MAPS_IOS_API_KEY,
     },
   },
   plugins: [
