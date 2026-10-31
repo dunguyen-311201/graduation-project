@@ -20,7 +20,7 @@ Build `services/api` as a NestJS (TypeScript) application and retire `server/fun
 - **Application layer:** command handlers from ADR-0003 are plain classes registered as Nest providers; ports are bound to adapters with Nest dependency injection tokens.
 - **Side effects that used to be Firestore triggers** (outbox, projections, triage) run as BullMQ jobs enqueued by the command handler after commit, not as database triggers.
 - **Timers** move from Cloud Tasks to BullMQ delayed jobs (ADR-0012).
-- **Errors:** a global exception filter maps domain errors to HTTP 409/422/403 with a stable `code` field, the REST equivalent of `HttpsError.details.code`.
+- **Errors:** a global exception filter maps domain errors to HTTP 400/403/409 with a stable `code` field, the REST equivalent of `HttpsError.details.code`.
 - **Hosting:** a Docker image deployed to Render (Singapore) with a Redis instance for BullMQ. Free-tier instances sleep after 15 minutes idle, which would break NF-01, so either a paid always-on instance is used for production or a keep-warm ping runs every 10 minutes (as in the Portfolio project).
 
 The data store (keep Firestore, or move to PostgreSQL) is decided separately in ADR-0013.

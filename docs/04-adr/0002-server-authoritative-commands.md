@@ -3,6 +3,7 @@
 - **Status:** Proposed
 - **Date:** 2026-10-31
 - **Related:** AUT-02, NF-04, NF-05, INV-01..INV-07
+- **Note:** the transport changed from Callable Functions to NestJS REST endpoints in [ADR-0011](0011-nestjs-api-replaces-cloud-functions.md); the decision below (server-authoritative commands, read-only clients) still holds.
 
 ## Context
 

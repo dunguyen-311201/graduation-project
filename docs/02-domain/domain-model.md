@@ -125,7 +125,7 @@ flowchart TB
 | Center Management → Dispatch | Customer/Supplier | Dispatch is the customer; it needs centers queried by location |
 | Identity → every context | Small Shared Kernel | Only `UserId`, `Role`, `Actor` |
 
-**Deployment grouping:** at the current scale, Emergency Request and Dispatch ship in one deployable (`services/functions`) but live in separate packages/folders and communicate only through domain events, so they can be split later.
+**Deployment grouping:** at the current scale, Emergency Request and Dispatch ship in one deployable (`services/api`, NestJS) but live in separate packages/folders and communicate only through domain events, so they can be split later.
 
 ## 5. Tactical design
 
@@ -221,9 +221,9 @@ Every event carries `eventId` (UUID), `occurredAt`, `aggregateId`, `version`. Ev
 ```mermaid
 flowchart LR
   subgraph Interface[Interface / driving adapters]
-    CALL[Callable Functions]
+    CALL[REST controllers<br/>NestJS]
     TRG[Firestore triggers]
-    TASK[Cloud Tasks handlers]
+    TASK[BullMQ processors]
   end
   subgraph App[Application]
     CMD[Command handlers<br/>RaiseSos, ClaimRequest...]
@@ -235,7 +235,7 @@ flowchart LR
   subgraph Infra[Infrastructure / driven adapters]
     FS[Firestore repos]
     FCMA[FCM / SMS]
-    CT[Cloud Tasks]
+    CT[BullMQ / Redis]
     CL[Claude adapter]
   end
   CALL --> CMD

@@ -12,8 +12,8 @@ The app (`sosapp/`) and Functions (`server/functions/`) define statuses and coll
 
 Move to a pnpm workspaces + Turborepo monorepo:
 
-- `apps/mobile`, `services/functions`, `packages/domain`, `packages/contracts`, `firebase/`.
-- `packages/contracts`: zod schemas for every callable's input/output, enums (`RequestStatus`, `IncidentCategory`, `ErrorCode`), collection names. Both the app and Functions import from it.
+- `apps/mobile`, `services/api`, `packages/domain`, `packages/contracts`, `firebase/`.
+- `packages/contracts`: zod schemas for every API request/response, enums (`RequestStatus`, `IncidentCategory`, `ErrorCode`), collection names. Both the app and the API import from it.
 - Root commands: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm emulators`, `pnpm e2e`.
 
 ## Options considered
@@ -27,5 +27,5 @@ Move to a pnpm workspaces + Turborepo monorepo:
 ## Consequences
 
 - Positive: one source of truth for contracts; one CI command.
-- Negative: Metro monorepo config; deploying Functions requires bundling internal packages (`tsup` or `pnpm deploy`).
+- Negative: Metro monorepo config; the API Docker image must include internal packages (`pnpm deploy --filter api`).
 - Follow-up: standardize on Node 22, TypeScript 5, ESLint flat config.

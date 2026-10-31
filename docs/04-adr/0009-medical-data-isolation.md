@@ -11,7 +11,7 @@ The original requirements call for storing blood type, allergies and conditions 
 ## Decision
 
 - Store it in `users/{uid}/private/medical`, separate from the profile; rules allow only the owner to read and write.
-- Others read it only through the callable `getMedicalForRescue(requestId)`: the function checks the caller is in `participantIds`, the request is `CLAIMED`, `ASSIGNED` or `IN_PROGRESS`, and the owner has enabled `consents.medicalDataSharing`. Every read is audit-logged to the timeline.
+- Others read it only through `GET /v1/requests/:id/medical` (`getMedicalForRescue`): the API checks the caller is in `participantIds`, the request is `CLAIMED`, `ASSIGNED` or `IN_PROGRESS`, and the owner has enabled `consents.medicalDataSharing`. Every read is audit-logged to the timeline.
 - Never copy medical data into `requests` documents.
 - Account deletion also deletes the private subcollection.
 
@@ -19,7 +19,7 @@ The original requirements call for storing blood type, allergies and conditions 
 
 | Option | Pros | Cons |
 | --- | --- | --- |
-| Private subcollection + per-rescue callable (chosen) | Time-bound access with an audit trail | One extra call when opening rescue details |
+| Private subcollection + per-rescue API endpoint (chosen) | Time-bound access with an audit trail | One extra call when opening rescue details |
 | Copy into the request at creation | Fast reads | Data lives forever in rescue history; hard to revoke |
 | Cross-collection rules on `requests` | No function | Complex rules; no audit |
 

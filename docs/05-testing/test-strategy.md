@@ -4,7 +4,7 @@ Version 1.0 · 2026-10-31 · Status: Proposed · Decision: [ADR-0010](../04-adr/
 
 ## 1. Principles
 
-1. **Test first, code second** for all code in `packages/domain` and `services/functions/src/application`. Business code does not merge unless a failing test preceded it in the PR's commit history (reviewers check).
+1. **Test first, code second** for all code in `packages/domain` and `services/api/src/application`. Business code does not merge unless a failing test preceded it in the PR's commit history (reviewers check).
 2. **Test behaviour, not implementation:** test names are business sentences in the ubiquitous language (`rejects claim when request already claimed by another center`).
 3. **Every bug becomes a test:** write a test reproducing the bug before fixing it.
 4. **One reason to fail per test:** clear Arrange / Act / Assert, one behaviour per test.
@@ -31,7 +31,8 @@ Commit rhythm: `test: …` (red) → `feat: …` (green) → `refactor: …`. Se
 | --- | --- | --- | --- | --- |
 | Domain unit | Vitest | Aggregates, VOs, policies, state machine | ~60% | < 5 s total |
 | Use case | Vitest + fake adapters | Command handlers, permissions, cross-aggregate invariants | ~20% | < 10 s |
-| Integration | Vitest + Firebase Emulator | Firestore repositories + transactions, rules, outbox triggers, Cloud Tasks handlers | ~12% | < 2 min |
+| Integration | Jest + Firestore/Auth emulators | Firestore repositories + transactions, rules, BullMQ processors (with a real Redis in CI) | ~10% | < 2 min |
+| API e2e | Jest + Supertest | Nest app over HTTP: auth guard, role checks, validation, error mapping | ~2% | < 30 s |
 | Contract | Vitest | zod schemas in `packages/contracts`; Claude adapter against recorded fixtures | ~3% | < 5 s |
 | Mobile component | Jest + React Native Testing Library | Hooks, SOS screen, error handling | ~4% | < 1 min |
 | E2E | Maestro on Android emulator | 3 main flows | ~1% | < 5 min |
@@ -79,7 +80,7 @@ describe('RescueRequest.claim', () => {
 Use case with a timer:
 
 ```ts
-// services/functions/test/application/expire-request.spec.ts
+// services/api/test/application/expire-request.spec.ts
 it('expires an unclaimed request after 3 minutes and frees the requester', async () => {
   const { handler, scheduler, clock, repo, notifier } = setup();
   const { requestId } = await raiseSos(handler, { requesterId: 'u1' });
@@ -178,7 +179,7 @@ Each row is a test written **before** the code. "Layer": U = domain unit, A = us
 | T-RUL-02 | Requester | Write `requests/*` | Denied | R | AUT-02 |
 | T-RUL-03 | User | Set their own `role` in `users/{uid}` | Denied | R | AUT-01 |
 | T-RUL-04 | Dispatcher of center c1 | Read a request that only notified c2 | Denied | R | INV-08 |
-| T-RUL-05 | Responder on the rescue | Read `users/{requester}/private/medical` directly | Denied (must use the callable) | R | INV-08 |
+| T-RUL-05 | Responder on the rescue | Read `users/{requester}/private/medical` directly | Denied (must use the API) | R | INV-08 |
 | T-RUL-06 | Responder on an `IN_PROGRESS` rescue, consent on | `getMedicalForRescue` | Returns profile, writes audit entry | I | PRF-04 |
 | T-RUL-07 | Rescue already `COMPLETED` | `getMedicalForRescue` | `NOT_PARTICIPANT` or denied | I | PRF-04 |
 | T-RUL-08 | Requester on the rescue | Write `tracking/{id}.responder` | Denied | R | TRK-01 |
@@ -192,7 +193,7 @@ Each row is a test written **before** the code. "Layer": U = domain unit, A = us
 | T-MOB-02 | Hold 3 s, let the countdown finish | | `raiseSos` called exactly once, tracking screen shown | M | SOS-01 |
 | T-MOB-03 | During the countdown | Press Cancel | `raiseSos` not called | M | SOS-01 |
 | T-MOB-04 | `raiseSos` fails with a network error | | Error shown, queued for retry, "Call 115" button shown | M | SOS-06 |
-| T-MOB-05 | Callable returns `ACTIVE_REQUEST_EXISTS` | | Navigates to the existing request, no blank screen | M | SOS-04 |
+| T-MOB-05 | API returns `ACTIVE_REQUEST_EXISTS` | | Navigates to the existing request, no blank screen | M | SOS-04 |
 | T-MOB-06 | Not signed in | Open the app | Not stuck on loading for more than 3 s | M | |
 
 ### 6.6 E2E (Maestro)

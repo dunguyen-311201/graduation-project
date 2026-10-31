@@ -6,7 +6,7 @@ Version 1.0 · 2026-10-31 · Status: Proposed
 
 SOS App lets a person in distress send a rescue request with their location in seconds, automatically routes the request to the nearest suitable rescue center, and lets the center assign a responder and track the rescue to completion.
 
-**In scope for v1:** Android mobile app (iOS if a test device is available), Firebase backend, AI incident classification, push notifications and SMS.
+**In scope for v1:** Android mobile app (iOS if a test device is available), NestJS API on Firebase Auth/Firestore/FCM, AI incident classification, push notifications and SMS.
 
 **Out of scope for v1:** direct integration with the 113/114/115 hotlines (the app only suggests calling), payments, a full web dashboard for centers (only a minimal admin to approve registrations), languages other than Vietnamese and English.
 
@@ -126,8 +126,8 @@ MoSCoW priority: **M** = Must, **S** = Should, **C** = Could.
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | AUT-01 | Roles (`requester`, `responder`, `dispatcher`, `admin`) live in custom claims; clients cannot change them | M |
-| AUT-02 | Every business state change goes through a Callable Function that checks role and ownership | M |
-| AUT-03 | Firebase App Check enabled for Functions and Firestore | S |
+| AUT-02 | Every business state change goes through an authenticated API command endpoint that checks role and ownership | M |
+| AUT-03 | Firebase App Check enabled for the API and Firestore | S |
 
 ## 5. Non-functional requirements (NFR)
 
@@ -174,3 +174,4 @@ MoSCoW priority: **M** = Must, **S** = Should, **C** = Could.
 - Question: should "independent" responders (volunteers not attached to a center) be supported? This affects the Responder domain model.
 - Question: which SMS provider (Twilio, eSMS.vn, SpeedSMS)? This affects cost and sender branding.
 - Question: does the app need to run on iOS for the demo?
+- Question: photo storage. Firebase Storage on new projects requires the Blaze plan (free 5 GB only for US bucket regions). Options: Blaze with a budget alert, or upload through the API to Cloudinary / Cloudflare R2. Decide in G3 (SOS-03, avatars).

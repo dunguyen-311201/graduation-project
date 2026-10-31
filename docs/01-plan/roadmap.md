@@ -54,11 +54,11 @@ No need to wait for the new design. Done on the current code.
 ### G1. Design and monorepo skeleton (1 week)
 
 - [ ] Review and finalize these docs: requirements, domain model, HLD, LLD, ADRs (status `Proposed` → `Accepted`).
-- [ ] Create the monorepo per [ADR-0008](../04-adr/0008-monorepo-shared-contracts.md): `apps/mobile`, `services/functions`, `packages/contracts`, `packages/domain`, `firebase/`.
-- [ ] Move Functions to TypeScript, firebase-functions v2, Node 22.
+- [ ] Create the monorepo per [ADR-0008](../04-adr/0008-monorepo-shared-contracts.md): `apps/mobile`, `services/api`, `packages/contracts`, `packages/domain`, `firebase/`.
+- [ ] Scaffold the NestJS API ([ADR-0011](../04-adr/0011-nestjs-api-replaces-cloud-functions.md)): Firebase ID token guard, health checks, config validation, Docker image, Redis + BullMQ; retire `server/functions`.
 - [ ] Minimal CI: lint, typecheck, unit tests for every package.
-- [ ] Firebase Emulator Suite starts with one command (`pnpm emulators`).
-- [ ] Create 3 Firebase projects: `sos-dev`, `sos-staging`, `sos-prod`.
+- [ ] Local stack starts with one command (`pnpm dev`): API, Redis, Firestore + Auth emulators.
+- [ ] Firebase projects on the Spark plan (no Functions needed): `sos-dev` now; `sos-staging`, `sos-prod` in G5. Render service + Redis for the API.
 
 **DoD:** `pnpm test` is green on CI with empty test suites in every package; docs are `Accepted`.
 
@@ -70,10 +70,10 @@ Rewrite all business logic in `packages/domain` (pure TypeScript, no Firebase de
 - [ ] `Assignment`, `RescueCenter`, `Responder` aggregates.
 - [ ] `CenterMatchingPolicy` domain service (geohash, expanding radius).
 - [ ] Command handlers: `RaiseSos`, `CancelSos`, `ClaimRequest`, `AssignResponder`, `AcceptAssignment`, `RejectAssignment`, `StartRescue`, `CompleteRescue`, `ExpireRequest`, `TimeoutAssignment`.
-- [ ] Adapters: Firestore repositories (transaction + optimistic version), FCM notifier, Cloud Tasks scheduler.
-- [ ] Callable Functions replace direct client writes; custom claims for roles ([ADR-0002](../04-adr/0002-server-authoritative-commands.md), [ADR-0004](../04-adr/0004-roles-via-custom-claims.md)).
+- [ ] Adapters: Firestore repositories (transaction + optimistic version), FCM notifier, BullMQ scheduler ([ADR-0012](../04-adr/0012-durable-timers-bullmq.md)).
+- [ ] REST command endpoints replace direct client writes; custom claims for roles ([ADR-0002](../04-adr/0002-server-authoritative-commands.md), [ADR-0004](../04-adr/0004-roles-via-custom-claims.md)).
 - [ ] Real Firestore rules, each with a test ([LLD §7](../03-design/lld.md#7-firestore-security-rules)).
-- [ ] App switches to callables; remove every client write to `status`.
+- [ ] App switches to the API client; remove every client write to `status`.
 - [ ] Migration script for old data (`messages`, `assigns`, `users`) to the new schema.
 
 **DoD:** every test case in [test-strategy §6](../05-testing/test-strategy.md#6-seed-test-case-catalog-tdd) is green; `packages/domain` coverage ≥ 90% lines, ≥ 85% branches; clients can no longer write state fields.
@@ -103,7 +103,7 @@ Per [ADR-0007](../04-adr/0007-ai-triage-advisory.md) and [LLD §8](../03-design/
 
 - [ ] Upgrade React Native to the current release (New Architecture) and RN Firebase; consider an Expo dev client.
 - [ ] Maestro E2E for the 3 main flows ([test-strategy §6.6](../05-testing/test-strategy.md#66-e2e-maestro)).
-- [ ] GitHub Actions: deploy rules + functions to `staging` on merge to `main`, to `prod` on tag; build a release-signed APK.
+- [ ] GitHub Actions: deploy the API to Render staging and Firestore rules to `sos-staging` on merge to `main`, to production on tag; build a release-signed APK; keep-warm ping.
 - [ ] Crashlytics, function error alerts, dispatch latency dashboard.
 
 **DoD:** pipeline is green from PR to staging automatically; a `v1.0.0` tag deploys to prod.
@@ -111,7 +111,7 @@ Per [ADR-0007](../04-adr/0007-ai-triage-advisory.md) and [LLD §8](../03-design/
 ### G6. Portfolio (3 to 4 days)
 
 - [ ] New README: diagrams, demo GIF, how to run on the emulator.
-- [ ] Portfolio case study: Problem → Challenge → Solution → Result, highlighting the state machine, transactions against race conditions, Cloud Tasks, escalate-only AI.
+- [ ] Portfolio case study: Problem → Challenge → Solution → Result, highlighting the state machine, transactions against race conditions, durable BullMQ timers, escalate-only AI.
 
 ## 3. Plan risks
 

@@ -25,6 +25,6 @@ The project has no meaningful tests. Several current bugs (undefined variable `d
 
 ## Consequences
 
-- Positive: safe refactoring during the React Native and Functions upgrades; tests act as living documentation.
+- Positive: safe refactoring during the React Native upgrade and the NestJS migration; tests act as living documentation.
 - Negative: the Emulator needs Java in CI; longer CI (target < 8 minutes).
-- Follow-up: build `FakeClock`, `FakeScheduler`, `InMemoryRequestRepository`, `RecordingNotifier` in `services/functions/test/fakes`.
+- Follow-up: build `FakeClock`, `FakeScheduler`, `InMemoryRequestRepository`, `RecordingNotifier` in `services/api/test/fakes`; Supertest e2e tests run the Nest app against fakes and the Firestore emulator.

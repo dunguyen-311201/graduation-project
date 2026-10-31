@@ -5,7 +5,7 @@ Each ADR records one architectural decision: context, decision, options consider
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0001](0001-keep-firebase-serverless.md) | Keep Firebase as the backend platform | Partly superseded by 0011 |
-| [0002](0002-server-authoritative-commands.md) | Every state change goes through a Callable Function | Proposed |
+| [0002](0002-server-authoritative-commands.md) | Every state change goes through a server command (transport per 0011) | Proposed |
 | [0003](0003-hexagonal-ddd-in-functions.md) | Hexagonal architecture with a pure TypeScript domain | Proposed |
 | [0004](0004-roles-via-custom-claims.md) | Authorization with Firebase Auth custom claims | Proposed |
 | [0005](0005-durable-timers-cloud-tasks.md) | Durable timers with Cloud Tasks | Superseded by 0012 |
@@ -16,6 +16,6 @@ Each ADR records one architectural decision: context, decision, options consider
 | [0010](0010-tdd-with-emulator.md) | TDD with a test pyramid and the Firebase Emulator | Proposed |
 | [0011](0011-nestjs-api-replaces-cloud-functions.md) | A NestJS API replaces Cloud Functions | Proposed |
 | [0012](0012-durable-timers-bullmq.md) | Durable timers and background jobs with BullMQ | Proposed |
-| 0013 | Data store for the NestJS API (Firestore or PostgreSQL) | Pending decision |
+| [0013](0013-firestore-as-data-store.md) | Keep Firestore as the data store behind the NestJS API | Proposed |
 
 New ADR template: copy [template.md](template.md).

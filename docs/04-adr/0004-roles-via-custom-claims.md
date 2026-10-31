@@ -10,9 +10,9 @@ The role is currently a `role` field in `users/{uid}`, written by the client at 
 
 ## Decision
 
-Store role and `centerId` in Firebase Auth custom claims, settable only by Cloud Functions (Admin SDK):
+Store role and `centerId` in Firebase Auth custom claims, settable only by the backend through the Admin SDK (the NestJS API since ADR-0011):
 
-- New sign-up: blocking function `beforeUserCreated` sets `role: 'requester'`.
+- New sign-up: the client calls `POST /v1/me/bootstrap` after first sign-in and the API sets `role: 'requester'` if no role exists (blocking functions would need Cloud Functions).
 - `reviewCenter(APPROVE)`: sets `role: 'dispatcher'` and `centerId` on the registrant's account.
 - `createResponder`: creates the user with `role: 'responder'` and `centerId`.
 - Admin: set once manually with a script.

@@ -20,15 +20,19 @@ graduation-project/
 │        │     └─ (each feature: screens/, components/, hooks/, api.ts, __tests__/)
 │        └─ shared/                # UI kit, lib (firebase, location), utils
 ├─ services/
-│  └─ functions/
-│     └─ src/
-│        ├─ application/           # command handlers + ports
-│        ├─ infrastructure/        # firestore repos, fcm, sms, cloud tasks, claude
-│        ├─ interface/             # callables, triggers, task handlers
-│        └─ index.ts               # function exports
+│  └─ api/                         # NestJS API (ADR-0011)
+│     ├─ src/
+│     │  ├─ application/           # command handlers + ports
+│     │  ├─ infrastructure/        # firestore repos, fcm, sms, bullmq, claude
+│     │  ├─ interface/http/        # controllers, guards, pipes, filters
+│     │  ├─ interface/jobs/        # BullMQ processors (timers, outbox)
+│     │  ├─ app.module.ts
+│     │  └─ main.ts                # starts HTTP and/or workers by MODE
+│     ├─ test/                     # e2e (Supertest) + fakes
+│     └─ Dockerfile
 ├─ packages/
 │  ├─ domain/                      # aggregates, VOs, events, policies (pure TS)
-│  └─ contracts/                   # zod schemas for callable I/O, shared enums
+│  └─ contracts/                   # zod schemas for API request/response, shared enums
 ├─ firebase/
 │  ├─ firestore.rules
 │  ├─ firestore.indexes.json
@@ -39,7 +43,7 @@ graduation-project/
 └─ .github/workflows/
 ```
 
-Tooling: pnpm workspaces + Turborepo, TypeScript 5 strict, Vitest for Node packages, Jest + React Native Testing Library for mobile, ESLint (`eslint-plugin-boundaries`), Prettier, Husky + lint-staged.
+Tooling: pnpm workspaces + Turborepo, TypeScript 5 strict, NestJS 11, Jest + Supertest for the API, Vitest for pure packages, Jest + React Native Testing Library for mobile, ESLint (`eslint-plugin-boundaries`), Prettier, Husky + lint-staged.
 
 ## 2. Firestore schema
 
@@ -123,28 +127,36 @@ The transition table is a static map in `packages/domain/src/rescue-request/tran
 
 `Responder.availability`: `OFF_DUTY ⇄ AVAILABLE`, `AVAILABLE → ON_MISSION` (reserve), `ON_MISSION → AVAILABLE` (release). `OFF_DUTY` is not allowed while `ON_MISSION`.
 
-## 4. API contracts (Callable Functions)
+## 4. API contracts (REST, NestJS)
 
-Every callable: region `asia-southeast1`, `enforceAppCheck: true`, input validated with zod from `packages/contracts`, errors returned as `HttpsError` with a stable business code in `details.code`.
+Base URL `${API_URL}/v1`. Every endpoint requires `Authorization: Bearer <Firebase ID token>` (verified by `FirebaseAuthGuard`), optionally `X-Firebase-AppCheck`. Bodies are validated with zod schemas from `packages/contracts`. Errors use one shape:
 
-| Callable | Role | Input | Output | Business errors |
-| --- | --- | --- | --- | --- |
-| `raiseSos` | requester | `{ idempotencyKey, location{lat,lng,accuracyM,capturedAt}, category?, severity?, description? }` | `{ requestId, status }` | `ACTIVE_REQUEST_EXISTS`, `STALE_LOCATION`, `RATE_LIMITED` |
-| `updateSosDetails` | requester (owner) | `{ requestId, category?, description?, attachments? }` | `{ ok }` | `NOT_OWNER`, `REQUEST_CLOSED` |
-| `cancelSos` | requester (owner) | `{ requestId, reason? }` | `{ status }` | `NOT_OWNER`, `INVALID_TRANSITION` |
-| `claimRequest` | dispatcher | `{ requestId }` | `{ status }` | `NOT_NOTIFIED`, `ALREADY_CLAIMED`, `INVALID_TRANSITION` |
-| `assignResponder` | dispatcher (claiming center) | `{ requestId, responderId }` | `{ assignmentId }` | `NOT_CLAIM_OWNER`, `RESPONDER_UNAVAILABLE`, `RESPONDER_NOT_IN_CENTER`, `ASSIGNMENT_ACTIVE` |
-| `acceptAssignment` | responder (assignee) | `{ assignmentId, location }` | `{ requestId, status }` | `NOT_ASSIGNEE`, `ASSIGNMENT_CLOSED` |
-| `rejectAssignment` | responder (assignee) | `{ assignmentId, reason? }` | `{ ok }` | `NOT_ASSIGNEE`, `ASSIGNMENT_CLOSED` |
-| `completeRescue` | responder (assignee) | `{ requestId, distanceM, note? }` | `{ status }` | `NOT_ASSIGNEE`, `INVALID_TRANSITION` |
-| `setAvailability` | responder | `{ availability: 'AVAILABLE' \| 'OFF_DUTY' }` | `{ availability }` | `ON_MISSION`, `DISABLED` |
-| `createResponder` | dispatcher | `{ displayName, email, tempPassword }` | `{ responderId }` | `EMAIL_EXISTS` |
-| `disableResponder` | dispatcher | `{ responderId }` | `{ ok }` | `RESPONDER_NOT_IN_CENTER`, `ON_MISSION` |
-| `registerCenter` | signed-in user | `{ name, address, location, phone, licenseNo }` | `{ centerId }` | `ALREADY_REGISTERED` |
-| `reviewCenter` | admin | `{ centerId, decision: 'APPROVE' \| 'REJECT', note? }` | `{ status }` | `INVALID_TRANSITION` |
-| `overrideTriage` | dispatcher (claiming center) | `{ requestId, category, severity }` | `{ ok }` | `NOT_CLAIM_OWNER` |
-| `getMedicalForRescue` | dispatcher/responder on the rescue | `{ requestId }` | `MedicalProfile \| null` | `NOT_PARTICIPANT`, `NO_CONSENT` |
-| `registerFcmToken` | any user | `{ token }` | `{ ok }` | |
+```json
+{ "statusCode": 409, "code": "ALREADY_CLAIMED", "message": "Request already claimed by another center" }
+```
+
+Status mapping: validation → 400, missing/invalid token → 401, wrong role or not owner → 403, unknown resource → 404, business rule / invalid transition → 409, rate limit → 429.
+
+The "Command" column keeps the command names used in the domain and test cases.
+
+| Command | Endpoint | Role | Input | Output | Business errors |
+| --- | --- | --- | --- | --- | --- |
+| `raiseSos` | `POST /requests` | requester | `{ idempotencyKey, location{lat,lng,accuracyM,capturedAt}, category?, severity?, description? }` | `{ requestId, status }` | `ACTIVE_REQUEST_EXISTS`, `STALE_LOCATION`, `RATE_LIMITED` |
+| `updateSosDetails` | `PATCH /requests/:id` | requester (owner) | `{ requestId, category?, description?, attachments? }` | `{ ok }` | `NOT_OWNER`, `REQUEST_CLOSED` |
+| `cancelSos` | `POST /requests/:id/cancel` | requester (owner) | `{ requestId, reason? }` | `{ status }` | `NOT_OWNER`, `INVALID_TRANSITION` |
+| `claimRequest` | `POST /requests/:id/claim` | dispatcher | `{ requestId }` | `{ status }` | `NOT_NOTIFIED`, `ALREADY_CLAIMED`, `INVALID_TRANSITION` |
+| `assignResponder` | `POST /requests/:id/assignments` | dispatcher (claiming center) | `{ requestId, responderId }` | `{ assignmentId }` | `NOT_CLAIM_OWNER`, `RESPONDER_UNAVAILABLE`, `RESPONDER_NOT_IN_CENTER`, `ASSIGNMENT_ACTIVE` |
+| `acceptAssignment` | `POST /assignments/:id/accept` | responder (assignee) | `{ assignmentId, location }` | `{ requestId, status }` | `NOT_ASSIGNEE`, `ASSIGNMENT_CLOSED` |
+| `rejectAssignment` | `POST /assignments/:id/reject` | responder (assignee) | `{ assignmentId, reason? }` | `{ ok }` | `NOT_ASSIGNEE`, `ASSIGNMENT_CLOSED` |
+| `completeRescue` | `POST /requests/:id/complete` | responder (assignee) | `{ requestId, distanceM, note? }` | `{ status }` | `NOT_ASSIGNEE`, `INVALID_TRANSITION` |
+| `setAvailability` | `PUT /responders/me/availability` | responder | `{ availability: 'AVAILABLE' \| 'OFF_DUTY' }` | `{ availability }` | `ON_MISSION`, `DISABLED` |
+| `createResponder` | `POST /responders` | dispatcher | `{ displayName, email, tempPassword }` | `{ responderId }` | `EMAIL_EXISTS` |
+| `disableResponder` | `POST /responders/:id/disable` | dispatcher | `{ responderId }` | `{ ok }` | `RESPONDER_NOT_IN_CENTER`, `ON_MISSION` |
+| `registerCenter` | `POST /centers` | signed-in user | `{ name, address, location, phone, licenseNo }` | `{ centerId }` | `ALREADY_REGISTERED` |
+| `reviewCenter` | `POST /centers/:id/review` | admin | `{ centerId, decision: 'APPROVE' \| 'REJECT', note? }` | `{ status }` | `INVALID_TRANSITION` |
+| `overrideTriage` | `PUT /requests/:id/triage` | dispatcher (claiming center) | `{ requestId, category, severity }` | `{ ok }` | `NOT_CLAIM_OWNER` |
+| `getMedicalForRescue` | `GET /requests/:id/medical` | dispatcher/responder on the rescue | `{ requestId }` | `MedicalProfile \| null` | `NOT_PARTICIPANT`, `NO_CONSENT` |
+| `registerFcmToken` | `PUT /me/fcm-token` | any user | `{ token }` | `{ ok }` | |
 
 Example contract:
 
@@ -166,7 +178,7 @@ export type RaiseSosInput = z.infer<typeof RaiseSosInput>;
 export const RaiseSosOutput = z.object({ requestId: z.string(), status: RequestStatus });
 ```
 
-**Idempotency:** `raiseSos` looks up `requests` by `idempotencyKey` + `requesterId`; a repeated call with the same key returns the existing request instead of creating a new one. Other commands are naturally idempotent through the state machine (a repeated `claimRequest` by the same center succeeds).
+**Idempotency:** `POST /requests` takes an `Idempotency-Key` header (stored as `idempotencyKey`) and looks up `requests` by key + `requesterId`; a repeated call with the same key returns the existing request instead of creating a new one. Other commands are naturally idempotent through the state machine (a repeated `claimRequest` by the same center succeeds).
 
 ## 5. Detailed sequences
 
@@ -175,16 +187,16 @@ export const RaiseSosOutput = z.object({ requestId: z.string(), status: RequestS
 ```mermaid
 sequenceDiagram
   autonumber
-  participant C as Callable raiseSos
+  participant C as RequestsController (POST /v1/requests)
   participant H as RaiseSosHandler
   participant RL as RateLimiter
   participant Repo as RequestRepository
   participant Dir as CenterDirectory
   participant P as CenterMatchingPolicy
-  participant S as Scheduler (Cloud Tasks)
+  participant S as Scheduler (BullMQ)
   participant N as Notifier
 
-  C->>C: verify auth, role=requester, App Check, zod parse
+  C->>C: FirebaseAuthGuard, RolesGuard(requester), ZodValidationPipe
   C->>H: execute(cmd, actor)
   H->>RL: check(actor.uid)
   H->>Repo: findByIdempotencyKey(uid, key)
@@ -208,7 +220,7 @@ If no center exists within 10 km, the handler expands to 20 and then 50 km befor
 sequenceDiagram
   autonumber
   actor S as Responder
-  participant Fn as rejectAssignment / task TimeoutAssignment
+  participant Fn as POST /assignments/:id/reject or timeout job
   participant DB as Firestore (transaction)
   participant N as Notifier
   actor D as Dispatcher
@@ -216,7 +228,7 @@ sequenceDiagram
   alt Responder rejects
     S->>Fn: rejectAssignment(assignmentId)
   else 60 seconds pass
-    Note over Fn: Cloud Tasks calls TimeoutAssignment(assignmentId)
+    Note over Fn: BullMQ runs timeout-assignment job
   end
   Fn->>DB: read assignment, request, responder
   alt assignment no longer OFFERED
@@ -230,19 +242,22 @@ sequenceDiagram
   N-->>D: push
 ```
 
-### 5.3 Projections and side effects through triggers
+### 5.3 Projections and side effects through jobs (outbox)
 
-Command handlers write the aggregate plus a `timeline` record. The trigger `onDocumentCreated(requests/{id}/timeline/{eventId})` acts as an **outbox**: it reads the event, checks `processedEvents/{eventId}`, then runs the secondary policies (non-urgent notifications, updating `centers.availableResponders`, SMS to relatives, starting triage). The urgent push (notifying centers of a new SOS) is sent directly in `raiseSos` to meet NF-01.
+A command handler writes the aggregate plus a `timeline` record in one transaction, then enqueues one `domain-events` job per new event (job id = `eventId`). If the process dies between commit and enqueue, the 5-minute sweep re-enqueues timeline entries without a matching `processedEvents` document, so no event is lost. Processors check `processedEvents/{eventId}` before running secondary policies (non-urgent notifications, updating `centers.availableResponders`, SMS to relatives, starting triage). The urgent push (notifying centers of a new SOS) is sent directly in the raise-SOS handler to meet NF-01.
 
-## 6. Timers (Cloud Tasks)
+## 6. Timers (BullMQ)
 
-| Task | Scheduled at | Handler does | Skip when |
+Per [ADR-0012](../04-adr/0012-durable-timers-bullmq.md), queue `rescue-timers` on Redis.
+
+| Job | Delay | Handler does | Skip when |
 | --- | --- | --- | --- |
-| `ExpandRadius` | +60 s and +120 s after creation | `request.expandRadius()`, notify new centers | status ≠ `PENDING` or already at 50 km |
-| `ExpireRequest` | +3 min after creation | `request.expire()`, delete `activeRequests`, push the requester | status ≠ `PENDING` |
-| `TimeoutAssignment` | +60 s after assignment | as in §5.2 | assignment ≠ `OFFERED` |
+| `expand-radius` | 60 s and 120 s after creation | `request.expandRadius()`, notify new centers | status ≠ `PENDING` or already at 50 km |
+| `expire-request` | 3 min after creation | `request.expire()`, delete `activeRequests`, push the requester | status ≠ `PENDING` |
+| `timeout-assignment` | 60 s after assignment | as in §5.2 | assignment ≠ `OFFERED` |
+| `sweep` (repeatable) | every 5 min | re-enqueue lost timers and outbox events | nothing to do |
 
-Task names are deterministic (`expire-{requestId}`, `timeout-{assignmentId}`) so Cloud Tasks deduplicates them and they can be cancelled on claim. The `Scheduler` port has `schedule(name, at, payload)` and `cancel(name)`; the test fake records the schedule and lets tests "fast-forward" with `FakeClock`.
+Job ids are deterministic (`expire:{requestId}`, `timeout:{assignmentId}`) so duplicates are ignored and a claim can remove the pending expiry job. The `Scheduler` port has `schedule(name, at, payload)` and `cancel(name)`; the test fake records the schedule and lets tests "fast-forward" with `FakeClock`.
 
 ## 7. Firestore security rules
 
@@ -277,7 +292,7 @@ service cloud.firestore {
         uid() in resource.data.participantIds ||
         (role() == 'dispatcher' && request.auth.token.centerId in resource.data.notifiedCenterIds)
       );
-      allow write: if false; // Functions only (Admin SDK bypasses rules)
+      allow write: if false; // NestJS API only (Admin SDK bypasses rules)
 
       match /timeline/{eventId} {
         allow read: if signedIn() && uid() in get(/databases/$(db)/documents/requests/$(requestId)).data.participantIds;
@@ -325,7 +340,7 @@ Storage: `requests/{requestId}/{file}` may be uploaded only by the owning reques
 ```mermaid
 sequenceDiagram
   autonumber
-  participant T as Trigger (timeline: RescueRequested)
+  participant T as domain-events job (RescueRequested)
   participant H as AssessTriageHandler
   participant ACL as ClaudeTriageModel (ACL)
   participant API as Claude API
@@ -344,15 +359,15 @@ sequenceDiagram
 
 - **Model:** `claude-haiku-5-5` for text only, `claude-sonnet-5-5` when photos are attached. The model id and `promptVersion` are stored in `triage` for traceability.
 - **Output schema** (tool `report_triage`): `category` (TRI-01 enum), `severity` (1..5), `confidence` (0..1), `summary` (≤ 160 characters, Vietnamese), `firstAid` (3..5 strings), `needs` (enum array).
-- **Prompt** lives in `services/functions/src/infrastructure/triage/prompts/v1.md`, instructing: when unsure, choose the higher severity; never give a medical diagnosis; first aid follows general public guidance.
+- **Prompt** lives in `services/api/src/infrastructure/triage/prompts/v1.md`, instructing: when unsure, choose the higher severity; never give a medical diagnosis; first aid follows general public guidance.
 - **Resilience:** 8-second timeout, one retry on 5xx/429, a simple circuit breaker (disable AI for 5 minutes after 5 consecutive failures). Every failure is logged, never thrown out of the handler.
-- **Secret:** `ANTHROPIC_API_KEY` via `defineSecret`.
-- **Evaluation:** `services/functions/eval/triage-cases.jsonl` (50 to 100 labelled cases); `pnpm eval:triage` prints a confusion matrix and the under-triage rate.
+- **Secret:** `ANTHROPIC_API_KEY` from the hosting provider's secret store, read through the validated config module.
+- **Evaluation:** `services/api/eval/triage-cases.jsonl` (50 to 100 labelled cases); `pnpm eval:triage` prints a confusion matrix and the under-triage rate.
 
 ## 9. Mobile app
 
-- **Server state:** Firestore listeners wrapped in per-feature hooks (`useRescueRequest(id)`, `usePendingRequestsForCenter()`), returning `{ data, error, loading }`; commands go through the feature's `api.ts` using `httpsCallable` + zod output parsing.
-- **Errors:** every command returns `Result<T, AppError>`; `AppError` maps `details.code` to a localized message; no empty `catch {}` (ESLint `no-empty` as error).
+- **Server state:** Firestore listeners wrapped in per-feature hooks (`useRescueRequest(id)`, `usePendingRequestsForCenter()`), returning `{ data, error, loading }`; commands go through the feature's `api.ts` using a small `fetch` client that attaches the ID token and an `Idempotency-Key`, with zod output parsing.
+- **Errors:** every command returns `Result<T, AppError>`; `AppError` maps the response `code` to a localized message; no empty `catch {}` (ESLint `no-empty` as error).
 - **SOS button:** a small client-side state machine `idle → holding → countdown → sending → sent | failed`; on `failed` due to no network, the request is queued (AsyncStorage) and retried with backoff, and a "Call 115" button is shown.
 - **Location:** `react-native-geolocation-service` (drop `@react-native-community/geolocation`), fresh fix with `maximumAge: 120000`; Android foreground service while a rescue is active.
 - **Notifications:** `@react-native-firebase/messaging` + Notifee (replacing the unmaintained `react-native-push-notification`), high-priority channel `sos-critical`.
@@ -363,7 +378,7 @@ sequenceDiagram
 | Layer | Approach |
 | --- | --- |
 | Domain | Errors are classes with a `code` (`InvalidTransitionError`, `InvariantViolation`) |
-| Application | Map domain errors to `HttpsError('failed-precondition', msg, { code })` |
+| Application / HTTP | A global exception filter maps domain errors to HTTP status + `{ code, message }` (§4) |
 | Infrastructure | Bounded retries; unrecoverable errors logged with `severity=ERROR` and `requestId` |
-| Logs | `firebase-functions/logger` JSON: `requestId`, `eventId`, `actorId` (never phone numbers or descriptions) |
-| Alerts | Cloud Monitoring: function errors > 1% / 5 min; Cloud Tasks backlog > 50; `raiseSos` p95 > 3 seconds |
+| Logs | `nestjs-pino` JSON: `requestId`, `eventId`, `actorId`, HTTP request id (never phone numbers or descriptions) |
+| Alerts | 5xx rate > 1% / 5 min; failed BullMQ jobs > 0; `POST /v1/requests` p95 > 3 seconds; `/health/ready` failing |

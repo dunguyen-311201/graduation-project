@@ -2,7 +2,7 @@
 
 - **Status:** Proposed
 - **Date:** 2026-10-31
-- **Related:** NF-10, ADR-0010
+- **Related:** NF-10, ADR-0010, ADR-0011 (hosts these layers in NestJS)
 
 ## Context
 
@@ -13,9 +13,9 @@
 Split into 4 layers, each its own folder/package, with dependencies pointing inward only:
 
 1. `packages/domain`: aggregates, value objects, domain events, domain services. Standard TypeScript only; no Firebase imports, no I/O; time passed in through `Clock`.
-2. `services/functions/src/application`: command handlers (one use case per class) and port definitions (`RequestRepository`, `CenterDirectory`, `Notifier`, `Scheduler`, `TriageModel`, `Clock`, `UnitOfWork`).
-3. `services/functions/src/infrastructure`: adapters implementing the ports with Firestore, FCM, Cloud Tasks, Claude.
-4. `services/functions/src/interface`: callables, triggers, task handlers; they only parse input, build the actor, call a handler and map errors.
+2. `services/api/src/application`: command handlers (one use case per class) and port definitions (`RequestRepository`, `CenterDirectory`, `Notifier`, `Scheduler`, `TriageModel`, `Clock`, `UnitOfWork`).
+3. `services/api/src/infrastructure`: adapters implementing the ports with Firestore, FCM, BullMQ, Claude.
+4. `services/api/src/interface`: REST controllers, guards, BullMQ processors; they only parse input, build the actor, call a handler and map errors.
 
 Enforced with `eslint-plugin-boundaries` in CI.
 
