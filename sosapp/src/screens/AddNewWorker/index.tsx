@@ -1,10 +1,11 @@
-import {StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {EScreen} from '@enums';
 import {Context} from '@context';
 import {callAPI} from '@services';
+import {Route} from '@constants';
 import {DARK_GRAY_COLOR} from '@theme';
 import {Field, validate} from '@utils';
 import {CustomInput, ScreenBase} from '@components';
@@ -55,14 +56,25 @@ const AddNewWorker = () => {
     try {
       setLoading(true);
 
-      const {rePassword, ...data} = worker || {};
+      const {rePassword, email, password, displayName} = worker || {};
 
-      rePassword &&
-        (await callAPI({
+      if (rePassword) {
+        // The API takes the center from the signed-in user's token.
+        const res = await callAPI({
           method: 'POST',
-          route: 'users/new-worker',
-          data,
-        }));
+          route: Route.RESPONDERS,
+          data: {email, password, displayName},
+        });
+
+        if (res.status >= 400) {
+          Alert.alert(
+            'Could not add worker',
+            res.data?.message || 'Please try again.',
+          );
+          setLoading(false);
+          return;
+        }
+      }
 
       goBack();
     } catch (err: any) {

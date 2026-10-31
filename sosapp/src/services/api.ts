@@ -1,6 +1,5 @@
 import auth from '@react-native-firebase/auth';
-import {Config} from 'react-native-config';
-import {API_ENDPOINT_TEST, API_ENDPOINT_TEST1, ERROR_CODE} from '@constants';
+import {API_URL, ERROR_CODE} from '@constants';
 
 type API = {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT';
@@ -10,9 +9,7 @@ type API = {
 
 const callAPI = async ({data, method, route}: API) => {
   try {
-    // ENV=dev points at the local emulator; anything else uses the deployed API.
-    let url =
-      (Config.ENV === 'dev' ? API_ENDPOINT_TEST1 : API_ENDPOINT_TEST) + route;
+    const url = API_URL + route;
     let options: RequestInit = {};
 
     // The API verifies the Firebase ID token of the signed-in user.
@@ -38,7 +35,8 @@ const callAPI = async ({data, method, route}: API) => {
     }
 
     const res = await fetch(url, options);
-    const _data = await res.json();
+    // Some responses (204, proxy errors) have no JSON body.
+    const _data = await res.json().catch(() => null);
     return {data: _data, status: res.status};
   } catch (error) {
     return {data: null, status: ERROR_CODE, message: error};
