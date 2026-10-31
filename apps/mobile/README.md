@@ -3,16 +3,16 @@
 React Native app for raising and handling rescue requests. Built with Expo SDK 58
 (React Native 0.88, React 19) using a **development build** (`expo-dev-client`),
 not Expo Go, because React Native Firebase and Google Maps need native code.
-See [ADR-0014](../docs/04-adr/0014-expo-dev-client.md).
+See [ADR-0014](../../docs/04-adr/0014-expo-dev-client.md).
 
 ## Setup
 
-1. Install Node 22, pnpm 10 (`corepack enable`) and Android Studio (SDK + an emulator), then run `pnpm install`.
-   `pnpm-workspace.yaml` sets `nodeLinker: hoisted`, which React Native needs.
+1. Install Node 22, pnpm 10 (`corepack enable`) and Android Studio (SDK + an emulator), then run `pnpm install` at the repo root.
+   The root `pnpm-workspace.yaml` sets `nodeLinker: hoisted`, which React Native needs.
 2. Copy `.env.example` to `.env` and fill in `EXPO_PUBLIC_API_URL` and the two
    Google Maps keys (see the comments in `.env.example`).
 3. Download `google-services.json` for the Android app `com.sosapp` from the
-   Firebase console and put it next to this README (it is git-ignored).
+   Firebase console and put it in `apps/mobile/` (it is git-ignored).
 4. Build and install the dev client once: `pnpm android`.
    This runs `expo prebuild` (generates `android/`, which is git-ignored) and Gradle.
 5. Afterwards, day-to-day work only needs `pnpm start`.
@@ -21,6 +21,8 @@ Rebuild the dev client (`pnpm android`) whenever you add a native package or
 change `app.config.ts`.
 
 ## Scripts
+
+Run these inside `apps/mobile`, or from the root with `pnpm --filter @sos/mobile <script>` (`pnpm android` and `pnpm dev:mobile` are root shortcuts).
 
 | Script | What it does |
 | --- | --- |
@@ -41,5 +43,5 @@ variable named `GOOGLE_SERVICES_JSON`; `app.config.ts` reads it.
 - Firebase uses the modular API (`getFirestore`, `doc`, `onSnapshot`, ...);
   instances live in `src/services/firebase.ts`.
 - Writes that change business state are moving to the NestJS API
-  (`services/api`, ADR-0011) and go through `callAPI` in `src/services/api.ts`.
+  (`services/api`, ADR-0011) and go through `callAPI` in `src/services/api.ts`, with request types from `@sos/contracts`.
 - Avatar upload uses Firebase Storage, which needs the Blaze plan.

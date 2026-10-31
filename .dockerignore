@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.expo
+**/.env
+apps/mobile/android
+apps/mobile/ios
+**/google-services.json
+.git

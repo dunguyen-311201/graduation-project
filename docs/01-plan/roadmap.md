@@ -54,8 +54,8 @@ No need to wait for the new design. Done on the current code.
 ### G1. Design and monorepo skeleton (1 week)
 
 - [ ] Review and finalize these docs: requirements, domain model, HLD, LLD, ADRs (status `Proposed` → `Accepted`).
-- [ ] Create the monorepo per [ADR-0008](../04-adr/0008-monorepo-shared-contracts.md): `apps/mobile`, `services/api`, `packages/contracts`, `packages/domain`, `firebase/`.
-- [ ] Scaffold the NestJS API ([ADR-0011](../04-adr/0011-nestjs-api-replaces-cloud-functions.md)): Firebase ID token guard, health checks, config validation, Docker image, Redis + BullMQ; retire `server/functions`.
+- [x] Create the monorepo per [ADR-0008](../04-adr/0008-monorepo-shared-contracts.md): `apps/mobile`, `services/api`, `packages/contracts` (done 2026-10-31; `packages/domain` comes with the first aggregate in G2).
+- [ ] Scaffold the NestJS API ([ADR-0011](../04-adr/0011-nestjs-api-replaces-cloud-functions.md)): Firebase ID token guard, health checks, config validation, Docker image (done); Redis + BullMQ; retire `server/functions`.
 - [ ] Minimal CI: lint, typecheck, unit tests for every package.
 - [ ] Local stack starts with one command (`pnpm dev`): API, Redis, Firestore + Auth emulators.
 - [ ] Firebase projects on the Spark plan (no Functions needed): `sos-dev` now; `sos-staging`, `sos-prod` in G5. Render service + Redis for the API.

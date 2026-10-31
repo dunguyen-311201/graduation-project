@@ -1,3 +1,5 @@
+import {ApiRoute} from '@sos/contracts';
+
 import {ENV} from './env';
 
 // Base URL of the NestJS API (services/api), EXPO_PUBLIC_API_URL in .env.
@@ -6,9 +8,8 @@ import {ENV} from './env';
 const RAW_API_URL = ENV.API_URL;
 const API_URL = RAW_API_URL.endsWith('/') ? RAW_API_URL : `${RAW_API_URL}/`;
 
-const Route = {
-  RESPONDERS: 'v1/responders',
-};
+// Paths are shared with the API through @sos/contracts.
+const Route = ApiRoute;
 
 const ERROR_CODE = 404;
 

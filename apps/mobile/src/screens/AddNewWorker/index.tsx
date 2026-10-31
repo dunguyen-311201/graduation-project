@@ -6,6 +6,7 @@ import {EScreen} from '@enums';
 import {Context} from '@context';
 import {callAPI} from '@services';
 import {Route} from '@constants';
+import type {ApiError, CreateResponderBody} from '@sos/contracts';
 import {DARK_GRAY_COLOR} from '@theme';
 import {Field, validate} from '@utils';
 import {CustomInput, ScreenBase} from '@components';
@@ -58,18 +59,19 @@ const AddNewWorker = () => {
 
       const {rePassword, email, password, displayName} = worker || {};
 
-      if (rePassword) {
+      if (rePassword && email && password && displayName) {
+        const body: CreateResponderBody = {email, password, displayName};
         // The API takes the center from the signed-in user's token.
         const res = await callAPI({
           method: 'POST',
           route: Route.RESPONDERS,
-          data: {email, password, displayName},
+          data: body,
         });
 
         if (res.status >= 400) {
           Alert.alert(
             'Could not add worker',
-            res.data?.message || 'Please try again.',
+            (res.data as ApiError | null)?.message || 'Please try again.',
           );
           setLoading(false);
           return;

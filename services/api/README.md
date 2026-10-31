@@ -4,13 +4,24 @@ Backend for SOS App. It replaces the Cloud Functions in `server/functions` ([ADR
 
 ## Run locally
 
+From the repo root:
+
 ```bash
-cd services/api
 pnpm install
-cp .env.example .env   # set FIREBASE_PROJECT_ID, and credentials or emulator hosts
+cp services/api/.env.example services/api/.env   # FIREBASE_PROJECT_ID, credentials or emulator hosts
 pnpm test              # unit + e2e with fake Firebase adapters, no network
-pnpm build && pnpm start
+pnpm dev:api           # or: pnpm build && pnpm --filter @sos/api start
 curl localhost:4000/health/live
+```
+
+Request schemas and error codes come from `@sos/contracts` (`packages/contracts`).
+
+## Docker
+
+The image is built from the repo root so it can include workspace packages:
+
+```bash
+docker build -f services/api/Dockerfile -t sos-api .
 ```
 
 ## Layout

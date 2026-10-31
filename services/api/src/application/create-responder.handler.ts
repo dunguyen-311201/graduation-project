@@ -1,3 +1,4 @@
+import { ErrorCode } from "@sos/contracts";
 import { Inject, Injectable } from "@nestjs/common";
 import { ForbiddenError } from "./errors.js";
 import {
@@ -30,10 +31,10 @@ export class CreateResponderHandler {
     // Until custom claims exist (G2), the center is the caller's own `users` document.
     const center = await this.users.get(actor.uid);
     if (!center || center.role !== "center") {
-      throw new ForbiddenError("NOT_A_DISPATCHER", "Only a rescue center can create responders");
+      throw new ForbiddenError(ErrorCode.NOT_A_DISPATCHER, "Only a rescue center can create responders");
     }
     if (center.statusRegistration !== "approved") {
-      throw new ForbiddenError("CENTER_NOT_APPROVED", "The center has not been approved yet");
+      throw new ForbiddenError(ErrorCode.CENTER_NOT_APPROVED, "The center has not been approved yet");
     }
 
     const { uid } = await this.identity.createUser(cmd);

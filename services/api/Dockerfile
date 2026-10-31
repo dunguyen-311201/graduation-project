@@ -1,19 +1,24 @@
-# docker build -t sos-api services/api
-FROM node:22-alpine AS build
+# Build from the repo root: docker build -f services/api/Dockerfile -t sos-api .
+FROM node:22-alpine AS base
 RUN corepack enable
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+WORKDIR /repo
+
+# Keep only @sos/api and the workspace packages it depends on.
+FROM base AS prune
+COPY . .
+RUN pnpm dlx turbo@2.11.10 prune @sos/api --docker
+
+FROM base AS build
+COPY --from=prune /repo/out/json/ .
 RUN pnpm install --frozen-lockfile
-COPY tsconfig.json tsconfig.build.json ./
-COPY src ./src
-RUN pnpm build && pnpm prune --prod
+COPY --from=prune /repo/out/full/ .
+RUN pnpm turbo run build --filter=@sos/api \
+  && pnpm deploy --filter=@sos/api --prod --legacy /prod/api
 
 FROM node:22-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
-COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/dist ./dist
-COPY --chown=node:node package.json ./
+COPY --from=build --chown=node:node /prod/api ./
 USER node
 EXPOSE 4000
 CMD ["node", "dist/main.js"]

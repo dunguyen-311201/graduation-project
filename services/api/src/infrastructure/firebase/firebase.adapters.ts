@@ -1,3 +1,4 @@
+import { ErrorCode } from "@sos/contracts";
 import { type App, cert, getApps, initializeApp, applicationDefault } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
@@ -36,8 +37,8 @@ export class FirebaseIdentityProvider implements IdentityProvider {
       return { uid: user.uid };
     } catch (error) {
       const code = (error as { code?: string }).code ?? "";
-      if (code === "auth/email-already-exists") throw new ConflictError("EMAIL_EXISTS", "Email is already registered");
-      if (AUTH_INPUT_ERRORS.has(code)) throw new InvalidInputError("INVALID_INPUT", (error as Error).message);
+      if (code === "auth/email-already-exists") throw new ConflictError(ErrorCode.EMAIL_EXISTS, "Email is already registered");
+      if (AUTH_INPUT_ERRORS.has(code)) throw new InvalidInputError(ErrorCode.INVALID_INPUT, (error as Error).message);
       throw error;
     }
   }
