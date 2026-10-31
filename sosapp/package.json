@@ -48,5 +48,6 @@
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor"
   },
-  "private": true
+  "private": true,
+  "packageManager": "pnpm@10.28.0"
 }

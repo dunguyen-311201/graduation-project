@@ -32,7 +32,7 @@ Rebuild `sosapp/` as an Expo SDK 58 project (React Native 0.88, React 19, new ar
 | React Navigation 6 | React Navigation 7 (`unmountOnBlur` removed; screens use realtime listeners) |
 
 - `google-services.json` is per Firebase project and git-ignored; EAS Build receives it as a file environment variable `GOOGLE_SERVICES_JSON`.
-- Package manager: npm (`package-lock.json`) inside `sosapp/` until the pnpm workspace from ADR-0008 lands; Expo then needs `node-linker=hoisted` in `.npmrc`.
+- Package manager: pnpm (`pnpm-lock.yaml`), consistent with ADR-0008, with `nodeLinker: hoisted` in `sosapp/pnpm-workspace.yaml` because React Native autolinking and Metro expect a flat `node_modules`.
 
 ## Options considered
 

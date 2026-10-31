@@ -1,0 +1,7 @@
+# React Native autolinking and Metro expect a flat node_modules.
+nodeLinker: hoisted
+
+# Postinstall scripts these packages do not need in the app.
+ignoredBuiltDependencies:
+  - '@firebase/util'
+  - protobufjs
