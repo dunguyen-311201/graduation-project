@@ -1,6 +1,6 @@
 # ADR-0005: Durable timers with Cloud Tasks
 
-- **Status:** Proposed
+- **Status:** Superseded by [ADR-0012](0012-durable-timers-bullmq.md)
 - **Date:** 2026-10-31
 - **Related:** DSP-04, DSP-06, NF-03
 

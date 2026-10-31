@@ -1,6 +1,6 @@
 # ADR-0001: Keep Firebase as the backend platform
 
-- **Status:** Proposed
+- **Status:** Partly superseded by [ADR-0011](0011-nestjs-api-replaces-cloud-functions.md) (business logic moves from Cloud Functions to a NestJS API)
 - **Date:** 2026-10-31
 - **Related:** NF-01, NF-08, NF-12
 
