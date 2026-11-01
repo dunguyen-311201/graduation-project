@@ -7,3 +7,5 @@ apps/mobile/android
 apps/mobile/ios
 **/google-services.json
 .git
+
+*firebase-adminsdk*.json

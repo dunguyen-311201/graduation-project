@@ -1,6 +1,6 @@
 # ADR-0011: A NestJS API replaces Cloud Functions
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-31
 - **Supersedes:** the "Cloud Functions holds all business logic" part of ADR-0001; the Callable Function mechanism in ADR-0002
 - **Related:** AUT-02, NF-01, NF-03, NF-10, ADR-0003, ADR-0012

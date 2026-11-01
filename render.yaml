@@ -1,0 +1,19 @@
+# Render blueprint for the SOS API (ADR-0011). Secrets marked sync: false are
+# entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: sos-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: feat/expo-migration
+    dockerfilePath: ./services/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/live
+    envVars:
+      - key: APP_ENV
+        value: dev
+      - key: FIREBASE_PROJECT_ID
+        value: sos-app-dev-b1963
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false

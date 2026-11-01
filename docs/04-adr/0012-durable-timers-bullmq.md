@@ -1,6 +1,6 @@
 # ADR-0012: Durable timers and background jobs with BullMQ
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-31
 - **Supersedes:** ADR-0005 (Cloud Tasks)
 - **Related:** DSP-04, DSP-06, NF-03, ADR-0011

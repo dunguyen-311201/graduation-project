@@ -14,8 +14,8 @@ Each ADR records one architectural decision: context, decision, options consider
 | [0008](0008-monorepo-shared-contracts.md) | pnpm + Turborepo monorepo with shared contracts | Accepted |
 | [0009](0009-medical-data-isolation.md) | Isolate medical data and share it per rescue | Proposed |
 | [0010](0010-tdd-with-emulator.md) | TDD with a test pyramid and the Firebase Emulator | Proposed |
-| [0011](0011-nestjs-api-replaces-cloud-functions.md) | A NestJS API replaces Cloud Functions | Proposed |
-| [0012](0012-durable-timers-bullmq.md) | Durable timers and background jobs with BullMQ | Proposed |
+| [0011](0011-nestjs-api-replaces-cloud-functions.md) | A NestJS API replaces Cloud Functions | Accepted |
+| [0012](0012-durable-timers-bullmq.md) | Durable timers and background jobs with BullMQ | Accepted |
 | [0013](0013-firestore-as-data-store.md) | Keep Firestore as the data store behind the NestJS API | Proposed |
 | [0014](0014-expo-dev-client.md) | Move the mobile app to Expo with a development build | Proposed |
 | [0015](0015-modular-monolith.md) | Modular monolith, not microservices | Proposed |
