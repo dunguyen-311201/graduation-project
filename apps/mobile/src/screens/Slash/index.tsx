@@ -1,11 +1,10 @@
-import {ArrowRightIcon, CheckShieldIcon} from '@theme';
+import {CheckShieldIcon} from '@theme';
 import {
-  CustomButton,
   CustomLinearGradient,
   CustomText,
   Shadow,
 } from '@components';
-import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
+import React, {memo, useContext, useEffect, useState} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {Context} from '@context';
@@ -31,10 +30,6 @@ function SplashScreen() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (firstSignedIn) {
-      return;
-    }
-
     if (!loading) {
       if (notify) {
         notify.background && navigate(EScreen.DETAIL_MESSAGE, notify);
@@ -47,11 +42,7 @@ function SplashScreen() {
       }
       navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
     }
-  }, [firstSignedIn, isAuthenticated, loading]);
-
-  const handlePressStart = useCallback(() => {
-    navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-  }, []);
+  }, [isAuthenticated, loading]);
 
 
   return (
@@ -63,21 +54,12 @@ function SplashScreen() {
           </Shadow>
 
           {firstSignedIn && (
-            <View style={styles.tagline}>
-              <CustomText text="More with safety" type="text_large_20" />
+            <View style={styles.tagline} accessible>
+              <CustomText text="Move with safety" type="text_large_20" />
               <Image source={CheckShieldIcon} />
             </View>
           )}
         </View>
-        {firstSignedIn && (
-          <CustomButton
-            label="Get Started"
-            type="primary"
-            icon={ArrowRightIcon}
-            onPress={handlePressStart}
-            customStyle={styles.button}
-          />
-        )}
       </SafeAreaView>
     </CustomLinearGradient>
   );

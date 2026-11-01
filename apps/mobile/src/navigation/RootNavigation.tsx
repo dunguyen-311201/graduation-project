@@ -20,7 +20,7 @@ import {ERole, EScreen} from '@enums';
 import React, {useContext} from 'react';
 
 import {Context} from '@context';
-import DrawerNavigation from './DrawerNavigation';
+import MainTabs from './MainTabs';
 import {Location} from '@types';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -107,6 +107,7 @@ const RootNavigation = () => {
             <Stack.Screen
               name={EScreen.DETAIL_MESSAGE}
               component={DetailMessageScreen}
+              options={{headerShown: false}}
             />
 
             <Stack.Screen
@@ -123,7 +124,7 @@ const RootNavigation = () => {
 
             <Stack.Screen
               name={EScreen.DRAWER}
-              component={DrawerNavigation}
+              component={MainTabs}
               options={{headerShown: false}}
             />
 
@@ -135,6 +136,7 @@ const RootNavigation = () => {
             <Stack.Screen
               name={EScreen.SEND_DISTRESS_SIGNAL}
               component={SendDistreeSignal}
+              options={{headerShown: false}}
             />
           </>
         ) : (

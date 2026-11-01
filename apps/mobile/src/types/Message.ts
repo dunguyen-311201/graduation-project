@@ -15,4 +15,6 @@ export type TMessage = {
   startAt?: number;
   endAt?: number;
   time: number;
+  // Raw API status (PENDING, CLAIMED, ASSIGNED, ...), for the tracker.
+  stage?: string;
 };

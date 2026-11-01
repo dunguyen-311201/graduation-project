@@ -120,7 +120,8 @@ const ConfirmPhoneNumberScreen = () => {
     <ScreenBase
       loading={loading}
       onBack={goBack}
-      title={'Enter The 6-Digit Code At\n' + phone}
+      title="Enter the code"
+      desc={`We sent a 6-digit code to ${phone}`}
       onNext={handleNext}
       disableNext={code.length !== 6}>
       <View style={styles.content}>

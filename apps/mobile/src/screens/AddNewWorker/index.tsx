@@ -111,7 +111,7 @@ const AddNewWorker = () => {
             },
             {
               check: validate.isSample(worker?.rePassword, worker?.password),
-              message: 'Comfirm Password incorrect!',
+              message: 'Passwords do not match.',
             },
           ],
         },
@@ -144,7 +144,7 @@ const AddNewWorker = () => {
   return (
     <ScreenBase
       loading={loading}
-      title="Add New Worker"
+      title="Add worker"
       onNext={handleAddWorker}
       nextTitle="Add"
       disableNext={isVisible < 2 || error !== undefined}>

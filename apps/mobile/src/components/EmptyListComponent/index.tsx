@@ -1,15 +1,21 @@
 import {StyleSheet, View} from 'react-native';
 
-import {CustomText} from '../common';
 import React from 'react';
+import Txt from '../ui/Txt';
+import {colors, space} from '../../theme/tokens';
 
-const EmptyListComponent = ({text}: {text?: string}) => {
-  return (
-    <View style={styles.container}>
-      <CustomText text={text || 'No items to display'} color="blue" />
-    </View>
-  );
-};
+const EmptyListComponent = ({text, hint}: {text?: string; hint?: string}) => (
+  <View style={styles.container}>
+    <Txt variant="heading" center>
+      {text || 'Nothing here yet'}
+    </Txt>
+    {hint ? (
+      <Txt variant="body" color={colors.textMuted} center>
+        {hint}
+      </Txt>
+    ) : null}
+  </View>
+);
 
 export default EmptyListComponent;
 
@@ -18,10 +24,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'gray',
+    rowGap: space.sm,
+    paddingHorizontal: space.xl,
   },
 });

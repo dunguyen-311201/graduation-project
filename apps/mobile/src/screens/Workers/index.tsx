@@ -7,15 +7,12 @@ import {
   View,
 } from 'react-native';
 import {
-  CloseBlackIcon,
-  DARK_GRAY_COLOR,
-  NewIcon,
-  OpenIcon,
-  OptionIcon,
-  UnlockIcon,
-  WHITE_COLOR,
-} from '@theme';
-import {CustomButton, CustomText, ScreenBase} from '@components';
+  AppButton,
+  EmptyListComponent,
+  ScreenBase,
+  Txt,
+} from '@components';
+import {OptionIcon, tokens} from '@theme';
 import React, {useCallback, useMemo, useState} from 'react';
 import {
   formatDistance,
@@ -27,13 +24,16 @@ import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {TUser} from '@types';
 import {WorkerItem} from './components';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {isApprovedCenter} from '@features/auth';
 import {useWorker} from '@features/rescue';
+
+const {colors, space, radius} = tokens;
 
 const Worker = () => {
   const {navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.WORKER>>();
+  const inTab = useRoute().name !== EScreen.WORKER;
 
   const [id, setId] = useState<string>();
 
@@ -65,8 +65,17 @@ const Worker = () => {
     if (workerSelect && id) {
       const {displayName, status} = workerSelect;
       if (status !== 'busy') {
-        await deleteWorker(id);
-        setId(undefined);
+        Alert.alert('Remove this worker?', `${displayName ?? 'This worker'} will no longer get tasks.`, [
+          {text: 'Cancel', style: 'cancel'},
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: async () => {
+              await deleteWorker(id);
+              setId(undefined);
+            },
+          },
+        ]);
         return;
       }
 
@@ -118,10 +127,10 @@ const Worker = () => {
 
   return (
     <ScreenBase
-      title="Management Workers"
+      title="Workers"
       loading={loading}
-      padding={10}
-      onBack={goBack}
+      padding={20}
+      onBack={inTab ? undefined : goBack}
       flexDirection="row">
       <View style={styles.container}>
         <FlatList
@@ -129,83 +138,60 @@ const Worker = () => {
           renderItem={handleRenderItem}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={itemSeparatorComponent}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <EmptyListComponent
+              text="No workers yet"
+              hint="Add your first rescue worker to start assigning requests."
+            />
+          }
         />
-        <CustomButton
-          icon={NewIcon}
-          type="secondary"
-          customStyle={styles.btnAdd}
-          onPress={handleAddWorker}
-        />
+        <AppButton label="Add worker" onPress={handleAddWorker} />
       </View>
-      <Modal visible={id !== undefined} transparent animationType="slide">
+      <Modal
+        visible={id !== undefined}
+        transparent
+        animationType="slide"
+        onRequestClose={handleHiden}>
         <TouchableWithoutFeedback onPress={handleHiden}>
-          <View style={styles.container}>
-            <View style={styles.modalContent}>
-              <View style={styles.info}>
-                {workerSelect?.startAt && (
-                  <View style={styles.row}>
-                    <CustomText
-                      text="In progress:"
-                      color="black"
-                      type="text_medium_18"
-                    />
-                    <CustomText
-                      text={formatTimeAgo(workerSelect?.startAt)}
-                      color="black"
-                      type="text_medium_18"
-                    />
-                  </View>
-                )}
-
-                {workerSelect?.time && workerSelect?.distance !== undefined && (
-                  <View style={styles.row}>
-                    <CustomText
-                      text={formatDistance(workerSelect.distance)}
-                      color="black"
-                      type="text_medium_18"
-                    />
-                    <CustomText text="/" color="black" type="text_medium_18" />
-                    <CustomText
-                      text={formatTime(workerSelect.time)}
-                      color="black"
-                      type="text_medium_18"
-                    />
-                  </View>
-                )}
-
-                <View style={styles.row}>
-                  <CustomText
-                    text={workerSelect?.email || ''}
-                    color="black"
-                    type="text_medium_18"
+          <View style={styles.scrim}>
+            <TouchableWithoutFeedback>
+              <View style={styles.sheet}>
+                <View style={styles.handle} />
+                <Txt variant="heading" style={styles.name}>
+                  {workerSelect?.displayName || 'Worker'}
+                </Txt>
+                {workerSelect?.email ? (
+                  <Txt variant="caption" color={colors.textMuted}>
+                    {workerSelect.email}
+                  </Txt>
+                ) : null}
+                {workerSelect?.startAt ? (
+                  <Txt variant="body">
+                    On a rescue since {formatTimeAgo(workerSelect.startAt)}
+                  </Txt>
+                ) : null}
+                {workerSelect?.time && workerSelect?.distance !== undefined ? (
+                  <Txt variant="body" color={colors.textMuted}>
+                    {formatDistance(workerSelect.distance)} ·{' '}
+                    {formatTime(workerSelect.time)} away
+                  </Txt>
+                ) : null}
+                <AppButton label="View tasks" onPress={handleToRequestByWorker} />
+                {workerSelect?.disabled && (
+                  <AppButton
+                    label="Activate worker"
+                    variant="secondary"
+                    onPress={handleActive}
                   />
-                </View>
-              </View>
-              {workerSelect?.disabled && (
-                <CustomButton
-                  icon={UnlockIcon}
-                  label="Active this Worker"
-                  type="secondary"
-                  onPress={handleActive}
-                  reverse
+                )}
+                <AppButton
+                  label="Remove worker"
+                  variant="ghost"
+                  onPress={handleDelete}
                 />
-              )}
-
-              <CustomButton
-                icon={CloseBlackIcon}
-                label="Remove this Worker"
-                type="secondary"
-                onPress={handleDelete}
-                reverse
-              />
-              <CustomButton
-                label="View all tasks"
-                type="secondary"
-                icon={OpenIcon}
-                onPress={handleToRequestByWorker}
-                reverse
-              />
-            </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -216,40 +202,25 @@ const Worker = () => {
 export default Worker;
 
 const styles = StyleSheet.create({
-  btnAdd: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
+  container: {marginTop: 20, flex: 1, rowGap: space.md},
+  list: {flexGrow: 1},
+  separator: {height: space.md},
+  scrim: {flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim},
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    padding: space.xl,
+    paddingTop: space.sm,
+    rowGap: space.md,
   },
-  container: {
-    marginTop: 20,
-    flex: 1,
+  handle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    marginBottom: space.sm,
   },
-  input: {
-    color: DARK_GRAY_COLOR,
-  },
-  separator: {
-    height: 5,
-  },
-  modalContent: {
-    backgroundColor: WHITE_COLOR,
-    borderRadius: 8,
-    // height: 150,
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'flex-start',
-    justifyContent: 'space-around',
-    rowGap: 10,
-  },
-  info: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  row: {
-    flexDirection: 'row',
-    columnGap: 10,
-  },
+  name: {textTransform: 'capitalize'},
 });

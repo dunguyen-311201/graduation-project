@@ -22,7 +22,9 @@ type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 const Messages = () => {
   const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
-  const {workerID, mode} = useRoute<ConfirmRoute>().params || {};
+  const route = useRoute<ConfirmRoute>();
+  const {workerID, mode} = route.params || {};
+  const inTab = route.name !== EScreen.MESSAGES;
 
   const {currentUser} = useContext(Context);
 
@@ -73,7 +75,7 @@ const Messages = () => {
     <ScreenBase
       customStyle={styles.container}
       title="Requests"
-      onBack={handleback}
+      onBack={inTab ? undefined : handleback}
       loading={loading}
       padding={20}
       flexDirection="row">
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   separator: {
-    height: 2,
+    height: 12,
   },
   btnNew: {
     position: 'absolute',

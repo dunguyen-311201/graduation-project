@@ -1,18 +1,15 @@
-import {ActiveIcon, ExpiredIcon, InProgressIcon, PendingIcon} from '../icons';
-import {CustomButton, CustomText} from '../common';
-import {EMessage, ERole, EScreen} from '@enums';
 import {Pressable, StyleSheet, View} from 'react-native';
-import React, {memo, useCallback, useContext, useMemo} from 'react';
+import React, {memo, useCallback} from 'react';
+import {StatusPill, Txt} from '../ui';
 
-import {Context} from '@context';
 import {MESSAGE_COMPLETED} from '@constants';
-import {RootScreenNavigationProps} from '@navigation';
 import {TMessage} from '@types';
-import {WHITE_COLOR} from '@theme';
 import {formatTimeAgo} from '@utils';
-import {useNavigation} from '@react-navigation/native';
-import {useUsers} from '@features/auth';
+import {tokens} from '@theme';
 
+const {colors, space, radius} = tokens;
+
+// One row in the Requests list: status first, then what and where.
 const MessageInfo = ({
   item,
   onPress,
@@ -20,84 +17,39 @@ const MessageInfo = ({
   item: TMessage;
   onPress: (uid: string) => void;
 }) => {
-  const {navigate} =
-    useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
+  const handlePress = useCallback(() => onPress(item.id), [item.id, onPress]);
 
-  const {currentUser} = useContext(Context);
-
-  const {user} = useUsers(item.workerID);
-
-  const Icon = useMemo(() => {
-    if (item.status === EMessage.MESSAGE_PENDING) {
-      return <PendingIcon />;
-    } else if (item.status === EMessage.MESSAGE_IN_PROGRESS) {
-      return <InProgressIcon />;
-    } else if (item.status === EMessage.MESSAGE_COMPLETED) {
-      return <ActiveIcon />;
-    } else {
-      return <ExpiredIcon />;
-    }
-  }, [item]);
-
-  const handleGoMap = useCallback(() => {
-    if (currentUser && currentUser.role === ERole.USER && user) {
-      user.location && navigate(EScreen.MAP, {to: user.location});
-    } else {
-      navigate(EScreen.MAP, {to: item.location});
-    }
-  }, [currentUser, item.location, user]);
-
-  const handlePress = useCallback(() => {
-    onPress(item.id);
-  }, [item.id]);
+  const when = item.time
+    ? item.status === MESSAGE_COMPLETED
+      ? new Date(item.time).toLocaleString()
+      : formatTimeAgo(item.time)
+    : undefined;
 
   return (
-    <Pressable style={styles.container} onPress={handlePress}>
-      <View style={styles.content}>
-        <View style={styles.row}>
-          <CustomText text="Type: " type="text_medium_16" color="black" />
-          <CustomText text={item.type} type="text_medium_16" color="blue" />
-          {Icon}
-        </View>
-
-        {item.description && (
-          <View style={styles.row}>
-            <CustomText
-              text="Description: "
-              type="text_medium_20"
-              color="black"
-            />
-            <CustomText
-              text={item.description}
-              type="text_medium_20"
-              color="blue"
-            />
-          </View>
-        )}
-
-        <View style={styles.row}>
-          <CustomText text="Location: " type="text_medium_16" color="black" />
-          <CustomButton type="secondary" onPress={handleGoMap}>
-            <CustomText
-              text={item.location?.city}
-              type="text_medium_16"
-              color="blue"
-            />
-          </CustomButton>
-        </View>
-
-        {item.time && (
-          <CustomText
-            text={
-              item.status === MESSAGE_COMPLETED
-                ? new Date(item.time).toLocaleString()
-                : formatTimeAgo(item.time)
-            }
-            type="text_medium_14"
-            color="black"
-          />
-        )}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityHint="Opens the request"
+      onPress={handlePress}
+      style={({pressed}) => [styles.card, pressed && styles.pressed]}>
+      <View style={styles.top}>
+        <StatusPill status={item.status} />
+        {when ? (
+          <Txt variant="caption" color={colors.textMuted}>
+            {when}
+          </Txt>
+        ) : null}
       </View>
+      <Txt variant="label">{item.type}</Txt>
+      {item.description ? (
+        <Txt variant="body" color={colors.textMuted} numberOfLines={2}>
+          {item.description}
+        </Txt>
+      ) : null}
+      {item.location?.description || item.location?.city ? (
+        <Txt variant="caption" color={colors.textMuted} numberOfLines={1}>
+          {item.location.description || item.location.city}
+        </Txt>
+      ) : null}
     </Pressable>
   );
 };
@@ -105,31 +57,16 @@ const MessageInfo = ({
 export default memo(MessageInfo);
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    backgroundColor: WHITE_COLOR,
-    alignSelf: 'flex-start',
-    borderRadius: 6,
+  card: {
+    padding: space.lg,
+    rowGap: space.sm,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
   },
-  content: {
-    marginTop: 10,
-  },
-  row: {
+  pressed: {backgroundColor: colors.surfaceRaised},
+  top: {
     flexDirection: 'row',
-    paddingBottom: 6,
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    width: '100%',
-  },
-  locationIcon: {
-    width: 20,
-    height: 20,
-    marginLeft: 10,
-  },
-  header: {
     justifyContent: 'space-between',
-    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
