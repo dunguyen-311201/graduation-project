@@ -9,6 +9,7 @@ Date: 2026-10-31 · Status: **Proposed** (not yet implemented)
 | # | Document | Answers | Primary readers |
 | --- | --- | --- | --- |
 | 1 | [01-plan/roadmap.md](01-plan/roadmap.md) | What we build, in what order, by when | Everyone |
+| 1a | [01-plan/nestjs-migration-plan.md](01-plan/nestjs-migration-plan.md) | How Cloud Functions move to the NestJS API | Dev |
 | 2 | [01-plan/requirements.md](01-plan/requirements.md) | What the system must do (FR) and how well (NFR) | PO, Dev, QA |
 | 3 | [02-domain/domain-model.md](02-domain/domain-model.md) | How the business is modelled (DDD) | Dev |
 | 4 | [03-design/hld.md](03-design/hld.md) | Major building blocks, how they talk, where they run | Dev, DevOps |
