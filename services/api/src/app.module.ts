@@ -7,6 +7,7 @@ import { CreateResponderHandler } from "./application/create-responder.handler.j
 import { FirebaseAuthGuard } from "./interface/http/auth.guard.js";
 import { AppErrorFilter } from "./interface/http/app-error.filter.js";
 import { HealthController } from "./interface/http/health.controller.js";
+import { MeController } from "./interface/http/me.controller.js";
 import { RespondersController } from "./interface/http/responders.controller.js";
 
 @Module({})
@@ -22,7 +23,7 @@ export class AppModule {
     return {
       module: AppModule,
       imports: [envModule, firebase],
-      controllers: [HealthController, RespondersController],
+      controllers: [HealthController, MeController, RespondersController],
       providers: [
         CreateResponderHandler,
         { provide: APP_GUARD, useClass: FirebaseAuthGuard },

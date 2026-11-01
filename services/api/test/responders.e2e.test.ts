@@ -75,3 +75,24 @@ describe("POST /v1/responders (CTR-02, T-RUL-09)", () => {
     expect(identity.users.size).toBe(0);
   });
 });
+
+describe("PUT /v1/me/fcm-token", () => {
+  it("rejects a missing token with 401", async () => {
+    await http().put("/v1/me/fcm-token").send({ token: "device-1" }).expect(401);
+  });
+
+  it("rejects an empty device token with 400", async () => {
+    await http().put("/v1/me/fcm-token").set("Authorization", "Bearer token-user-1").send({ token: " " }).expect(400);
+  });
+
+  it("stores the device token once for the caller", async () => {
+    for (let i = 0; i < 2; i++) {
+      await http()
+        .put("/v1/me/fcm-token")
+        .set("Authorization", "Bearer token-user-1")
+        .send({ token: "device-1" })
+        .expect(200, { ok: true });
+    }
+    expect([...(users.fcmTokens.get("user-1") ?? [])]).toEqual(["device-1"]);
+  });
+});

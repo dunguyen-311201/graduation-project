@@ -1,4 +1,4 @@
-import {FIRST_INSTALLED, USER_CACHE} from '@constants';
+import {FIRST_INSTALLED, Route, USER_CACHE} from '@constants';
 import {getAsyncStorage, setAsyncStorage} from '@utils';
 import {useCallback, useEffect, useState} from 'react';
 import {
@@ -13,7 +13,7 @@ import {getToken} from '@react-native-firebase/messaging';
 
 import {ERole} from '@enums';
 import {TUser} from '@types';
-import {auth, db, messaging} from '@services';
+import {auth, callAPI, db, messaging} from '@services';
 
 const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<TUser | null>(null);
@@ -139,6 +139,13 @@ const useAuth = () => {
               data.status === 'unavailable' &&
               !data.disable && {status: 'free'}),
           });
+          if (token) {
+            await callAPI({
+              method: 'PUT',
+              route: Route.FCM_TOKEN,
+              data: {token},
+            });
+          }
           await loadProfile(auth.currentUser);
         }
       } catch (error) {}

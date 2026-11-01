@@ -36,6 +36,7 @@ export class FakeIdentityProvider implements IdentityProvider {
 export class InMemoryUserDirectory implements UserDirectory {
   docs = new Map<string, LegacyUserRecord>();
   failNextCreate = false;
+  fcmTokens = new Map<string, Set<string>>();
 
   async get(uid: string) {
     return this.docs.get(uid) ?? null;
@@ -48,5 +49,9 @@ export class InMemoryUserDirectory implements UserDirectory {
     }
     if (this.docs.has(uid)) throw new Error("already exists");
     this.docs.set(uid, record);
+  }
+
+  async addFcmToken(uid: string, token: string) {
+    this.fcmTokens.set(uid, (this.fcmTokens.get(uid) ?? new Set()).add(token));
   }
 }
