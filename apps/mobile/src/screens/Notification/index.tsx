@@ -1,7 +1,8 @@
-import {CloseBlackIcon, OpenIcon, WHITE_COLOR} from '@theme';
+import {tokens} from '@theme';
 import {
-  CustomButton,
+  AppButton,
   EmptyListComponent,
+  Txt,
   NotifyCard,
   ScreenBase,
 } from '@components';
@@ -20,6 +21,8 @@ import {TNotification} from '@types';
 import {rejectAssign} from '@features/rescue';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useNotifications} from '@features/notification';
+
+const {colors, space, radius} = tokens;
 
 const Notification = () => {
   const {notifications, loading, onDelete} = useNotifications();
@@ -84,31 +87,34 @@ const Notification = () => {
             ItemSeparatorComponent={ItemSeparatorComponent}
           />
         ) : (
-          <EmptyListComponent text="No notifications yet" />
+          <EmptyListComponent
+            text="No notifications yet"
+            hint="Updates about your requests will show up here."
+          />
         )}
       </View>
       <Modal
         visible={notification !== undefined}
         transparent
-        animationType="slide">
+        animationType="slide"
+        onRequestClose={handleHiden}>
         <TouchableWithoutFeedback onPress={handleHiden}>
-          <View style={styles.container}>
-            <View style={styles.modalContent}>
-              <CustomButton
-                icon={CloseBlackIcon}
-                label="Remove this notification"
-                type="secondary"
-                onPress={handleDelete}
-                reverse
-              />
-              <CustomButton
-                label="View action this notification"
-                type="secondary"
-                icon={OpenIcon}
-                onPress={handleAction}
-                reverse
-              />
-            </View>
+          <View style={styles.scrim}>
+            <TouchableWithoutFeedback>
+              <View style={styles.sheet}>
+                <View style={styles.handle} />
+                <Txt variant="heading">{notification?.title}</Txt>
+                <Txt variant="body" color={colors.textMuted}>
+                  {notification?.body}
+                </Txt>
+                <AppButton label="Open request" onPress={handleAction} />
+                <AppButton
+                  label="Remove notification"
+                  variant="ghost"
+                  onPress={handleDelete}
+                />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -119,23 +125,23 @@ const Notification = () => {
 export default Notification;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 20,
+  container: {flex: 1, marginTop: 20},
+  separator: {height: space.md},
+  scrim: {flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim},
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    padding: space.xl,
+    paddingTop: space.sm,
+    rowGap: space.md,
   },
-  separator: {
-    height: 2,
-  },
-  modalContent: {
-    backgroundColor: WHITE_COLOR,
-    borderRadius: 8,
-    height: 150,
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'flex-start',
-    justifyContent: 'space-around',
+  handle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    marginBottom: space.sm,
   },
 });
