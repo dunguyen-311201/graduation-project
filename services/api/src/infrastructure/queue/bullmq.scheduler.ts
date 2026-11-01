@@ -1,5 +1,5 @@
 import type { OnApplicationShutdown } from "@nestjs/common";
-import { Queue } from "bullmq";
+import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
 import type { Scheduler, TimerJob } from "../../application/ports.js";
 
@@ -9,6 +9,7 @@ export const RESCUE_TIMERS_QUEUE = "rescue-timers";
 export class BullMqScheduler implements Scheduler, OnApplicationShutdown {
   private readonly redis: Redis;
   private readonly queue: Queue;
+  private worker?: Worker;
 
   constructor(url: string) {
     // BullMQ requires maxRetriesPerRequest: null on its connections.
@@ -30,11 +31,20 @@ export class BullMqScheduler implements Scheduler, OnApplicationShutdown {
     await this.queue.remove(id);
   }
 
+  onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>) {
+    this.worker = new Worker(
+      RESCUE_TIMERS_QUEUE,
+      (job) => handler({ name: job.name as TimerJob["name"], payload: job.data }),
+      { connection: this.redis.duplicate() },
+    );
+  }
+
   async ping() {
     await this.redis.ping();
   }
 
   async onApplicationShutdown() {
+    await this.worker?.close();
     await this.queue.close();
     this.redis.disconnect();
   }

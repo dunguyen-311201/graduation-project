@@ -1,9 +1,13 @@
-import { ConflictError } from "../src/application/errors.js";
+import { isActive, type CenterCandidate } from "@sos/domain";
+import { ConflictError, NotFoundError } from "../src/application/errors.js";
 import type {
+  CenterDirectory,
   IdentityProvider,
   LegacyUserRecord,
   Notifier,
   PushMessage,
+  RequestRepository,
+  RescueRequestRecord,
   Scheduler,
   TimerJob,
   UserDirectory,
@@ -68,6 +72,7 @@ export class InMemoryUserDirectory implements UserDirectory {
 export class FakeScheduler implements Scheduler {
   jobs = new Map<string, TimerJob>();
   healthy = true;
+  private handler?: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>;
 
   async schedule(job: TimerJob) {
     if (!this.jobs.has(job.id)) this.jobs.set(job.id, job);
@@ -80,6 +85,19 @@ export class FakeScheduler implements Scheduler {
   async ping() {
     if (!this.healthy) throw new Error("redis down");
   }
+
+  onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>) {
+    this.handler = handler;
+  }
+
+  /** Fast-forwards a scheduled timer. */
+  async fire(id: string) {
+    await this.run(this.jobs.get(id)!);
+  }
+
+  async run(job: TimerJob) {
+    await this.handler?.(job);
+  }
 }
 
 export class FakeNotifier implements Notifier {
@@ -87,5 +105,46 @@ export class FakeNotifier implements Notifier {
 
   async push(uids: string[], message: PushMessage) {
     this.sent.push({ uids, message });
+  }
+}
+
+export class InMemoryRequests implements RequestRepository {
+  docs = new Map<string, RescueRequestRecord>();
+  private locks = new Set<string>();
+  private seq = 0;
+
+  newId() {
+    return `req-${++this.seq}`;
+  }
+
+  async findByIdempotencyKey(requesterId: string, key: string) {
+    return [...this.docs.values()].find((r) => r.requesterId === requesterId && r.idempotencyKey === key) ?? null;
+  }
+
+  async create(record: RescueRequestRecord) {
+    if (this.locks.has(record.requesterId)) {
+      throw new ConflictError("ACTIVE_REQUEST_EXISTS", "You already have an active request");
+    }
+    this.locks.add(record.requesterId);
+    this.docs.set(record.id, record);
+  }
+
+  async update(id: string, change: (record: RescueRequestRecord) => RescueRequestRecord | null) {
+    const current = this.docs.get(id);
+    if (!current) throw new NotFoundError("REQUEST_NOT_FOUND", "Request not found");
+    const next = change(current);
+    if (!next) return null;
+    const updated = { ...next, version: current.version + 1 };
+    this.docs.set(id, updated);
+    if (!isActive(updated.status)) this.locks.delete(updated.requesterId);
+    return updated;
+  }
+}
+
+export class FakeCenterDirectory implements CenterDirectory {
+  items: CenterCandidate[] = [];
+
+  async listApproved() {
+    return this.items;
   }
 }

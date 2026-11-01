@@ -1,5 +1,6 @@
 import {
   CURRENT_LOCATION,
+  Route,
   MESSAGE_COMPLETED,
   MESSAGE_IN_PROGRESS,
   MESSAGE_PENDING,
@@ -13,7 +14,6 @@ import {EStatusUser} from '@enums';
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -21,7 +21,8 @@ import {
   updateDoc,
   where,
 } from '@react-native-firebase/firestore';
-import {db} from '@services';
+import {callAPI, db} from '@services';
+import {toMessage} from '../utils/request';
 
 const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
@@ -31,11 +32,10 @@ const useMessage = (id: string) => {
   const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    const unsubcribe = onSnapshot(doc(db, 'messages', id), snap => {
-      const data = snap.data() as TMessage;
+    const unsubcribe = onSnapshot(doc(db, 'requests', id), snap => {
+      const data = snap.data();
       if (data) {
-        const mess: any = {...data, id};
-        setMessage(mess);
+        setMessage(toMessage(id, data as any));
       }
     });
 
@@ -131,7 +131,7 @@ const useMessage = (id: string) => {
   const onDelete = useCallback(async () => {
     setLoading(true);
 
-    await deleteDoc(doc(db, 'messages', id));
+    await callAPI({method: 'POST', route: `${Route.REQUESTS}/${id}/cancel`});
 
     setLoading(false);
   }, [id]);

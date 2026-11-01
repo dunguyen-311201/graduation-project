@@ -32,3 +32,12 @@ export class InvalidInputError extends AppError {
     super(message);
   }
 }
+
+export class NotFoundError extends AppError {
+  constructor(
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}

@@ -1,3 +1,6 @@
+import type { IncidentCategory, RaiseSosBody } from "@sos/contracts";
+import type { CenterCandidate, RequestStatus } from "@sos/domain";
+
 /** The authenticated caller, built by the HTTP guard from a verified ID token. */
 export interface Actor {
   uid: string;
@@ -59,6 +62,8 @@ export interface Scheduler {
   cancel(id: string): Promise<void>;
   /** Throws when the queue backend cannot be reached. */
   ping(): Promise<void>;
+  /** Registers the single handler for fired timers. */
+  onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>): void;
 }
 export const SCHEDULER = Symbol("SCHEDULER");
 
@@ -73,3 +78,43 @@ export interface Notifier {
   push(uids: string[], message: PushMessage): Promise<void>;
 }
 export const NOTIFIER = Symbol("NOTIFIER");
+
+/** `requests/{id}` (LLD section 2.1). */
+export interface RescueRequestRecord {
+  id: string;
+  requesterId: string;
+  status: RequestStatus;
+  location: RaiseSosBody["location"];
+  category: IncidentCategory;
+  severity: number;
+  severitySource: "DEFAULT" | "REQUESTER" | "AI" | "DISPATCHER";
+  description: string;
+  searchRadiusKm: number;
+  notifiedCenterIds: string[];
+  claimedByCenterId: string | null;
+  activeAssignmentId: string | null;
+  responderId: string | null;
+  participantIds: string[];
+  idempotencyKey: string;
+  endReason?: "COMPLETED" | "CANCELLED_BY_REQUESTER" | "NO_CENTER_AVAILABLE";
+  createdAt: number;
+  version: number;
+}
+
+export interface RequestRepository {
+  newId(): string;
+  findByIdempotencyKey(requesterId: string, key: string): Promise<RescueRequestRecord | null>;
+  /** Throws ConflictError("ACTIVE_REQUEST_EXISTS") when the requester has an active request (INV-01). */
+  create(record: RescueRequestRecord): Promise<void>;
+  /** Transactional. `change` returns null to skip; ending a request frees the requester's lock. */
+  update(
+    id: string,
+    change: (record: RescueRequestRecord) => RescueRequestRecord | null,
+  ): Promise<RescueRequestRecord | null>;
+}
+export const REQUEST_REPOSITORY = Symbol("REQUEST_REPOSITORY");
+
+export interface CenterDirectory {
+  listApproved(): Promise<CenterCandidate[]>;
+}
+export const CENTER_DIRECTORY = Symbol("CENTER_DIRECTORY");

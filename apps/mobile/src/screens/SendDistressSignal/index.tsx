@@ -22,8 +22,7 @@ import type {TextareaRef} from '../../components/common/Textarea';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 
 import {Context} from '@context';
-import {collection, doc} from '@react-native-firebase/firestore';
-import {db} from '@services';
+import {newIdempotencyKey} from '@features/rescue';
 import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
@@ -50,7 +49,7 @@ const SendDistreeSignal = () => {
 
   const textreaeRef = useRef<TextareaRef>(null);
   // Fixed per form, so sending again after a timeout cannot create a duplicate.
-  const requestId = useRef(doc(collection(db, 'messages')).id);
+  const requestId = useRef(newIdempotencyKey());
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<FormData>({
@@ -103,7 +102,8 @@ const SendDistreeSignal = () => {
         reset({routes: [{name: EScreen.MESSAGES}], index: 0});
       } catch (_error: any) {
         setError(
-          'Your request was not confirmed. Check your connection and send again, or call 112 if it is urgent.',
+          _error?.message ||
+            'Your request was not confirmed. Check your connection and send again, or call 112 if it is urgent.',
         );
       }
 

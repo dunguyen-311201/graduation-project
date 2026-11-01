@@ -39,7 +39,16 @@ service cloud.firestore {
         && resource.data.get('centerID', null) == request.auth.uid;
     }
 
-    // Interim: any signed-in user. Moves to Callable Functions in G2.
+    // Written only by the NestJS API (LLD section 7).
+    match /requests/{id} {
+      allow read: if signedIn() && (
+        request.auth.uid in resource.data.participantIds ||
+        request.auth.uid in resource.data.notifiedCenterIds
+      );
+      allow write: if false;
+    }
+
+    // Interim: any signed-in user. Moves to the NestJS API in G2.
     match /messages/{id} {
       allow read, write: if signedIn();
     }

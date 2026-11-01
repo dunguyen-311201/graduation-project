@@ -7,6 +7,10 @@ import { QueueModule } from "./infrastructure/queue/queue.module.js";
 import { CreateResponderHandler } from "./application/create-responder.handler.js";
 import { FirebaseAuthGuard } from "./interface/http/auth.guard.js";
 import { AppErrorFilter } from "./interface/http/app-error.filter.js";
+import { CancelSosHandler, ExpireRequestHandler } from "./application/end-request.handlers.js";
+import { RaiseSosHandler } from "./application/raise-sos.handler.js";
+import { RequestsController } from "./interface/http/requests.controller.js";
+import { TimersProcessor } from "./interface/jobs/timers.processor.js";
 import { HealthController } from "./interface/http/health.controller.js";
 import { MeController } from "./interface/http/me.controller.js";
 import { RespondersController } from "./interface/http/responders.controller.js";
@@ -28,9 +32,13 @@ export class AppModule {
     return {
       module: AppModule,
       imports: [envModule, firebase, queue],
-      controllers: [HealthController, MeController, RespondersController],
+      controllers: [HealthController, MeController, RequestsController, RespondersController],
       providers: [
         CreateResponderHandler,
+        RaiseSosHandler,
+        CancelSosHandler,
+        ExpireRequestHandler,
+        TimersProcessor,
         { provide: APP_GUARD, useClass: FirebaseAuthGuard },
         { provide: APP_FILTER, useClass: AppErrorFilter },
       ],
