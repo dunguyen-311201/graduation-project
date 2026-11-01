@@ -20,4 +20,7 @@ export enum EScreen {
   NEW_WORKER = 'new-worker-screen',
   NOTIFICATION = 'notification-screen',
   ASSIGN = 'assign-screen',
+  TAB_REQUESTS = 'tab-requests',
+  TAB_ALERTS = 'tab-alerts',
+  TAB_WORKERS = 'tab-workers',
 }

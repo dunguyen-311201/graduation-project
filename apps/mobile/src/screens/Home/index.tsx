@@ -1,9 +1,7 @@
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Linking,
-  Pressable,
   StyleSheet,
   View,
 } from 'react-native';
@@ -15,7 +13,7 @@ import {
   StatusPill,
   Txt,
 } from '@components';
-import {BellIcon, MenuIcon, tokens} from '@theme';
+import {tokens} from '@theme';
 import {ERole, EScreen} from '@enums';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import React, {
@@ -36,7 +34,7 @@ import {RootScreenNavigationProps} from '@navigation';
 import {isFreeUser} from '@features/auth';
 import {useNavigation} from '@react-navigation/native';
 
-const {colors, space, radius, TOUCH} = tokens;
+const {colors, space} = tokens;
 
 // Time to cancel a quick SOS before it is sent.
 const UNDO_SECONDS = 5;
@@ -60,7 +58,7 @@ const timeAgo = (time: number) => {
 };
 
 const HomeScreen = () => {
-  const {navigate, openDrawer} =
+  const {navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
 
   const {currentUser} = useContext(Context);
@@ -304,23 +302,6 @@ const HomeScreen = () => {
         <View style={[StyleSheet.absoluteFill, styles.mapPlaceholder]} />
       )}
 
-      <View style={styles.topBar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open menu"
-          onPress={openDrawer}
-          style={styles.fab}>
-          <Image source={MenuIcon} style={styles.icon} />
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Notifications"
-          onPress={() => navigate(EScreen.NOTIFICATION)}
-          style={styles.fab}>
-          <Image source={BellIcon} style={styles.icon} />
-        </Pressable>
-      </View>
-
       <Sheet>{isUser ? renderUserSheet() : renderStaffSheet()}</Sheet>
     </View>
   );
@@ -331,23 +312,5 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   mapPlaceholder: {backgroundColor: colors.surface},
-  topBar: {
-    position: 'absolute',
-    top: space.lg,
-    left: space.lg,
-    right: space.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  fab: {
-    width: TOUCH,
-    height: TOUCH,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 6,
-  },
-  icon: {width: 22, height: 22, resizeMode: 'contain'},
   center: {alignItems: 'center', rowGap: space.md, paddingVertical: space.xl},
 });

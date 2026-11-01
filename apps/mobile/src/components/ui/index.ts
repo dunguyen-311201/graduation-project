@@ -4,3 +4,4 @@ export {default as HoldToSosButton} from './HoldToSosButton';
 export {default as Sheet} from './Sheet';
 export {default as StatusPill} from './StatusPill';
 export {default as Txt} from './Txt';
+export {default as StatusStepper} from './StatusStepper';

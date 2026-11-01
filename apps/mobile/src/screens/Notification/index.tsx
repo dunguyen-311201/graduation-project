@@ -18,7 +18,7 @@ import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {TNotification} from '@types';
 import {rejectAssign} from '@features/rescue';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useNotifications} from '@features/notification';
 
 const Notification = () => {
@@ -27,6 +27,7 @@ const Notification = () => {
 
   const {navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
+  const inTab = useRoute().name !== EScreen.NOTIFICATION;
 
   const handleshow = useCallback((no?: TNotification) => {
     no && setNotification(no);
@@ -72,7 +73,7 @@ const Notification = () => {
       title="Notifications"
       padding={20}
       loading={loading}
-      onBack={goBack}
+      onBack={inTab ? undefined : goBack}
       flexDirection="row">
       <View style={styles.container}>
         {notifications && notifications.length > 0 ? (

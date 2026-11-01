@@ -37,6 +37,7 @@ export const toMessage = (id: string, data: RequestDoc): TMessage => ({
   userID: data.requesterId,
   workerID: data.responderId ?? undefined,
   status: STATUS[data.status] ?? 'expired',
+  stage: data.status,
   type: TYPE_BY_CATEGORY[data.category] ?? 'Rescue request',
   description: data.description ?? '',
   time: data.createdAt,

@@ -27,13 +27,14 @@ import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {TUser} from '@types';
 import {WorkerItem} from './components';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {isApprovedCenter} from '@features/auth';
 import {useWorker} from '@features/rescue';
 
 const Worker = () => {
   const {navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.WORKER>>();
+  const inTab = useRoute().name !== EScreen.WORKER;
 
   const [id, setId] = useState<string>();
 
@@ -121,7 +122,7 @@ const Worker = () => {
       title="Management Workers"
       loading={loading}
       padding={10}
-      onBack={goBack}
+      onBack={inTab ? undefined : goBack}
       flexDirection="row">
       <View style={styles.container}>
         <FlatList

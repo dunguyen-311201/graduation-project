@@ -1,5 +1,5 @@
-import {CustomInput, ScreenBase} from '@components';
-import {EScreen, EUser} from '@enums';
+import {AppButton, CustomInput, ScreenBase} from '@components';
+import {EUser} from '@enums';
 import {Image, Pressable, StyleSheet, View} from 'react-native';
 import {ProfileIcon, WHITE_COLOR} from '@theme';
 import React, {
@@ -12,14 +12,12 @@ import React, {
 import * as ImagePicker from 'expo-image-picker';
 
 import {Context} from '@context';
-import {RootScreenNavigationProps} from '@navigation';
 import {
   getDownloadURL,
   getStorage,
   putFile,
   ref,
 } from '@react-native-firebase/storage';
-import {useNavigation} from '@react-navigation/native';
 
 type FormData = {
   [EUser.displayName]?: string | null;
@@ -29,9 +27,7 @@ type FormData = {
 };
 
 const SettingsScreen = () => {
-  const {goBack} = useNavigation<RootScreenNavigationProps<EScreen.MESSAGES>>();
-
-  const {currentUser, updateProfile, loading} = useContext(Context);
+  const {currentUser, updateProfile, loading, signOut} = useContext(Context);
 
   const [formData, setFormData] = useState<FormData>();
   const [_loading, setLoading] = useState(0);
@@ -94,9 +90,8 @@ const SettingsScreen = () => {
 
   return (
     <ScreenBase
-      onBack={goBack}
       loading={loading}
-      title="Settings"
+      title="Profile"
       flexDirection="row"
       onNext={handleNext}
       nextTitle="Update">
@@ -146,6 +141,7 @@ const SettingsScreen = () => {
             title="Citizen Identification"
           />
         )}
+        <AppButton label="Sign out" variant="secondary" onPress={signOut} />
       </View>
     </ScreenBase>
   );
