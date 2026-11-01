@@ -1,15 +1,15 @@
 import {
   AppButton,
   BackButton,
-  DropDown2,
   EmptyListComponent,
   Loading,
   StatusPill,
+  Avatar,
   StatusStepper,
   Txt,
   UserInfo,
 } from '@components';
-import {Alert, ScrollView, StyleSheet, View} from 'react-native';
+import {Alert, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {ERole, EScreen} from '@enums';
 import {
   MESSAGE_COMPLETED,
@@ -195,28 +195,46 @@ const DetailMessage = () => {
               <Txt variant="label" color={colors.textMuted}>
                 People
               </Txt>
-              <View style={styles.people}>
-                <UserInfo id={message.userID} customStyle={styles.flex} />
-                {message.workerID ? (
-                  <UserInfo id={message.workerID} customStyle={styles.flex} />
-                ) : (
-                  <Txt variant="body" color={colors.textMuted} style={styles.flex}>
-                    No worker yet
-                  </Txt>
-                )}
-              </View>
+              <UserInfo id={message.userID} label="Requester" />
+              <View style={styles.divider} />
+              {message.workerID ? (
+                <UserInfo id={message.workerID} label="Rescue worker" />
+              ) : (
+                <Txt variant="body" color={colors.textMuted}>
+                  No worker assigned yet
+                </Txt>
+              )}
             </View>
 
             {role === ERole.CENTER && message.status === MESSAGE_PENDING && (
-              <View style={[styles.card, styles.raised]}>
+              <View style={styles.card} accessibilityRole="radiogroup">
                 <Txt variant="label" color={colors.textMuted}>
                   Choose a worker
                 </Txt>
-                <DropDown2
-                  data={workerDropdown}
-                  value={workerID}
-                  onSelect={handleSelect}
-                />
+                {workerDropdown.length === 0 ? (
+                  <Txt variant="body" color={colors.textMuted}>
+                    No worker is free right now.
+                  </Txt>
+                ) : (
+                  workerDropdown.map(w => {
+                    const selected = w.id === workerID;
+                    return (
+                      <Pressable
+                        key={w.id}
+                        onPress={() => handleSelect(w.id)}
+                        accessibilityRole="radio"
+                        accessibilityState={{selected}}
+                        accessibilityLabel={w.value}
+                        style={[styles.option, selected && styles.optionOn]}>
+                        <Avatar name={w.value} size={36} />
+                        <Txt variant="body" style={styles.flex}>
+                          {w.value || 'Worker'}
+                        </Txt>
+                        <View style={[styles.radio, selected && styles.radioOn]} />
+                      </Pressable>
+                    );
+                  })
+                )}
               </View>
             )}
           </ScrollView>
@@ -241,8 +259,26 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     backgroundColor: colors.surface,
   },
-  raised: {zIndex: 2},
-  people: {flexDirection: 'row', columnGap: space.md},
+  divider: {height: StyleSheet.hairlineWidth, backgroundColor: colors.border},
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: space.md,
+    minHeight: 56,
+    paddingHorizontal: space.md,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  optionOn: {borderColor: colors.primary, backgroundColor: 'rgba(83, 90, 255, 0.12)'},
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+  },
+  radioOn: {borderColor: colors.primary, borderWidth: 6},
   flex: {flex: 1},
   footer: {
     paddingHorizontal: space.xl,
