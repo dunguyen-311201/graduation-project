@@ -2,20 +2,18 @@ import {
   ActivityIndicator,
   Image,
   ImageSourcePropType,
+  Pressable,
   StyleProp,
   StyleSheet,
   TextStyle,
-  TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
-import {GRAY_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 import React, {memo} from 'react';
 
-import CustomText from '../Text';
 import {EButton} from '@enums';
-import Shadow from '../../Shadow';
-import {Styles as st} from '@utils';
+import Txt from '../../ui/Txt';
+import {TOUCH, colors, radius, space} from '../../../theme/tokens';
 
 type ButtonProps = {
   label?: string;
@@ -33,6 +31,16 @@ type ButtonProps = {
   accessibilityLabel?: string;
 };
 
+// Same sizes as ui/AppButton: filled buttons are 52 high with a 15/600 label,
+// text buttons (secondary) keep a 48 touch target.
+const LABEL_COLOR: Record<keyof typeof EButton, string> = {
+  default: colors.onPrimary,
+  primary: colors.onPrimary,
+  outline: colors.text,
+  notify: colors.onPrimary,
+  secondary: colors.primary,
+};
+
 const CustomButton = ({
   label = '',
   type = 'default',
@@ -46,133 +54,97 @@ const CustomButton = ({
   isLoading = false,
   accessibilityLabel,
 }: ButtonProps) => {
-  if (type === 'primary') {
-    return (
-      <Shadow customStyle={styles.shadow} paddingVertical={16}>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={accessibilityLabel || label}
-          onPress={onPress}
-          style={[styles[EButton[type]], customStyle]}>
-          <CustomText text={label} type="text_xLarge" />
-          {icon && <Image source={icon} style={[iconSize]} />}
-        </TouchableOpacity>
-      </Shadow>
-    );
-  }
+  const filled = type === 'default' || type === 'primary';
 
   return (
-    <TouchableOpacity
+    <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || label}
-      accessibilityState={{disabled: Boolean(disabled)}}
+      accessibilityState={{disabled: Boolean(disabled), busy: isLoading}}
       hitSlop={8}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       onPress={onPress}
-      style={[
-        customStyle,
-        styles[EButton[type]],
-        {...(disabled && {opacity: 0.4})},
-        {...(reverse && {flexDirection: 'row-reverse', columnGap: 20})},
+      style={({pressed}) => [
+        styles.base,
+        styles[type],
+        filled && pressed && styles.filledPressed,
+        !filled && pressed && styles.pressed,
+        reverse && styles.reverseRow,
+        customStyle as StyleProp<ViewStyle>,
+        disabled && styles.disabled,
       ]}>
       {children}
-      {label && (
-        <CustomText
-          text={label}
-          type={
-            type === 'notify'
-              ? 'text_medium_14'
-              : type === 'outline'
-                ? 'text_large_20'
-                : type === 'secondary'
-                  ? 'text_medium_20'
-                  : 'text_xLarge'
-          }
-          color={type === 'secondary' ? 'blue' : 'white'}
-          customStyle={StyleSheet.flatten(customStyle) as TextStyle}
-        />
+      {isLoading && filled ? (
+        <ActivityIndicator color={colors.onPrimary} />
+      ) : (
+        label !== '' && (
+          <Txt
+            variant={type === 'notify' ? 'caption' : 'label'}
+            color={LABEL_COLOR[type]}>
+            {label}
+          </Txt>
+        )
       )}
       {icon && (
-        <View
-          style={{
-            ...(reverse && styles.reverse),
-          }}>
-          <Image source={icon} />
+        <View style={reverse && styles.reverseIcon}>
+          <Image source={icon} style={iconSize} />
         </View>
       )}
-      {isLoading && (
-        <ActivityIndicator
-          size="large"
-          color={LIGHT_BLUE_COLOR}
-          style={styles.loading}
-        />
-      )}
-    </TouchableOpacity>
+      {isLoading && !filled && <ActivityIndicator color={colors.primary} />}
+    </Pressable>
   );
 };
 
 export default memo(CustomButton);
 
 const styles = StyleSheet.create({
-  shadow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  [EButton.default]: {
-    backgroundColor: LIGHT_BLUE_COLOR,
-    borderRadius: 10,
+  base: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    columnGap: space.sm,
+  },
+  default: {
     width: '100%',
-    paddingVertical: 16,
-    textAlign: 'center',
-    ...st.text_large_7_white,
+    minHeight: TOUCH + 4,
+    paddingHorizontal: space.xl,
+    borderRadius: radius.card,
+    backgroundColor: colors.primary,
   },
-  [EButton.outline]: {
+  primary: {
     alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderColor: '#EDF6FF',
-    borderWidth: 2,
-    borderRadius: 17,
-    paddingVertical: 7,
-    paddingHorizontal: 20,
+    minHeight: TOUCH + 4,
+    paddingHorizontal: space.xl,
+    borderRadius: radius.card,
+    backgroundColor: colors.primary,
   },
-  [EButton.notify]: {
-    opacity: 0.9,
-    borderRadius: 17,
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-    backgroundColor: '#00BFFF',
+  outline: {
     alignSelf: 'flex-start',
+    minHeight: 36,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  [EButton.primary]: {
-    borderRadius: 10,
+  notify: {
     alignSelf: 'flex-start',
-    alignItems: 'center',
-    justifyContent: 'center',
-    columnGap: 5,
+    minHeight: 32,
+    paddingHorizontal: space.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primary,
   },
-  [EButton.secondary]: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    columnGap: 20,
+  secondary: {
+    alignSelf: 'flex-start',
+    minHeight: TOUCH,
+    minWidth: TOUCH,
   },
-  center: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loading: {
-    marginLeft: 20,
-  },
-  reverse: {
-    backgroundColor: GRAY_COLOR,
-    alignContent: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    borderRadius: 50,
+  filledPressed: {backgroundColor: colors.primaryPressed},
+  pressed: {opacity: 0.7},
+  disabled: {opacity: 0.4},
+  reverseRow: {flexDirection: 'row-reverse', columnGap: space.md},
+  reverseIcon: {
+    padding: space.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceRaised,
   },
 });

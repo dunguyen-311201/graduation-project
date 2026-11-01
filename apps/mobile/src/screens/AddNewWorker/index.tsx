@@ -7,7 +7,6 @@ import {Context} from '@context';
 import {callAPI} from '@services';
 import {Route} from '@constants';
 import type {ApiError, CreateResponderBody} from '@sos/contracts';
-import {DARK_GRAY_COLOR} from '@theme';
 import {Field, validate} from '@utils';
 import {CustomInput, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
@@ -154,7 +153,6 @@ const AddNewWorker = () => {
           title="Email"
           value={worker?.email}
           border
-          valueStyle={styles.input}
           editable={false}
           onChangeText={handleChangeText}
         />
@@ -162,7 +160,6 @@ const AddNewWorker = () => {
           field="password"
           title="Password"
           value={worker?.password}
-          valueStyle={styles.input}
           border
           onChangeText={handleChangeText}
           inputMode="password"
@@ -175,7 +172,6 @@ const AddNewWorker = () => {
           title="Re-Password"
           field="rePassword"
           value={worker?.rePassword}
-          valueStyle={styles.input}
           onChangeText={handleChangeText}
           inputMode="password"
           onBlur={handleBlur}
@@ -199,8 +195,5 @@ const styles = StyleSheet.create({
   content: {
     rowGap: 20,
     marginTop: 20,
-  },
-  input: {
-    color: DARK_GRAY_COLOR,
   },
 });

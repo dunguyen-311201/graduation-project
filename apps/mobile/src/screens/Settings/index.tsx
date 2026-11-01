@@ -1,7 +1,7 @@
-import {AppButton, CustomInput, ScreenBase} from '@components';
+import {AppButton, Avatar, CustomInput, ScreenBase, Txt} from '@components';
 import {EUser} from '@enums';
-import {Image, Pressable, ScrollView, StyleSheet, View} from 'react-native';
-import {ProfileIcon, WHITE_COLOR} from '@theme';
+import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {tokens} from '@theme';
 import React, {
   useCallback,
   useContext,
@@ -97,18 +97,19 @@ const SettingsScreen = () => {
         style={styles.flex}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled">
-        <Pressable onPress={handleChangeAvatar} style={styles.boxAvatar}>
-          <Image
-            style={styles.avatar}
-            resizeMode="cover"
-            source={
-              formData?.photoURL
-                ? {
-                    uri: formData?.photoURL,
-                  }
-                : ProfileIcon
-            }
+        <Pressable
+          onPress={handleChangeAvatar}
+          style={styles.boxAvatar}
+          accessibilityRole="button"
+          accessibilityLabel="Change profile photo">
+          <Avatar
+            size={96}
+            uri={formData?.photoURL}
+            name={formData?.displayName || currentUser?.email}
           />
+          <Txt variant="caption" color={tokens.colors.primary}>
+            Change photo
+          </Txt>
           {_loading !== 0 && (
             <View style={styles.loading}>
               <View style={[{width: _loading + '%'}, styles.percent]} />
@@ -166,17 +167,11 @@ const styles = StyleSheet.create({
 
   boxAvatar: {
     alignSelf: 'center',
-    rowGap: 20,
-    height: 132,
-  },
-  avatar: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    backgroundColor: WHITE_COLOR,
+    alignItems: 'center',
+    rowGap: 8,
   },
   loading: {
-    width: 112,
+    width: 96,
     alignSelf: 'center',
     borderRadius: 8,
     height: 10,

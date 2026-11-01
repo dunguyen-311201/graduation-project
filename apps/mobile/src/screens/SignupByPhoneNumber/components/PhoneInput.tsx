@@ -1,4 +1,4 @@
-import {DARK_GRAY_COLOR, DropDownIcon, WHITE_COLOR} from '@theme';
+import {DropDownIcon, WHITE_COLOR, tokens} from '@theme';
 import {
   FlatList,
   Image,
@@ -100,7 +100,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
             <Image source={{uri: national?.url}} style={styles.flag} />
             <Image source={DropDownIcon} style={styles.dropDown} />
           </Pressable>
-          <CustomText text={national?.code} type="text_medium_24" />
+          <CustomText text={national?.code} type="text_medium_20" />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
@@ -111,7 +111,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
             autoComplete="tel-national"
             accessibilityLabel="Phone number"
             placeholder="912 345 678"
-            placeholderTextColor={DARK_GRAY_COLOR}
+            placeholderTextColor={tokens.colors.textMuted}
             ref={refInput}
           />
           {errorMessage && (
@@ -138,12 +138,14 @@ const styles = StyleSheet.create({
   },
   inputGroup: {flex: 6},
   input: {
-    borderBottomWidth: 1,
-    borderBottomColor: WHITE_COLOR,
-    color: WHITE_COLOR,
-    fontSize: 24,
-
-    padding: 0,
+    minHeight: tokens.TOUCH + 4,
+    paddingHorizontal: tokens.space.lg,
+    borderRadius: tokens.radius.card,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+    backgroundColor: tokens.colors.surface,
+    color: tokens.colors.text,
+    fontSize: tokens.type.body.fontSize,
   },
   nationList: {
     backgroundColor: WHITE_COLOR,
@@ -157,16 +159,19 @@ const styles = StyleSheet.create({
   },
   nation: {
     flexDirection: 'row',
-    columnGap: 10,
-    flex: 4,
+    alignItems: 'center',
+    columnGap: 8,
+    minHeight: tokens.TOUCH + 4,
+    marginRight: tokens.space.sm,
   },
   flagSelect: {
     alignItems: 'center',
     flexDirection: 'row',
   },
   flag: {
-    width: 52,
-    height: 31,
+    width: 32,
+    height: 20,
+    borderRadius: 3,
   },
   dropDown: {
     marginLeft: 5,

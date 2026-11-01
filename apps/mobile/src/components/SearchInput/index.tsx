@@ -184,7 +184,7 @@ const inputSearch = StyleSheet.create({
     zIndex: 5,
   },
   textInput: {
-    fontSize: 18,
+    fontSize: 17,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },

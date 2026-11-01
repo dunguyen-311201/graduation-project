@@ -5,6 +5,7 @@ import {
   LIGHT_BLUE_COLOR,
   TEXT_COLOR,
   WHITE_COLOR,
+  tokens,
 } from '@theme';
 import {StyleSheet} from 'react-native';
 
@@ -134,91 +135,29 @@ export const Styles = {
   },
 };
 
+// Legacy CustomText types, mapped onto the token type scale (theme/tokens.ts)
+// so every screen uses the same five sizes and the system font.
+const t = tokens.type;
+const c = tokens.colors;
+
 export const styles = StyleSheet.create({
-  text_large_64: {
-    fontSize: 64,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-    color: TEXT_COLOR,
-  },
-  text_large_20: {
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-    color: TEXT_COLOR,
-  },
-  text_xLarge: {
-    fontSize: 22,
-    fontWeight: '700',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-    textAlign: 'center',
-  },
-  text_medium_30: {
-    fontSize: 30,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_24: {
-    fontSize: 24,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_20: {
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_24: {
-    fontSize: 24,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_20: {
-    fontSize: 20,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_16: {
-    fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_18: {
-    fontSize: 18,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_14: {
-    fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_10: {
-    fontSize: 10,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
+  text_large_64: {fontSize: 48, lineHeight: 56, fontWeight: '700', color: c.text},
+  text_large_20: {...t.body, fontWeight: '600', color: c.text},
+  text_xLarge: {...t.heading, color: c.text, textAlign: 'center'},
+  text_medium_30: {...t.title, color: c.text},
+  text_medium_24: {...t.heading, color: c.text},
+  text_medium_20: {...t.body, color: c.text},
+  text_regular_24: {...t.heading, fontWeight: '400', color: c.text},
+  text_regular_20: {...t.body, color: c.text},
+  text_medium_18: {...t.body, color: c.textMuted},
+  text_medium_16: {...t.label, fontWeight: '400', color: c.textMuted},
+  text_medium_14: {...t.caption, color: c.textMuted},
+  text_medium_10: {...t.caption, color: c.textMuted},
 });
 
 export const colors = StyleSheet.create({
-  blue: {
-    color: LIGHT_BLUE_COLOR,
-  },
-  white: {
-    color: TEXT_COLOR,
-  },
+  blue: {color: c.primary},
+  white: {color: c.text},
   black: {color: BLACK_COLOR},
-  red: {
-    color: 'red',
-  },
+  red: {color: c.sos},
 });

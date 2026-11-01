@@ -1,10 +1,5 @@
-import {
-  DARK_GRAY_COLOR,
-  EyeIcon,
-  HideIcon,
-  TEXT_COLOR,
-  WHITE_COLOR,
-} from '@theme';
+import {EyeIcon, HideIcon} from '@theme';
+import {TOUCH, colors, radius, space, type as typeScale} from '../../../theme/tokens';
 import {
   InputModeOptions,
   StyleProp,
@@ -17,7 +12,7 @@ import type {TextInputInstance} from 'react-native';
 import React, {forwardRef, useCallback, useState} from 'react';
 
 import CustomButton from '../Button';
-import CustomText from '../Text';
+import Txt from '../../ui/Txt';
 
 export type CustomInputProps = {
   title?: string;
@@ -35,6 +30,7 @@ export type CustomInputProps = {
   placeholder?: string;
   onEndEditing?: (feild: string) => void;
   nColumn?: number;
+  /** Kept for old callers; every input now shares one look. */
   border?: boolean;
   editable?: boolean;
   width?: number;
@@ -51,6 +47,7 @@ const CustomInput: React.ForwardRefRenderFunction<
     value = '',
     inputMode = 'text',
     titleStyle,
+    errorMessageStyle,
     valueStyle,
     maxLength = 30,
     onChangeText,
@@ -61,23 +58,24 @@ const CustomInput: React.ForwardRefRenderFunction<
     editable = true,
     width,
     nColumn = 1,
-    border,
-    row,
   } = props;
 
   const [secureTextEntry, setSecureTextEntry] = useState(
     inputMode === 'password',
   );
+  const [focused, setFocused] = useState(false);
 
   const handleChangeText = useCallback((_value: string) => {
     onChangeText && onChangeText(_value, field);
   }, []);
 
   const handleFocus = useCallback(() => {
+    setFocused(true);
     onFocus && onFocus(field);
   }, [onFocus, field]);
 
   const handleBlur = useCallback(() => {
+    setFocused(false);
     onBlur && onBlur(field);
   }, [field, onBlur]);
 
@@ -90,23 +88,19 @@ const CustomInput: React.ForwardRefRenderFunction<
   }, []);
 
   return (
-    <View style={{width: width || `${100 / nColumn}%`}}>
+    <View style={[styles.group, {width: width || `${100 / nColumn}%`}]}>
+      {title && (
+        <Txt variant="label" color={colors.textMuted} style={titleStyle}>
+          {title}
+        </Txt>
+      )}
       <View
-        style={{
-          ...styles.inputgroup,
-          ...(row && styles.row),
-          ...(errorMessage && styles.error),
-        }}>
-        {title && (
-          <CustomText
-            text={title}
-            type={row ? 'text_medium_24' : 'text_medium_14'}
-            customStyle={{
-              ...styles.title,
-              ...titleStyle,
-            }}
-          />
-        )}
+        style={[
+          styles.field,
+          focused && styles.focused,
+          Boolean(errorMessage) && styles.invalid,
+          !editable && styles.readOnly,
+        ]}>
         <TextInput
           ref={ref}
           value={value}
@@ -120,28 +114,29 @@ const CustomInput: React.ForwardRefRenderFunction<
           maxLength={maxLength}
           placeholder={placeholder}
           onChangeText={handleChangeText}
-          placeholderTextColor={DARK_GRAY_COLOR}
+          placeholderTextColor={colors.textMuted}
           onEndEditing={handleEndEdit}
           {...(inputMode === 'password' ? {secureTextEntry} : {inputMode})}
-          style={[
-            styles.input,
-            {...(!row && styles.column)},
-            {...(!editable && {opacity: 0.5})},
-            {...(border ? styles.border : styles.default)},
-            valueStyle,
-          ]}
+          style={[styles.input, valueStyle]}
         />
         {inputMode === 'password' && (
           <CustomButton
             icon={secureTextEntry ? EyeIcon : HideIcon}
+            iconSize={styles.eyeIcon}
             type="secondary"
-            customStyle={styles.password}
+            accessibilityLabel={secureTextEntry ? 'Show password' : 'Hide password'}
             onPress={handleSecretPassword}
           />
         )}
       </View>
       {errorMessage && (
-        <CustomText text={errorMessage} type="text_medium_14" color="red" />
+        <Txt
+          variant="caption"
+          color={colors.sos}
+          style={errorMessageStyle}
+          accessibilityLiveRegion="polite">
+          {errorMessage}
+        </Txt>
       )}
     </View>
   );
@@ -150,50 +145,27 @@ const CustomInput: React.ForwardRefRenderFunction<
 export default forwardRef(CustomInput);
 
 const styles = StyleSheet.create({
-  inputgroup: {
-    position: 'relative',
-    zIndex: 1,
-  },
-  title: {
-    marginRight: 10,
-  },
-  default: {
-    flex: 1,
-  },
-  border: {
-    borderColor: TEXT_COLOR,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-  },
-  input: {
-    color: DARK_GRAY_COLOR,
-    fontSize: 20,
-    fontWeight: '400',
-    paddingHorizontal: 10,
-  },
-  column: {
-    borderColor: WHITE_COLOR,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginTop: 8,
-    color: WHITE_COLOR,
-  },
-  row: {
+  group: {rowGap: space.sm},
+  field: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: TOUCH + 4,
+    paddingLeft: space.lg,
+    paddingRight: space.xs,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
-  error: {
-    borderBottomColor: 'red',
+  focused: {borderColor: colors.primary},
+  invalid: {borderColor: colors.sos},
+  readOnly: {opacity: 0.6},
+  input: {
+    flex: 1,
+    fontSize: typeScale.body.fontSize,
+    color: colors.text,
+    paddingVertical: space.md,
+    paddingRight: space.md,
   },
-  password: {
-    maxWidth: 30,
-    maxHeight: 30,
-    position: 'absolute',
-    zIndex: 2,
-    right: 10,
-    top: '50%',
-    transform: [{translateY: 5}],
-  },
+  eyeIcon: {width: 22, height: 22},
 });
