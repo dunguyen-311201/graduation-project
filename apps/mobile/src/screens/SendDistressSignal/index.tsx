@@ -1,175 +1,264 @@
-import {CURRENT_LOCATION, MESSAGE_PENDING, types} from '@constants';
 import {
-  CustomText,
-  DropDown,
-  Error,
-  ScreenBase,
+  AppButton,
+  BackButton,
+  ChipGroup,
+  Notification,
   SearchInput,
-  Textreae,
+  Txt,
 } from '@components';
+import {CURRENT_LOCATION, types} from '@constants';
 import {ERole, EScreen} from '@enums';
-import React, {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import React, {memo, useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {StyleSheet, TextInput, View} from 'react-native';
-import type {TextareaRef} from '../../components/common/Textarea';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
+import {newIdempotencyKey, useMessages} from '@features/rescue';
 
 import {Context} from '@context';
-import {newIdempotencyKey} from '@features/rescue';
 import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
+import {tokens} from '@theme';
 
-type FormData = {
-  description?: string;
-  type?: string;
-  location: Location | null;
-};
+const {colors, space, radius} = tokens;
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.SEND_DISTRESS_SIGNAL>;
 
 // Firestore never rejects a write while offline, it only queues it.
 const SEND_TIMEOUT_MS = 15000;
 
-const SendDistreeSignal = () => {
-  const {reset} =
-    useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
+// Short chip labels; the values stay the strings the API mapping expects.
+const LABELS: Record<string, string> = {
+  'Rescue request': 'Breakdown',
+  'Traffic incident report': 'Accident',
+  'Road issue report': 'Road hazard',
+  'Replacement vehicle request': 'Need a vehicle',
+  'Emergency support request': 'Medical',
+};
+const TYPE_OPTIONS = types.map(t => ({value: t, label: LABELS[t] ?? t}));
 
-  const {onNew} = useRoute<ConfirmRoute>().params || {};
+const SendDistressSignal = () => {
+  const {reset, goBack} =
+    useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
+  const params = useRoute<ConfirmRoute>().params;
+  const {onNew: onNewFromHook} = useMessages();
+  const onNew = params?.onNew ?? onNewFromHook;
 
   const {currentUser} = useContext(Context);
-  const [error, setError] = useState<string>();
 
-  const textreaeRef = useRef<TextareaRef>(null);
   // Fixed per form, so sending again after a timeout cannot create a duplicate.
   const requestId = useRef(newIdempotencyKey());
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<FormData>({
-    description: '',
-    type: types[0],
-    location: null,
-  });
+  const [location, setLocation] = useState<Location | null>(null);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [type, setType] = useState(types[0]);
+  const [description, setDescription] = useState('');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
     const setup = async () => {
       await (currentUser?.role === ERole.WORKER
         ? requestLocationPermission(1)
         : requestLocationPermission());
-
       const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
-      if (cache) {
-        setMessage(prev => ({...prev, location: cache}));
-      }
+      cache && setLocation(cache);
     };
-
     setup();
   }, [currentUser]);
 
-  const sendSignal = useCallback(async () => {
-    if (!message.location) {
-      setError('Please choose your location so the rescue team can find you.');
+  const handleSearch = useCallback(async (picked: Location) => {
+    setLocation(picked);
+    setEditingLocation(false);
+  }, []);
+
+  const send = useCallback(async () => {
+    if (!location) {
+      setError('Choose your location so the rescue team can find you.');
       return;
     }
-
-    if (currentUser && onNew) {
-      setLoading(true);
-      setError(undefined);
-
-      try {
-        const mess = {
-          ...message,
+    if (!currentUser) {
+      return;
+    }
+    Keyboard.dismiss();
+    setSending(true);
+    setError(undefined);
+    try {
+      await Promise.race([
+        onNew({
           id: requestId.current,
-          status: MESSAGE_PENDING,
+          type,
+          description,
+          location,
+          status: 'pending',
           time: Date.now(),
           userID: currentUser.id,
-        };
-
-        await Promise.race([
-          onNew(mess),
-          new Promise((_, reject) =>
-            setTimeout(() => reject('timeout'), SEND_TIMEOUT_MS),
-          ),
-        ]);
-
-        reset({routes: [{name: EScreen.MESSAGES}], index: 0});
-      } catch (_error: any) {
-        setError(
-          _error?.message ||
-            'Your request was not confirmed. Check your connection and send again, or call 112 if it is urgent.',
-        );
-      }
-
-      setLoading(false);
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), SEND_TIMEOUT_MS),
+        ),
+      ]);
+      reset({routes: [{name: EScreen.DRAWER}], index: 0});
+    } catch (e: any) {
+      setError(
+        e?.message && e.message !== 'timeout'
+          ? e.message
+          : 'Your request was not confirmed. Check your connection and send again.',
+      );
     }
-  }, [message, currentUser, onNew]);
-
-  const handleChangeText = useCallback((value: string, field?: string) => {
-    if (field) {
-      setMessage(prev => ({...prev, [field]: value}));
-    }
-  }, []);
-
-  const handleSearch = useCallback(async (_location: Location) => {
-    setMessage(prev => ({...prev, location: _location}));
-  }, []);
+    setSending(false);
+  }, [location, currentUser, onNew, type, description, reset]);
 
   return (
-    <ScreenBase
-      loading={loading}
-      onNext={sendSignal}
-      nextTitle="Send request"
-      title="Request rescue">
-      <View style={styles.mapField}>
-        <CustomText text="Location" type="text_medium_16" />
-        <SearchInput
-          region={message?.location}
-          onSearch={handleSearch}
-          placeholder="Location"
-          field="location"
-          isDirection={true}
-          zIndex={4}
-          customStyle={styles.search}
-        />
-      </View>
-      <DropDown
-        data={types}
-        initValue={message?.type}
-        onSelect={handleChangeText}
-        field="type"
-        title="Type"
-      />
-      <Textreae
-        ref={textreaeRef}
-        title="Description"
-        value={message?.description}
-        field="description"
-        onChangeText={handleChangeText}
-      />
-      {error && <Error message={error} />}
-    </ScreenBase>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Notification />
+        <View style={styles.header}>
+          <BackButton onPress={goBack} />
+          <Txt variant="title">Request rescue</Txt>
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.section}>
+            <Txt variant="label" color={colors.textMuted}>
+              Where are you?
+            </Txt>
+            {editingLocation ? (
+              <View style={styles.searchBox}>
+                <SearchInput
+                  region={location}
+                  onSearch={handleSearch}
+                  placeholder="Search an address"
+                  field="location"
+                  zIndex={4}
+                />
+              </View>
+            ) : (
+              <View style={styles.card}>
+                <View style={styles.flex}>
+                  <Txt variant="body" numberOfLines={2}>
+                    {location
+                      ? location.description || 'Current GPS position'
+                      : 'Finding your location…'}
+                  </Txt>
+                  {location?.accuracy ? (
+                    <Txt variant="caption" color={colors.textMuted}>
+                      Accurate to about {Math.round(location.accuracy)} m
+                    </Txt>
+                  ) : null}
+                </View>
+                <AppButton
+                  label="Change"
+                  variant="ghost"
+                  onPress={() => setEditingLocation(true)}
+                />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.section}>
+            <Txt variant="label" color={colors.textMuted}>
+              What happened?
+            </Txt>
+            <ChipGroup
+              options={TYPE_OPTIONS}
+              value={type}
+              onChange={setType}
+              accessibilityLabel="Problem type"
+            />
+          </View>
+
+          <View style={styles.section}>
+            <Txt variant="label" color={colors.textMuted}>
+              Details (optional)
+            </Txt>
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              placeholder="E.g. flat tyre, car is on the right shoulder"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              maxLength={500}
+              style={styles.input}
+              accessibilityLabel="Details"
+            />
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          {error && (
+            <View style={styles.error} accessibilityLiveRegion="polite">
+              <Txt variant="body" color={colors.sos}>
+                {error}
+              </Txt>
+              <AppButton
+                label="Call 112"
+                variant="secondary"
+                onPress={() => Linking.openURL('tel:112')}
+              />
+            </View>
+          )}
+          <AppButton
+            label={error ? 'Send again' : 'Send SOS'}
+            variant="danger"
+            loading={sending}
+            disabled={!location}
+            onPress={send}
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
-export default memo(SendDistreeSignal);
+export default memo(SendDistressSignal);
 
 const styles = StyleSheet.create({
-  mapField: {
-    position: 'relative',
-    width: '100%',
-    height: 80,
-    marginTop: 20,
-    zIndex: 3,
+  container: {flex: 1, backgroundColor: colors.bg},
+  header: {
+    paddingHorizontal: space.xl,
+    paddingTop: space.lg,
+    rowGap: space.md,
   },
-  search: {
-    top: 20,
-    right: -10,
+  body: {flex: 1, paddingHorizontal: space.xl, paddingTop: space.xl, rowGap: space.xl},
+  section: {rowGap: space.sm},
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: space.sm,
+    padding: space.lg,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
   },
+  flex: {flex: 1, rowGap: space.xs},
+  searchBox: {height: 56, zIndex: 4},
+  input: {
+    minHeight: 96,
+    padding: space.lg,
+    borderRadius: radius.card,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    fontSize: 17,
+    textAlignVertical: 'top',
+  },
+  footer: {
+    paddingHorizontal: space.xl,
+    paddingTop: space.md,
+    paddingBottom: space.xl,
+    rowGap: space.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  error: {rowGap: space.sm},
 });
