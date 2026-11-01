@@ -2,16 +2,17 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { createTestApp } from "./setup.js";
-import type { FakeIdentityProvider, InMemoryUserDirectory } from "./fakes.js";
+import type { FakeIdentityProvider, FakeScheduler, InMemoryUserDirectory } from "./fakes.js";
 
 let app: INestApplication;
 let identity: FakeIdentityProvider;
 let users: InMemoryUserDirectory;
+let scheduler: FakeScheduler;
 const http = () => request(app.getHttpServer());
 const valid = { displayName: "Nguyen Van A", email: "a@center.vn", password: "secret123" };
 
 beforeEach(async () => {
-  ({ app, identity, users } = await createTestApp());
+  ({ app, identity, users, scheduler } = await createTestApp());
   users.docs.set("center-1", { role: "center", statusRegistration: "approved" });
   users.docs.set("center-2", { role: "center", statusRegistration: "pending" });
   users.docs.set("user-1", { role: "user" });
@@ -23,6 +24,12 @@ afterEach(async () => {
 describe("health", () => {
   it("answers liveness without a token", async () => {
     await http().get("/health/live").expect(200, { status: "ok" });
+  });
+
+  it("reports readiness from the queue backend", async () => {
+    await http().get("/health/ready").expect(200, { status: "ok" });
+    scheduler.healthy = false;
+    await http().get("/health/ready").expect(503);
   });
 });
 

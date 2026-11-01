@@ -22,8 +22,13 @@ export const envSchema = z.object({
    * (e.g. `gcloud auth application-default login` or the Auth/Firestore emulators).
    */
   FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  /** Redis for BullMQ timers (ADR-0012). Required outside tests. */
+  REDIS_URL: z.string().optional(),
   /** Allowed browser origins (the mobile app does not need CORS). */
   CORS_ORIGINS: csv,
+}).refine((env) => env.APP_ENV === "test" || Boolean(env.REDIS_URL), {
+  path: ["REDIS_URL"],
+  error: "REDIS_URL is required",
 });
 
 export type Env = z.infer<typeof envSchema>;

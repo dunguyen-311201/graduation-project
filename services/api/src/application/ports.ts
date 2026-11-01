@@ -42,3 +42,22 @@ export interface UserDirectory {
   addFcmToken(uid: string, token: string): Promise<void>;
 }
 export const USER_DIRECTORY = Symbol("USER_DIRECTORY");
+
+export type TimerJobName = "expire-request" | "expand-radius" | "timeout-assignment";
+
+/** A durable timer (ADR-0012). Survives API restarts, unlike setTimeout. */
+export interface TimerJob {
+  name: TimerJobName;
+  /** Deterministic, e.g. `expire-<requestId>`, so a repeat is ignored. No ":" (BullMQ reserves it). */
+  id: string;
+  at: Date;
+  payload: Record<string, string>;
+}
+
+export interface Scheduler {
+  schedule(job: TimerJob): Promise<void>;
+  cancel(id: string): Promise<void>;
+  /** Throws when the queue backend cannot be reached. */
+  ping(): Promise<void>;
+}
+export const SCHEDULER = Symbol("SCHEDULER");

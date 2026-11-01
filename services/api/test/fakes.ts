@@ -1,5 +1,12 @@
 import { ConflictError } from "../src/application/errors.js";
-import type { IdentityProvider, LegacyUserRecord, UserDirectory, VerifiedToken } from "../src/application/ports.js";
+import type {
+  IdentityProvider,
+  LegacyUserRecord,
+  Scheduler,
+  TimerJob,
+  UserDirectory,
+  VerifiedToken,
+} from "../src/application/ports.js";
 
 /** Token "token-<uid>" verifies as <uid>; anything else is rejected. */
 export class FakeIdentityProvider implements IdentityProvider {
@@ -53,5 +60,22 @@ export class InMemoryUserDirectory implements UserDirectory {
 
   async addFcmToken(uid: string, token: string) {
     this.fcmTokens.set(uid, (this.fcmTokens.get(uid) ?? new Set()).add(token));
+  }
+}
+
+export class FakeScheduler implements Scheduler {
+  jobs = new Map<string, TimerJob>();
+  healthy = true;
+
+  async schedule(job: TimerJob) {
+    if (!this.jobs.has(job.id)) this.jobs.set(job.id, job);
+  }
+
+  async cancel(id: string) {
+    this.jobs.delete(id);
+  }
+
+  async ping() {
+    if (!this.healthy) throw new Error("redis down");
   }
 }

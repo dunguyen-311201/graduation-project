@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import helmet from "helmet";
 import { ENV, type Env } from "./config/env.js";
 import { FirebaseModule } from "./infrastructure/firebase/firebase.module.js";
+import { QueueModule } from "./infrastructure/queue/queue.module.js";
 import { CreateResponderHandler } from "./application/create-responder.handler.js";
 import { FirebaseAuthGuard } from "./interface/http/auth.guard.js";
 import { AppErrorFilter } from "./interface/http/app-error.filter.js";
@@ -12,8 +13,12 @@ import { RespondersController } from "./interface/http/responders.controller.js"
 
 @Module({})
 export class AppModule {
-  /** `firebase` lets tests swap the Firebase adapters for fakes. */
-  static forRoot(env: Env, firebase: DynamicModule | typeof FirebaseModule = FirebaseModule): DynamicModule {
+  /** `firebase` and `queue` let tests swap the adapters for fakes. */
+  static forRoot(
+    env: Env,
+    firebase: DynamicModule | typeof FirebaseModule = FirebaseModule,
+    queue: DynamicModule | typeof QueueModule = QueueModule,
+  ): DynamicModule {
     const envModule: DynamicModule = {
       module: class EnvModule {},
       global: true,
@@ -22,7 +27,7 @@ export class AppModule {
     };
     return {
       module: AppModule,
-      imports: [envModule, firebase],
+      imports: [envModule, firebase, queue],
       controllers: [HealthController, MeController, RespondersController],
       providers: [
         CreateResponderHandler,

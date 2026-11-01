@@ -17,3 +17,16 @@ services:
         value: sos-app-dev-b1963
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: sos-redis
+          property: connectionString
+  # The free tier does not persist data, so scheduled jobs can be lost on a
+  # restart. Dev only: production needs a persistent plan (ADR-0012).
+  - type: keyvalue
+    name: sos-redis
+    plan: free
+    region: singapore
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
