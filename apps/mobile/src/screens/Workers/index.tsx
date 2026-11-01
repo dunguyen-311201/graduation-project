@@ -21,7 +21,6 @@ import {
   formatDistance,
   formatTime,
   formatTimeAgo,
-  isApprovedCenter,
 } from '@utils';
 
 import {EScreen} from '@enums';
@@ -29,7 +28,8 @@ import {RootScreenNavigationProps} from '@navigation';
 import {TUser} from '@types';
 import {WorkerItem} from './components';
 import {useNavigation} from '@react-navigation/native';
-import {useWorker} from '@hooks';
+import {isApprovedCenter} from '@features/auth';
+import {useWorker} from '@features/rescue';
 
 const Worker = () => {
   const {navigate, goBack} =

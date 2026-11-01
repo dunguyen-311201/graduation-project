@@ -59,7 +59,7 @@ const SignInByEmail = () => {
             },
             {
               check: !validate.isEmail(data?.email),
-              message: 'This field is Email!',
+              message: 'Please enter a valid email address.',
             },
           ],
         },
@@ -122,13 +122,12 @@ const SignInByEmail = () => {
           password,
         );
         const uid = userCredential.user.uid;
-        await signIn(uid);
+        if (!(await signIn(uid))) {
+          setError({password: 'This account has no SOS profile yet.'});
+        }
       }
     } catch (err) {
-      setError({
-        email: 'Please check your email!',
-        password: 'Please check your password!',
-      });
+      setError({password: 'Incorrect email or password. Please try again.'});
     }
     setLoading(false);
   }, [data]);
@@ -139,11 +138,12 @@ const SignInByEmail = () => {
       title="You are the rescue team?"
       onNext={handleLoginByEmailPassword}
       onBack={goBack}
-      disableNext={error !== undefined}>
+      disableNext={Boolean(error?.email || error?.password)}>
       <View style={styles.content}>
         <CustomInput
           value={data?.email}
           field="email"
+          maxLength={100}
           onChangeText={handleChangeText}
           onEndEditing={handleEndEdit}
           onBlur={handleValid}

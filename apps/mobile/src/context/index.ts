@@ -6,7 +6,7 @@ export type ContextProps = {
   isAuthenticated: boolean;
   currentUser: TUser | null;
   loading: boolean;
-  signIn: (id: string) => Promise<void>;
+  signIn: (id: string) => Promise<boolean>;
   signUp: () => Promise<void>;
   signOut: () => Promise<void>;
   notify: TNotification | null;
@@ -17,7 +17,7 @@ export type ContextProps = {
 export const Context = createContext<ContextProps>({
   isAuthenticated: false,
   loading: false,
-  signIn: async () => {},
+  signIn: async () => false,
   signOut: async () => {},
   signUp: async () => {},
   notify: null,

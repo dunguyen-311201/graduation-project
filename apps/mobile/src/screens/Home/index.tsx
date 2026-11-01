@@ -6,6 +6,8 @@ import {
   MapImage,
   MessageIcon,
   SOSIcon,
+  SOS_RED_COLOR,
+  WHITE_COLOR,
 } from '@theme';
 import {
   Card,
@@ -16,7 +18,7 @@ import {
   SearchInput,
 } from '@components';
 import {ERole, EScreen} from '@enums';
-import {Image, StyleSheet, View} from 'react-native';
+import {Image, Pressable, StyleSheet, View} from 'react-native';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 
@@ -80,10 +82,8 @@ const HomeScreen = () => {
             />
           </View>
           <CustomText
-            text={
-              'Are you having your problems with vehicle? Immediately connect to the rescue service.'
-            }
-            type="text_medium_30"
+            text="Vehicle trouble? Get rescue help now."
+            type="text_medium_24"
             customStyle={styles.title}
           />
           <CustomButton
@@ -95,10 +95,20 @@ const HomeScreen = () => {
       </View>
 
       <View style={styles.content}>
+        {currentUser?.role === ERole.USER && (
+          <Pressable
+            style={styles.sos}
+            onPress={handleRequests}
+            accessibilityRole="button"
+            accessibilityLabel="Request rescue">
+            <View style={styles.sosIcon}>
+              <Image source={SOSIcon} style={styles.sosImage} />
+            </View>
+            <CustomText text="Request rescue" type="text_medium_24" />
+          </Pressable>
+        )}
+
         <View style={styles.options}>
-          {currentUser?.role === ERole.USER && (
-            <Card icon={SOSIcon} title="Rescue" onPress={handleRequests} />
-          )}
 
           {currentUser?.role === ERole.CENTER && (
             <Card
@@ -161,11 +171,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 32,
   },
+  sos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: 16,
+    paddingVertical: 18,
+    borderRadius: 12,
+    backgroundColor: SOS_RED_COLOR,
+  },
+  sosIcon: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: WHITE_COLOR,
+  },
+  sosImage: {
+    width: 28,
+    height: 28,
+  },
   options: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    paddingTop: 30,
+    paddingTop: 24,
     width: '100%',
   },
   map: {

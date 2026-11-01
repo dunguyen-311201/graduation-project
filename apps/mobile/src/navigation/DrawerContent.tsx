@@ -24,7 +24,7 @@ const DrawerContent = (props: DrawerContentComponentProps) => {
   }, [currentUser, signOut]);
 
   const handleGoMessage = async () => {
-    props.navigation.navigate(EScreen.MESSAGES);
+    props.navigation.navigate(EScreen.NOTIFICATION);
   };
 
   return (

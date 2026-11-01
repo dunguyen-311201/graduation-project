@@ -30,6 +30,7 @@ type ButtonProps = {
   iconSize?: {height: number; width: number};
   isLoading?: boolean;
   reverse?: boolean;
+  accessibilityLabel?: string;
 };
 
 const CustomButton = ({
@@ -43,11 +44,14 @@ const CustomButton = ({
   disabled,
   reverse,
   isLoading = false,
+  accessibilityLabel,
 }: ButtonProps) => {
   if (type === 'primary') {
     return (
       <Shadow customStyle={styles.shadow} paddingVertical={16}>
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel || label}
           onPress={onPress}
           style={[styles[EButton[type]], customStyle]}>
           <CustomText text={label} type="text_xLarge" />
@@ -59,12 +63,16 @@ const CustomButton = ({
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel || label}
+      accessibilityState={{disabled: Boolean(disabled)}}
+      hitSlop={8}
       disabled={disabled}
       onPress={onPress}
       style={[
         customStyle,
         styles[EButton[type]],
-        {...(disabled && {opacity: 0.5})},
+        {...(disabled && {opacity: 0.4})},
         {...(reverse && {flexDirection: 'row-reverse', columnGap: 20})},
       ]}>
       {children}
@@ -112,7 +120,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   [EButton.default]: {
-    backgroundColor: '#000000',
+    backgroundColor: LIGHT_BLUE_COLOR,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

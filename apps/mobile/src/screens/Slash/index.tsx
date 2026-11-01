@@ -6,7 +6,7 @@ import {
   Shadow,
 } from '@components';
 import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, View} from 'react-native';
+import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
 import {Context} from '@context';
 import {EScreen} from '@enums';
@@ -63,11 +63,10 @@ function SplashScreen() {
           </Shadow>
 
           {firstSignedIn && (
-            <CustomButton
-              label="More with safety"
-              type="outline"
-              icon={CheckShieldIcon}
-            />
+            <View style={styles.tagline}>
+              <CustomText text="More with safety" type="text_large_20" />
+              <Image source={CheckShieldIcon} />
+            </View>
           )}
         </View>
         {firstSignedIn && (
@@ -92,7 +91,7 @@ const styles = StyleSheet.create({
   },
   container: {
     paddingHorizontal: 32,
-    paddingTop: '50%',
+    paddingTop: '30%',
     paddingBottom: 62,
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -100,6 +99,11 @@ const styles = StyleSheet.create({
   top: {
     alignItems: 'center',
     rowGap: 41,
+  },
+  tagline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 8,
   },
   button: {
     flexDirection: 'row',

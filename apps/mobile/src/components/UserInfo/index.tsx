@@ -11,7 +11,7 @@ import {CustomButton, CustomText} from '../common';
 import {GRAY_COLOR, TEXT_COLOR} from '@theme';
 import React, {memo, useCallback} from 'react';
 
-import {useUsers} from '@hooks';
+import {useUsers} from '@features/auth';
 
 type UserInfoProps = {
   id?: string;

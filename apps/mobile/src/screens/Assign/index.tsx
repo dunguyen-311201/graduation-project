@@ -4,7 +4,7 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {TTask} from '@types';
 import {EScreen} from '@enums';
-import {useTasks} from '@hooks';
+import {useTasks} from '@features/rescue';
 import {TaskItem} from './components';
 import {ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';

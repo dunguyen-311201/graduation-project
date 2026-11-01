@@ -57,11 +57,8 @@
       "@utils/*": [
         "./src/utils/*"
       ],
-      "@hooks": [
-        "./src/hooks"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
+      "@features/*": [
+        "./src/features/*"
       ],
       "@context": [
         "./src/context"
@@ -82,8 +79,6 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.tsx"
   ]
 }

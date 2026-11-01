@@ -111,6 +111,9 @@ const CustomInput: React.ForwardRefRenderFunction<
           ref={ref}
           value={value}
           selectTextOnFocus
+          accessibilityLabel={title}
+          autoCapitalize={inputMode === 'text' ? 'sentences' : 'none'}
+          autoCorrect={inputMode === 'text'}
           editable={editable}
           onBlur={handleBlur}
           onFocus={handleFocus}

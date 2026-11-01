@@ -10,7 +10,7 @@ import {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
 import {TNotification} from '@types';
-import {rejectAssign} from '@utils';
+import {rejectAssign} from '@features/rescue';
 
 const useNotification = () => {
   const [notify, setNotify] = useState<TNotification | null>(null);

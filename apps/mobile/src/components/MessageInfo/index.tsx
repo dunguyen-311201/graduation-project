@@ -11,7 +11,7 @@ import {TMessage} from '@types';
 import {WHITE_COLOR} from '@theme';
 import {formatTimeAgo} from '@utils';
 import {useNavigation} from '@react-navigation/native';
-import {useUsers} from '@hooks';
+import {useUsers} from '@features/auth';
 
 const MessageInfo = ({
   item,

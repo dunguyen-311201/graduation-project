@@ -22,7 +22,8 @@ import React, {
   useState,
 } from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {useMessage, useUsers, useWorker} from '@hooks';
+import {useUsers} from '@features/auth';
+import {useMessage, useWorker} from '@features/rescue';
 
 import {Context} from '@context';
 import {RootParamList} from '@navigation/RootNavigation';
@@ -38,7 +39,14 @@ const DetailMessage = () => {
 
   const {currentUser} = useContext(Context);
 
-  const {message, onComfirm, onComplete, onAssign, loading} = useMessage(id);
+  const {
+    message,
+    onComfirm,
+    onComplete,
+    onAssign,
+    onDelete: onDeleteMessage,
+    loading,
+  } = useMessage(id);
 
   const [workerID, setWorkerID] = useState<string>();
 
@@ -85,10 +93,25 @@ const DetailMessage = () => {
     }
   }, [message?.location, user?.location]);
 
-  const handleDelete = useCallback(async () => {
-    message && onDelete && (await onDelete(message.id));
-    navigate(EScreen.MESSAGES);
-  }, [message]);
+  const handleDelete = useCallback(() => {
+    Alert.alert(
+      'Remove this request?',
+      'Rescue teams will no longer see it.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            if (message) {
+              await (onDelete ? onDelete(message.id) : onDeleteMessage());
+            }
+            navigate(EScreen.MESSAGES);
+          },
+        },
+      ],
+    );
+  }, [message, onDelete, onDeleteMessage]);
 
   const handleSelect = useCallback((_workerID: string) => {
     setWorkerID(_workerID);
@@ -164,9 +187,8 @@ const DetailMessage = () => {
           <Textreae
             title="Description"
             field="description"
-            onChangeText={handleMap}
             value={message.description}
-            editable={currentUser?.role !== 'user'}
+            editable={false}
           />
 
           <CustomButton
@@ -193,7 +215,7 @@ const DetailMessage = () => {
                     <CustomButton
                       onPress={onComfirm}
                       customStyle={styles.seeMapButton}
-                      label="Comfirm"
+                      label="Confirm"
                     />
                     {onReject && (
                       <CustomButton
@@ -245,7 +267,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   item: {
-    backgroundColor: 'yellow',
     flex: 1,
   },
   headerRight: {

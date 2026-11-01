@@ -1,11 +1,11 @@
 import {useContext, useEffect, useState, useCallback} from 'react';
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
   onSnapshot,
   query,
+  setDoc,
   where,
 } from '@react-native-firebase/firestore';
 
@@ -53,9 +53,12 @@ const useMessages = (workerID?: string) => {
 
   const onNew = useCallback(async (mess: TMessage) => {
     setLoading(true);
-    const docRef = await addDoc(collection(db, 'messages'), mess);
-    setMessages(prev => [{...mess, id: docRef.id}, ...prev]);
-    setLoading(false);
+    const {id, ...data} = mess;
+    try {
+      await setDoc(doc(db, 'messages', id), data);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   return {messages, onDelete, onNew, loading};

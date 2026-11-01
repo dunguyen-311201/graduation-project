@@ -20,12 +20,13 @@ const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Loads the users/{uid} profile once the auth user has finished sign-up
-  // (has a displayName). The namespaced onUserChanged listener no longer
-  // exists in the modular API, so this runs after sign-in and profile updates.
+  // Loads the users/{uid} profile, which only exists once sign-up has finished.
+  // Accounts made in the Firebase console have no displayName, so that is not
+  // checked. The namespaced onUserChanged listener no longer exists in the
+  // modular API, so this runs after sign-in and profile updates.
   const loadProfile = useCallback(async (user: AuthUser | null) => {
     try {
-      if (user && user.displayName) {
+      if (user) {
         const data = (await getDoc(doc(db, 'users', user.uid))).data() as
           | TUser
           | undefined;
@@ -119,25 +120,33 @@ const useAuth = () => {
     setLoading(false);
   }, [loadProfile]);
 
-  const signIn = useCallback(async (id: string) => {
-    setLoading(true);
-    try {
-      const token = await getToken(messaging);
-      const ref = doc(db, 'users', id);
-      const data = (await getDoc(ref)).data();
+  const signIn = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      let hasProfile = false;
+      try {
+        // A device without a push token can still sign in.
+        const token = await getToken(messaging).catch(() => null);
+        const ref = doc(db, 'users', id);
+        const data = (await getDoc(ref)).data();
 
-      if (data) {
-        await updateDoc(ref, {
-          token,
-          lastLogin: Date.now(),
-          ...(data.role === ERole.WORKER &&
-            data.status === 'unavailable' &&
-            !data.disable && {status: 'free'}),
-        });
-      }
-    } catch (error) {}
-    setLoading(false);
-  }, []);
+        if (data) {
+          hasProfile = true;
+          await updateDoc(ref, {
+            ...(token && {token}),
+            lastLogin: Date.now(),
+            ...(data.role === ERole.WORKER &&
+              data.status === 'unavailable' &&
+              !data.disable && {status: 'free'}),
+          });
+          await loadProfile(auth.currentUser);
+        }
+      } catch (error) {}
+      setLoading(false);
+      return hasProfile;
+    },
+    [loadProfile],
+  );
 
   const updateProfile = useCallback(
     async (update: TUser) => {

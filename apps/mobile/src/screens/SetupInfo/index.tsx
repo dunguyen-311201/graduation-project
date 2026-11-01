@@ -106,10 +106,14 @@ const SetupInfoScreen = () => {
 
   return (
     <ScreenBase
-      title="Setup Infomation"
+      title="Set up your profile"
       onNext={handleNext}
       loading={loading}
-      disableNext={false}>
+      disableNext={
+        !data?.firstName?.trim() ||
+        !data?.lastName?.trim() ||
+        (isCenter && !data?.citizenIdentification?.trim())
+      }>
       <View style={styles.content}>
         <CustomInput
           field={EUser.first}
@@ -131,7 +135,7 @@ const SetupInfoScreen = () => {
         />
 
         <CustomSwitch
-          title="I am Center Rescue"
+          title="I am a rescue center"
           value={isCenter}
           onChange={handleChangeSwitch}
         />
@@ -141,7 +145,7 @@ const SetupInfoScreen = () => {
             field={EUser.citizenIdentification}
             value={data?.citizenIdentification || ''}
             onChangeText={handleChangeInput}
-            title="CitizenIdentification"
+            title="Citizen ID"
             inputMode="numeric"
             ref={inputcitizenRef}
             onEndEditing={handleEndEditing}

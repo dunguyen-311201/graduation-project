@@ -14,8 +14,8 @@ import {NewIcon} from '@theme';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 import {TMessage} from '@types';
-import {isFreeUser} from '@utils';
-import {useMessages} from '@hooks';
+import {isFreeUser} from '@features/auth';
+import {useMessages} from '@features/rescue';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 
@@ -87,13 +87,14 @@ const Messages = () => {
           />
         ) : (
           <View style={styles.content}>
-            <EmptyListComponent />
+            <EmptyListComponent text="No rescue requests yet" />
           </View>
         )}
         {currentUser?.role === 'user' && (
           <CustomButton
             icon={NewIcon}
             type="secondary"
+            accessibilityLabel="New rescue request"
             customStyle={styles.btnNew}
             onPress={handleSendRescue}
           />

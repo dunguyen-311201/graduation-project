@@ -22,6 +22,8 @@ import type {TextareaRef} from '../../components/common/Textarea';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 
 import {Context} from '@context';
+import {collection, doc} from '@react-native-firebase/firestore';
+import {db} from '@services';
 import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
@@ -34,6 +36,9 @@ type FormData = {
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.SEND_DISTRESS_SIGNAL>;
 
+// Firestore never rejects a write while offline, it only queues it.
+const SEND_TIMEOUT_MS = 15000;
+
 const SendDistreeSignal = () => {
   const {reset} =
     useNavigation<RootScreenNavigationProps<EScreen.SEND_DISTRESS_SIGNAL>>();
@@ -41,9 +46,11 @@ const SendDistreeSignal = () => {
   const {onNew} = useRoute<ConfirmRoute>().params || {};
 
   const {currentUser} = useContext(Context);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string>();
 
   const textreaeRef = useRef<TextareaRef>(null);
+  // Fixed per form, so sending again after a timeout cannot create a duplicate.
+  const requestId = useRef(doc(collection(db, 'messages')).id);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<FormData>({
@@ -53,11 +60,11 @@ const SendDistreeSignal = () => {
   });
 
   useEffect(() => {
-    currentUser?.role === ERole.WORKER
-      ? requestLocationPermission(1)
-      : requestLocationPermission();
-
     const setup = async () => {
+      await (currentUser?.role === ERole.WORKER
+        ? requestLocationPermission(1)
+        : requestLocationPermission());
+
       const cache = await getAsyncStorage<Location>(CURRENT_LOCATION);
       if (cache) {
         setMessage(prev => ({...prev, location: cache}));
@@ -68,26 +75,41 @@ const SendDistreeSignal = () => {
   }, [currentUser]);
 
   const sendSignal = useCallback(async () => {
-    if (currentUser) {
+    if (!message.location) {
+      setError('Please choose your location so the rescue team can find you.');
+      return;
+    }
+
+    if (currentUser && onNew) {
       setLoading(true);
+      setError(undefined);
 
       try {
         const mess = {
           ...message,
+          id: requestId.current,
           status: MESSAGE_PENDING,
           time: Date.now(),
           userID: currentUser.id,
         };
 
+        await Promise.race([
+          onNew(mess),
+          new Promise((_, reject) =>
+            setTimeout(() => reject('timeout'), SEND_TIMEOUT_MS),
+          ),
+        ]);
+
         reset({routes: [{name: EScreen.MESSAGES}], index: 0});
-        onNew && (await onNew(mess));
       } catch (_error: any) {
-        setError(_error);
+        setError(
+          'Your request was not confirmed. Check your connection and send again, or call 112 if it is urgent.',
+        );
       }
 
       setLoading(false);
     }
-  }, [message, currentUser]);
+  }, [message, currentUser, onNew]);
 
   const handleChangeText = useCallback((value: string, field?: string) => {
     if (field) {
@@ -103,7 +125,8 @@ const SendDistreeSignal = () => {
     <ScreenBase
       loading={loading}
       onNext={sendSignal}
-      title="You have to connect to the support service">
+      nextTitle="Send request"
+      title="Request rescue">
       <View style={styles.mapField}>
         <CustomText text="Location" type="text_medium_16" />
         <SearchInput
@@ -130,7 +153,7 @@ const SendDistreeSignal = () => {
         field="description"
         onChangeText={handleChangeText}
       />
-      {error && <Error message="Please check request!" />}
+      {error && <Error message={error} />}
     </ScreenBase>
   );
 };

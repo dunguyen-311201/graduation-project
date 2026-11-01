@@ -96,7 +96,7 @@ const SettingsScreen = () => {
     <ScreenBase
       onBack={goBack}
       loading={loading}
-      title="Setting"
+      title="Settings"
       flexDirection="row"
       onNext={handleNext}
       nextTitle="Update">

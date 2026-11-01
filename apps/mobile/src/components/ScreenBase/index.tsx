@@ -48,13 +48,13 @@ const ScreenBase = ({
   }, []);
 
   return (
-    <TouchableWithoutFeedback onPress={handleTouchOutside}>
+    <TouchableWithoutFeedback onPress={handleTouchOutside} accessible={false}>
       <View
         style={[
           styles.container,
-          {paddingHorizontal: padding || 32},
+          {paddingHorizontal: padding || 24},
           {
-            ...(onBack && {paddingTop: 36, paddingBottom: 31}),
+            ...(onBack && {paddingTop: 24}),
 
             // ...(onBack && styles.header),
           },
@@ -82,8 +82,8 @@ const ScreenBase = ({
           <View
             style={[
               customStyle,
-              styles.container,
-              {...(onBack && {paddingTop: 20})},
+              styles.keyboard,
+              {...(title && {paddingTop: 20})},
             ]}>
             {children}
           </View>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BACKGROUND_COLOR,
-    paddingBottom: 62,
+    paddingBottom: 24,
   },
   keyboard: {
     flex: 1,

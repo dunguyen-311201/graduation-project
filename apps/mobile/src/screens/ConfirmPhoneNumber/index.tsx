@@ -5,6 +5,7 @@ import {
   onAuthStateChanged as onAuthChanged,
   PhoneAuthProvider,
   signInWithCredential,
+  signInWithPhoneNumber,
 } from '@react-native-firebase/auth';
 import type {User} from '@react-native-firebase/auth';
 
@@ -13,23 +14,56 @@ import {Context} from '@context';
 import {EScreen} from '@enums';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
-import {ScreenBase} from '@components';
+import {CustomButton, ScreenBase} from '@components';
 import {doc, getDoc} from '@react-native-firebase/firestore';
 import {auth, db} from '@services';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
+const RESEND_SECONDS = 60;
+
 const ConfirmPhoneNumberScreen = () => {
   const {navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
-  const {phone, verificationId} = useRoute<ConfirmRoute>().params || {};
+  const {phone, verificationId: firstVerificationId} =
+    useRoute<ConfirmRoute>().params || {};
 
+  const [verificationId, setVerificationId] = useState(firstVerificationId);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [resendIn, setResendIn] = useState(RESEND_SECONDS);
 
   const {signIn} = useContext(Context);
+
+  useEffect(() => {
+    if (resendIn <= 0) {
+      return;
+    }
+    const timeId = setTimeout(() => setResendIn(prev => prev - 1), 1000);
+    return () => clearTimeout(timeId);
+  }, [resendIn]);
+
+  const handleChangeCode = useCallback((value: string) => {
+    setCode(value);
+    setError(undefined);
+  }, []);
+
+  const handleResend = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithPhoneNumber(auth, phone);
+      if (result.verificationId) {
+        setVerificationId(result.verificationId);
+        setResendIn(RESEND_SECONDS);
+        setError(undefined);
+      }
+    } catch (err) {
+      setError('Could not send a new code. Please try again later.');
+    }
+    setLoading(false);
+  }, [phone]);
 
   const onAuthStateChanged = useCallback(async (user: User | null) => {
     try {
@@ -43,7 +77,9 @@ const ConfirmPhoneNumberScreen = () => {
       }
 
       setLoading(false);
-    } catch (err) {}
+    } catch (err) {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -78,16 +114,23 @@ const ConfirmPhoneNumberScreen = () => {
       setError('Please check your sms credentials and try again!');
     }
     setLoading(false);
-  }, [code]);
+  }, [code, verificationId]);
 
   return (
     <ScreenBase
       loading={loading}
       onBack={goBack}
       title={'Enter The 6-Digit Code At\n' + phone}
-      onNext={handleNext}>
+      onNext={handleNext}
+      disableNext={code.length !== 6}>
       <View style={styles.content}>
-        <ComfirmInput code={code} onChange={setCode} error={error} />
+        <ComfirmInput onChange={handleChangeCode} error={error} />
+        <CustomButton
+          type="secondary"
+          label={resendIn > 0 ? `Resend code in ${resendIn}s` : 'Resend code'}
+          disabled={resendIn > 0}
+          onPress={handleResend}
+        />
       </View>
     </ScreenBase>
   );
@@ -98,5 +141,6 @@ export default ConfirmPhoneNumberScreen;
 const styles = StyleSheet.create({
   content: {
     marginTop: 20,
+    rowGap: 16,
   },
 });

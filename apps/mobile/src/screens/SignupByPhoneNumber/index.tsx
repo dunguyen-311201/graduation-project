@@ -1,4 +1,4 @@
-import {BackHandler, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {CustomButton, ScreenBase} from '@components';
 import React, {useCallback, useEffect, useState} from 'react';
 
@@ -31,10 +31,7 @@ const SignupByPhoneNumberScreen = () => {
     try {
       setLoading(true);
 
-      const result = await signInWithPhoneNumber(
-        auth,
-        phone.split(' ').join(''),
-      );
+      const result = await signInWithPhoneNumber(auth, phone);
 
       if (result.verificationId) {
         navigate(EScreen.CONFIRM_PHONE_NUMBER, {
@@ -42,8 +39,14 @@ const SignupByPhoneNumberScreen = () => {
           verificationId: result.verificationId,
         });
       }
-    } catch (err) {
-      setError('Please verify your phone number!');
+    } catch (err: any) {
+      if (err?.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please try again later.');
+      } else if (err?.code === 'auth/network-request-failed') {
+        setError('No connection. Check your network and try again.');
+      } else {
+        setError('This phone number could not be verified. Please check it.');
+      }
     }
     setLoading(false);
   }, [phone]);
@@ -54,6 +57,7 @@ const SignupByPhoneNumberScreen = () => {
 
   const handleChangePhone = useCallback((value: string) => {
     setPhone(value);
+    setError(undefined);
   }, []);
 
   return (
@@ -61,13 +65,12 @@ const SignupByPhoneNumberScreen = () => {
       title="Enter your phone number"
       onNext={handleNext}
       loading={loading}
-      disableNext={phone.length !== 12}
-      onBack={() => BackHandler.exitApp()}>
+      disableNext={!phone}>
       <View style={styles.container}>
         <PhoneInput onEndEditing={handleChangePhone} errorMessage={error} />
 
         <CustomButton
-          label="Or connect with social"
+          label="Other sign-in options"
           type="secondary"
           icon={ArrowRightBlueIcon}
           onPress={handleNavigateSocial}

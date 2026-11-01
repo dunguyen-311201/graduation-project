@@ -46,8 +46,9 @@ export default ({config}: ConfigContext): ExpoConfig => ({
     '@react-native-firebase/messaging',
     [
       'expo-build-properties',
-      // React Native Firebase needs static frameworks on iOS.
-      {ios: {useFrameworks: 'static'}},
+      // React Native Firebase needs static frameworks on iOS. firebase-auth 25
+      // is compiled with Kotlin metadata 2.4, which Kotlin 2.2 cannot read.
+      {ios: {useFrameworks: 'static'}, android: {kotlinVersion: '2.3.20'}},
     ],
     [
       'expo-location',

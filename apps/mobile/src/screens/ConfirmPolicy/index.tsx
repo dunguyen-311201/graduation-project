@@ -1,10 +1,10 @@
 import {CustomText, ScreenBase} from '@components';
-import {Image, StyleSheet, View} from 'react-native';
-import React, {useCallback, useContext, useEffect} from 'react';
+import {Image, Pressable, StyleSheet, View} from 'react-native';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
 import {EScreen} from '@enums';
-import {ProfileIcon} from '@theme';
+import {LIGHT_BLUE_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 
@@ -12,6 +12,7 @@ const ConfirmPolicyScreen = () => {
   const {setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
   const {signUp, loading} = useContext(Context);
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     setOptions({headerShown: false});
@@ -22,38 +23,41 @@ const ConfirmPolicyScreen = () => {
   }, []);
 
   return (
-    <ScreenBase onNext={handleNext} loading={loading}>
+    <ScreenBase
+      onNext={handleNext}
+      nextTitle="Agree and continue"
+      disableNext={!agreed}
+      loading={loading}>
       <View style={styles.content}>
         <View style={styles.boxProfile}>
           <Image source={ProfileIcon} />
         </View>
 
-        <CustomText
-          customStyle={styles.title}
-          text={
-            "By tapping the arrow below, you agree to SOS's Terms of Use and acknowledge that you have read the Privacy Policy"
-          }
-          type="text_regular_20"
-        />
-
-        <CustomText
-          customStyle={styles.desc}
-          text={
-            'Check the box to indicate that you are atleast 18 years of age, agree to the'
-          }
-          type="text_medium_14">
+        <Pressable
+          style={styles.agree}
+          onPress={() => setAgreed(prev => !prev)}
+          accessibilityRole="checkbox"
+          accessibilityState={{checked: agreed}}>
+          <View style={[styles.checkbox, agreed && styles.checked]}>
+            {agreed && <CustomText text="✓" type="text_medium_14" />}
+          </View>
           <CustomText
-            text={' Terms & Conditions '}
-            type="text_medium_14"
-            color="blue"
-          />
-          {'and acknowledge the '}
-          <CustomText
-            text={' Privacy Policy.'}
-            type="text_medium_14"
-            color="blue"
-          />
-        </CustomText>
+            customStyle={styles.desc}
+            text="I am at least 18 years old, agree to the"
+            type="text_medium_16">
+            <CustomText
+              text=" Terms & Conditions "
+              type="text_medium_16"
+              color="blue"
+            />
+            {'and acknowledge the'}
+            <CustomText
+              text=" Privacy Policy."
+              type="text_medium_16"
+              color="blue"
+            />
+          </CustomText>
+        </Pressable>
       </View>
     </ScreenBase>
   );
@@ -75,14 +79,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginTop: 122,
+    marginTop: 64,
   },
-  title: {
-    marginTop: 65,
-  },
-  desc: {marginTop: 141},
-  wrapText: {
+  agree: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    columnGap: 12,
+    marginTop: 48,
   },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: WHITE_COLOR,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checked: {
+    backgroundColor: LIGHT_BLUE_COLOR,
+    borderColor: LIGHT_BLUE_COLOR,
+  },
+  desc: {flex: 1},
 });

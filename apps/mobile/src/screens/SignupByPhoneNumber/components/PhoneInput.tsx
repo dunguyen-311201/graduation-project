@@ -20,39 +20,50 @@ type PhoneInputProps = {
   onEndEditing: (value: string) => void;
 };
 
+const MIN_DIGITS = 9;
+
+const maxDigits = (code?: string) => (code === '+84' ? 9 : 10);
+
 const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
   const [isVisible, setIsvisible] = useState(false);
   const [phone, setPhone] = useState('');
   const refInput = useRef<TextInputInstance>(null);
   const [national, setNational] = useState<Nation | undefined>(PHONES.at(0));
 
-  const handleSelectNation = useCallback((code: string) => {
-    const _nation = PHONES.find(item => item.code === code);
-    if (_nation) {
-      setNational(_nation);
-      setIsvisible(false);
-    }
-  }, []);
+  const updatePhone = useCallback(
+    (value: string, nation?: Nation) => {
+      // People usually type the national 0 prefix, which E.164 leaves out.
+      const digits = value
+        .replace(/\D/g, '')
+        .replace(/^0+/, '')
+        .slice(0, maxDigits(nation?.code));
 
-  const handleChangePhone = useCallback((value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    let formatted;
+      setPhone(digits.replace(/(\d{3})(?=\d)/g, '$1 '));
+      onEndEditing(digits.length >= MIN_DIGITS ? nation?.code + digits : '');
 
-    if (value.length < 6) {
-      formatted = cleaned.replace(/(\d{3})(\d{1})/, '$1 $2');
-    } else if (value.length === 6) {
-      formatted = cleaned.replace(/(\d{3})(\d{3})/, '$1 $2');
-    } else {
-      formatted = cleaned.replace(/(\d{3})(\d{3})(\d{1})/, '$1 $2 $3');
-    }
+      if (digits.length === maxDigits(nation?.code)) {
+        refInput.current?.blur();
+      }
+    },
+    [onEndEditing],
+  );
 
-    if (formatted.length === 11) {
-      refInput.current?.blur();
-      onEndEditing(national?.code + cleaned);
-    }
+  const handleSelectNation = useCallback(
+    (code: string) => {
+      const _nation = PHONES.find(item => item.code === code);
+      if (_nation) {
+        setNational(_nation);
+        setIsvisible(false);
+        updatePhone(phone, _nation);
+      }
+    },
+    [phone, updatePhone],
+  );
 
-    setPhone(formatted);
-  }, []);
+  const handleChangePhone = useCallback(
+    (value: string) => updatePhone(value, national),
+    [national, updatePhone],
+  );
 
   const _renderItem = useCallback(
     ({item}: {item: Nation}) => (
@@ -81,7 +92,11 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
           />
         )}
         <View style={styles.nation}>
-          <Pressable style={styles.flagSelect} onPress={handleVisibleSelect}>
+          <Pressable
+            style={styles.flagSelect}
+            onPress={handleVisibleSelect}
+            accessibilityRole="button"
+            accessibilityLabel={`Country code ${national?.name}`}>
             <Image source={{uri: national?.url}} style={styles.flag} />
             <Image source={DropDownIcon} style={styles.dropDown} />
           </Pressable>
@@ -92,10 +107,12 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
             style={styles.input}
             value={phone}
             onChangeText={handleChangePhone}
-            inputMode="numeric"
-            maxLength={11}
+            inputMode="tel"
+            autoComplete="tel-national"
+            accessibilityLabel="Phone number"
+            placeholder="912 345 678"
+            placeholderTextColor={DARK_GRAY_COLOR}
             ref={refInput}
-            selectTextOnFocus
           />
           {errorMessage && (
             <CustomText text={errorMessage} color="red" type="text_medium_14" />
@@ -123,7 +140,7 @@ const styles = StyleSheet.create({
   input: {
     borderBottomWidth: 1,
     borderBottomColor: WHITE_COLOR,
-    color: DARK_GRAY_COLOR,
+    color: WHITE_COLOR,
     fontSize: 24,
 
     padding: 0,

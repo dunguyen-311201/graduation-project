@@ -5,7 +5,7 @@ import {EScreen} from '@enums';
 import NotifyCard from './NotifyCard';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
-import {useNotification} from '@hooks';
+import {useNotification} from '@features/notification';
 
 const Notification = () => {
   const hideAnim = useRef(new Animated.Value(0)).current;

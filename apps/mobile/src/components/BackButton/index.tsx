@@ -14,6 +14,7 @@ const BackButton = ({onPress}: Iconprops) => {
       <CustomButton
         icon={BackIcon}
         type="secondary"
+        accessibilityLabel="Go back"
         customStyle={styles.button}
         onPress={onPress}
       />

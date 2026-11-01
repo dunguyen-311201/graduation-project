@@ -17,9 +17,9 @@ import React, {useCallback, useState} from 'react';
 import {EScreen} from '@enums';
 import {RootScreenNavigationProps} from '@navigation';
 import {TNotification} from '@types';
-import {rejectAssign} from '@utils';
+import {rejectAssign} from '@features/rescue';
 import {useNavigation} from '@react-navigation/native';
-import {useNotifications} from '@hooks';
+import {useNotifications} from '@features/notification';
 
 const Notification = () => {
   const {notifications, loading, onDelete} = useNotifications();
@@ -42,7 +42,7 @@ const Notification = () => {
     const {tID, id} = notification?.data || {};
     const params = {
       id,
-      ...(tID && {onRject: async () => await rejectAssign(tID)}),
+      ...(tID && {onReject: async () => await rejectAssign(tID)}),
     };
     navigate(EScreen.DETAIL_MESSAGE, params);
     setNotification(undefined);
@@ -83,7 +83,7 @@ const Notification = () => {
             ItemSeparatorComponent={ItemSeparatorComponent}
           />
         ) : (
-          <EmptyListComponent />
+          <EmptyListComponent text="No notifications yet" />
         )}
       </View>
       <Modal
