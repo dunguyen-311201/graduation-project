@@ -20,7 +20,7 @@ Port `server/functions` to `services/api` in vertical slices, using the LLD sche
 
 The app writes directly to Firestore and all coordination lives in triggers. Without them the SOS form still sends, but nobody receives the request.
 
-**Done in `services/api`:** Firebase ID token guard, error filter, `/health/live`, Dockerfile, `POST /v1/responders`, `PUT /v1/me/fcm-token`. The API runs at `https://sos-api-cp2x.onrender.com`. The `Scheduler` port, BullMQ adapter and `/health/ready` are pushed in `abaf1ab4`, but that deploy has not gone live yet.
+**Done in `services/api`:** Firebase ID token guard, error filter, `/health/live`, Dockerfile, `POST /v1/responders`, `PUT /v1/me/fcm-token`. The API runs at `https://sos-api-u0lh.onrender.com`. The `Scheduler` port, BullMQ adapter and `/health/ready` are live, with Redis on the same Render account.
 
 **Not done:** BullMQ worker, FCM adapter, `packages/domain`, and every command of the rescue flow.
 

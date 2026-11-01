@@ -61,3 +61,15 @@ export interface Scheduler {
   ping(): Promise<void>;
 }
 export const SCHEDULER = Symbol("SCHEDULER");
+
+export interface PushMessage {
+  title: string;
+  body: string;
+  data: Record<string, string>;
+}
+
+export interface Notifier {
+  /** Best effort: never throws, so a push failure cannot undo a committed command. */
+  push(uids: string[], message: PushMessage): Promise<void>;
+}
+export const NOTIFIER = Symbol("NOTIFIER");

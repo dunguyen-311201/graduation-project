@@ -2,6 +2,8 @@ import { ConflictError } from "../src/application/errors.js";
 import type {
   IdentityProvider,
   LegacyUserRecord,
+  Notifier,
+  PushMessage,
   Scheduler,
   TimerJob,
   UserDirectory,
@@ -77,5 +79,13 @@ export class FakeScheduler implements Scheduler {
 
   async ping() {
     if (!this.healthy) throw new Error("redis down");
+  }
+}
+
+export class FakeNotifier implements Notifier {
+  sent: { uids: string[]; message: PushMessage }[] = [];
+
+  async push(uids: string[], message: PushMessage) {
+    this.sent.push({ uids, message });
   }
 }
