@@ -1,4 +1,4 @@
-import {DropDownIcon, WHITE_COLOR, tokens} from '@theme';
+import {DropDownIcon, tokens} from '@theme';
 import {
   FlatList,
   Image,
@@ -14,6 +14,7 @@ import {CustomText} from '@components';
 import {Nation} from '@types';
 import NationSelect from './NationSelect';
 import {PHONES} from '@constants';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 type PhoneInputProps = {
   errorMessage?: string;
@@ -125,7 +126,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
 
 export default memo(PhoneInput);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     rowGap: 10,
     position: 'relative',
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {flex: 6},
   input: {
-    minHeight: tokens.TOUCH + 4,
+    minHeight: tokens.TOUCH,
     paddingHorizontal: tokens.space.lg,
     borderRadius: tokens.radius.card,
     borderWidth: 1,
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     fontSize: tokens.type.body.fontSize,
   },
   nationList: {
-    backgroundColor: WHITE_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     borderRadius: 10,
     position: 'absolute',
     top: 50,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     columnGap: 8,
-    minHeight: tokens.TOUCH + 4,
+    minHeight: tokens.TOUCH,
     marginRight: tokens.space.sm,
   },
   flagSelect: {
@@ -174,6 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   dropDown: {
+    tintColor: themeColors.text,
     marginLeft: 5,
   },
-});
+}));

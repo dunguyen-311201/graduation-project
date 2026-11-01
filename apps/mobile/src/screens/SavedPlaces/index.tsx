@@ -8,6 +8,7 @@ import {CURRENT_LOCATION} from '@constants';
 import {Location} from '@types';
 import {tokens} from '@theme';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -116,7 +117,7 @@ const SavedPlacesScreen = () => {
 
 export default SavedPlacesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   body: {padding: space.xl, rowGap: space.lg},
   card: {
@@ -128,4 +129,4 @@ const styles = StyleSheet.create({
   raised: {zIndex: 4},
   search: {height: 56, zIndex: 4},
   actions: {flexDirection: 'row', columnGap: space.sm},
-});
+}));

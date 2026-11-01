@@ -3,6 +3,7 @@ import React, {memo} from 'react';
 
 import {colors} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 type AvatarProps = {
   name?: string | null;
@@ -48,13 +49,13 @@ const Avatar = ({name, uri, size = 44}: AvatarProps) => {
 
 export default memo(Avatar);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   base: {backgroundColor: colors.surfaceRaised},
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(83, 90, 255, 0.16)',
+    backgroundColor: colors.primarySoft,
     borderWidth: 1,
-    borderColor: 'rgba(83, 90, 255, 0.35)',
+    borderColor: colors.primary,
   },
-});
+}));

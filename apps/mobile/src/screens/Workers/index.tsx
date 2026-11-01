@@ -27,6 +27,7 @@ import {WorkerItem} from './components';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {isApprovedCenter} from '@features/auth';
 import {useWorker} from '@features/rescue';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -201,7 +202,7 @@ const Worker = () => {
 
 export default Worker;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {marginTop: 20, flex: 1, rowGap: space.md},
   list: {flexGrow: 1},
   separator: {height: space.md},
@@ -223,4 +224,4 @@ const styles = StyleSheet.create({
     marginBottom: space.sm,
   },
   name: {textTransform: 'capitalize'},
-});
+}));

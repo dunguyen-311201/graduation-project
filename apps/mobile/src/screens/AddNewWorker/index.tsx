@@ -10,6 +10,7 @@ import type {ApiError, CreateResponderBody} from '@sos/contracts';
 import {Field, validate} from '@utils';
 import {CustomInput, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
+import {themedStyles} from '../../theme/tokens';
 
 type TWorker = {
   id?: string;
@@ -186,7 +187,7 @@ const AddNewWorker = () => {
 
 export default AddNewWorker;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   btnAdd: {
     position: 'absolute',
     bottom: 0,
@@ -196,4 +197,4 @@ const styles = StyleSheet.create({
     rowGap: 20,
     marginTop: 20,
   },
-});
+}));

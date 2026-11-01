@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import React, {memo, useCallback} from 'react';
 
-import {BACKGROUND_COLOR, tokens} from '@theme';
+import {tokens} from '@theme';
 import Txt from '../ui/Txt';
 import AppButton from '../ui/AppButton';
 import BackButton from '../BackButton';
 import Loading from '../Loading';
 import Notification from '../Notification';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 type ScreenBaseProps = {
   title?: string;
@@ -105,10 +106,10 @@ const ScreenBase = ({
 
 export default memo(ScreenBase);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_COLOR,
+    backgroundColor: themeColors.bg,
     paddingBottom: 24,
   },
   keyboard: {
@@ -124,4 +125,4 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 16,
   },
-});
+}));

@@ -4,9 +4,10 @@ import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {Context} from '@context';
 import {EScreen} from '@enums';
-import {LIGHT_BLUE_COLOR, ProfileIcon, WHITE_COLOR} from '@theme';
+import {ProfileIcon} from '@theme';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 const ConfirmPolicyScreen = () => {
   const {setOptions, navigate} =
@@ -67,7 +68,7 @@ const ConfirmPolicyScreen = () => {
 
 export default ConfirmPolicyScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   content: {
     width: '100%',
     alignContent: 'center',
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     height: 138,
     width: 138,
     borderRadius: 69,
-    backgroundColor: '#C4C4C4',
+    backgroundColor: themeColors.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
@@ -94,13 +95,13 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: WHITE_COLOR,
+    borderColor: themeColors.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checked: {
-    backgroundColor: LIGHT_BLUE_COLOR,
-    borderColor: LIGHT_BLUE_COLOR,
+    backgroundColor: themeColors.primary,
+    borderColor: themeColors.primary,
   },
   desc: {flex: 1},
-});
+}));

@@ -2,7 +2,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {FlatList, Pressable, StyleSheet, View} from 'react-native';
 
 import CustomText from '../Text';
-import {BLACK_COLOR, WHITE_COLOR} from '@theme';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 export type TDataDropDown = {id: string; value: string};
 
@@ -82,7 +82,7 @@ const DropDown = ({data, onSelect, value, title}: DropDownProps) => {
 
 export default DropDown;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   dropDown: {
     marginTop: 10,
     height: 72,
@@ -94,13 +94,13 @@ const styles = StyleSheet.create({
     zIndex: 2,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: WHITE_COLOR,
+    borderColor: themeColors.text,
     left: 0,
     bottom: 0,
     right: 0,
   },
   list: {
-    backgroundColor: BLACK_COLOR,
+    backgroundColor: themeColors.bg,
     overflow: 'hidden',
     position: 'absolute',
     zIndex: 3,
@@ -114,4 +114,4 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     height: 40,
   },
-});
+}));

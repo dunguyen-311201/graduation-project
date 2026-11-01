@@ -1,6 +1,6 @@
 import {
   AppButton,
-  BackButton,
+  ScreenHeader,
   ChipGroup,
   Notification,
   SearchInput,
@@ -30,6 +30,7 @@ import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 import {tokens} from '@theme';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -218,10 +219,7 @@ const SendDistressSignal = () => {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Notification />
-        <View style={styles.header}>
-          <BackButton onPress={goBack} />
-          <Txt variant="title">Request rescue</Txt>
-        </View>
+        <ScreenHeader title="Request rescue" onBack={goBack} />
 
         {/* Places autocomplete is a list, so it cannot sit inside a ScrollView. */}
         {editingLocation ? (
@@ -263,7 +261,7 @@ const SendDistressSignal = () => {
 
 export default memo(SendDistressSignal);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   header: {
     paddingHorizontal: space.xl,
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
     rowGap: space.md,
   },
   flex1: {flex: 1},
-  body: {paddingHorizontal: space.xl, paddingVertical: space.xl, rowGap: space.xl},
+  body: {paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl, rowGap: space.lg},
   section: {rowGap: space.sm},
   card: {
     flexDirection: 'row',
@@ -289,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     color: colors.text,
-    fontSize: 17,
+    fontSize: tokens.type.body.fontSize,
     textAlignVertical: 'top',
   },
   footer: {
@@ -301,4 +299,4 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   error: {rowGap: space.sm},
-});
+}));

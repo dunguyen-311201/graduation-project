@@ -2,6 +2,7 @@ import React, {memo} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {CustomText} from '../common';
+import {themedStyles} from '../../theme/tokens';
 
 const Error = ({message}: {message: string}) => {
   return (
@@ -13,7 +14,7 @@ const Error = ({message}: {message: string}) => {
 
 export default memo(Error);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     position: 'absolute',
     zIndex: 2,
@@ -26,4 +27,4 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     alignItems: 'center',
   },
-});
+}));

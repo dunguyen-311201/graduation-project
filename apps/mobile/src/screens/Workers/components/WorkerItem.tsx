@@ -4,6 +4,7 @@ import {Avatar, Txt} from '@components';
 
 import {TUser} from '@types';
 import {tokens} from '@theme';
+import {themedStyles} from '../../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -60,7 +61,7 @@ const WorkerItem = ({
 
 export default memo(WorkerItem);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -74,4 +75,4 @@ const styles = StyleSheet.create({
   name: {textTransform: 'capitalize'},
   row: {flexDirection: 'row', alignItems: 'center', columnGap: 6},
   dot: {width: 8, height: 8, borderRadius: 4},
-});
+}));

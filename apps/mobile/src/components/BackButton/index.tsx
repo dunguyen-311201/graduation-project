@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 
 import {BackIcon} from '@theme';
 import {CustomButton} from '../common';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 type Iconprops = {
   onPress?: () => void;
@@ -13,6 +14,8 @@ const BackButton = ({onPress}: Iconprops) => {
     <>
       <CustomButton
         icon={BackIcon}
+        iconTint={themeColors.text}
+        iconSize={{width: 24, height: 24}}
         type="secondary"
         accessibilityLabel="Go back"
         customStyle={styles.button}
@@ -24,8 +27,8 @@ const BackButton = ({onPress}: Iconprops) => {
 
 export default memo(BackButton);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   button: {
-    // alignSelf: 'flex-start',
+    alignSelf: 'center',
   },
-});
+}));

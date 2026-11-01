@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import {ScreenHeader, Txt} from '@components';
 import {tokens} from '@theme';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -74,7 +75,7 @@ const PrivacyLegalScreen = () => {
 
 export default PrivacyLegalScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   body: {padding: space.xl, rowGap: space.lg},
   card: {
@@ -92,4 +93,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.textMuted,
   },
   flex: {flex: 1},
-});
+}));

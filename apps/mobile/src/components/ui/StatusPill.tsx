@@ -4,17 +4,20 @@ import {StyleSheet, View} from 'react-native';
 import {TStatus} from '@types';
 import {colors, radius, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
-const STYLE: Record<TStatus, {label: string; color: string}> = {
+// A function, so colors are read for the active theme.
+const STYLE = (): Record<TStatus, {label: string; color: string}> => ({
   pending: {label: 'Waiting for rescue', color: colors.warning},
   'in progress': {label: 'Rescue on the way', color: colors.primary},
   completed: {label: 'Completed', color: colors.success},
   expired: {label: 'Closed', color: colors.textMuted},
-};
+});
 
 // Status is always written out, never shown by colour or icon alone.
 const StatusPill = ({status}: {status: TStatus}) => {
-  const {label, color} = STYLE[status] ?? STYLE.expired;
+  const map = STYLE();
+  const {label, color} = map[status] ?? map.expired;
 
   return (
     <View style={[styles.pill, {borderColor: color}]}>
@@ -28,7 +31,7 @@ const StatusPill = ({status}: {status: TStatus}) => {
 
 export default memo(StatusPill);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -40,4 +43,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   dot: {width: 8, height: 8, borderRadius: 4},
-});
+}));

@@ -2,6 +2,7 @@ import {Image, Pressable, StyleSheet} from 'react-native';
 
 import {OptionIcon} from '@theme';
 import React from 'react';
+import {themedStyles} from '../../theme/tokens';
 
 type OptionsButtonProps = {
   onPress?: () => void;
@@ -17,9 +18,9 @@ const OptionsButton = ({onPress}: OptionsButtonProps) => {
 
 export default OptionsButton;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   OptionsButton: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}));

@@ -1,5 +1,6 @@
 import {ActivityIndicator, Modal, StyleSheet, View} from 'react-native';
 import React, {memo} from 'react';
+import {themedStyles} from '../../theme/tokens';
 
 const Loading = () => {
   return (
@@ -13,7 +14,7 @@ const Loading = () => {
 
 export default memo(Loading);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -21,4 +22,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   loadingImage: {width: 150, height: 150},
-});
+}));

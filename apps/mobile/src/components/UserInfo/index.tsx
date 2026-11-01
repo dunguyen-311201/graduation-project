@@ -13,6 +13,7 @@ import Avatar from '../ui/Avatar';
 import Txt from '../ui/Txt';
 import {TOUCH, colors, space} from '../../theme/tokens';
 import {useUsers} from '@features/auth';
+import {themedStyles} from '../../theme/tokens';
 
 type UserInfoProps = {
   id?: string;
@@ -85,7 +86,7 @@ const UserInfo = ({
 
 export default memo(UserInfo);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -104,4 +105,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   pressed: {backgroundColor: colors.border},
-});
+}));

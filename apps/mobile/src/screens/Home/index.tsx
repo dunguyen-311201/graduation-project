@@ -35,6 +35,7 @@ import {Location} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
 import {isFreeUser} from '@features/auth';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space} = tokens;
 
@@ -378,8 +379,8 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   mapPlaceholder: {backgroundColor: colors.surface},
   center: {alignItems: 'center', rowGap: space.md, paddingVertical: space.xl},
-});
+}));

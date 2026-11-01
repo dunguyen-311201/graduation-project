@@ -3,6 +3,7 @@ import {Pressable, StyleSheet, View} from 'react-native';
 
 import {TOUCH, colors, radius, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 type ChipGroupProps = {
   options: {value: string; label: string}[];
@@ -43,7 +44,7 @@ const ChipGroup = ({
 
 export default memo(ChipGroup);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   wrap: {flexDirection: 'row', flexWrap: 'wrap', gap: space.sm},
   chip: {
     minHeight: TOUCH - 8,
@@ -55,4 +56,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceRaised,
   },
   selected: {backgroundColor: colors.primary, borderColor: colors.primary},
-});
+}));

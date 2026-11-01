@@ -1,18 +1,11 @@
-import {
-  BLACK_COLOR,
-  DARK_GRAY_COLOR,
-  GRAY_COLOR,
-  LIGHT_BLUE_COLOR,
-  TEXT_COLOR,
-  WHITE_COLOR,
-  tokens,
-} from '@theme';
+import {tokens} from '@theme';
 import {StyleSheet} from 'react-native';
+import {colors as themeColors, themedStyles} from '../theme/tokens';
 
-const BaseStyles = StyleSheet.create({
+const BaseStyles = themedStyles(() => StyleSheet.create({
   text_default: {
     fontFamily: 'Roboto',
-    color: WHITE_COLOR,
+    color: themeColors.text,
     fontSize: 20,
     fontWeight: '500',
   },
@@ -47,28 +40,28 @@ const BaseStyles = StyleSheet.create({
     fontSize: 27,
     fontWeight: '400',
   },
-});
+}));
 
-const ColorStyles = StyleSheet.create({
+const ColorStyles = themedStyles(() => StyleSheet.create({
   dedault: {
-    color: TEXT_COLOR,
+    color: themeColors.text,
   },
   gray: {
-    color: GRAY_COLOR,
+    color: themeColors.border,
   },
   white: {
-    color: WHITE_COLOR,
+    color: themeColors.text,
   },
   black: {
-    color: BLACK_COLOR,
+    color: themeColors.bg,
   },
   light_blue: {
-    color: LIGHT_BLUE_COLOR,
+    color: themeColors.primary,
   },
   dark_gray: {
-    color: DARK_GRAY_COLOR,
+    color: themeColors.textMuted,
   },
-});
+}));
 
 export const Styles = {
   text_large_white: {
@@ -140,8 +133,8 @@ export const Styles = {
 const t = tokens.type;
 const c = tokens.colors;
 
-export const styles = StyleSheet.create({
-  text_large_64: {fontSize: 48, lineHeight: 56, fontWeight: '700', color: c.text},
+export const styles = themedStyles(() => StyleSheet.create({
+  text_large_64: {fontSize: 40, lineHeight: 48, fontWeight: '700', color: c.text},
   text_large_20: {...t.body, fontWeight: '600', color: c.text},
   text_xLarge: {...t.heading, color: c.text, textAlign: 'center'},
   text_medium_30: {...t.title, color: c.text},
@@ -153,11 +146,11 @@ export const styles = StyleSheet.create({
   text_medium_16: {...t.label, fontWeight: '400', color: c.textMuted},
   text_medium_14: {...t.caption, color: c.textMuted},
   text_medium_10: {...t.caption, color: c.textMuted},
-});
+}));
 
-export const colors = StyleSheet.create({
+export const colors = themedStyles(() => StyleSheet.create({
   blue: {color: c.primary},
   white: {color: c.text},
-  black: {color: BLACK_COLOR},
+  black: {color: themeColors.text},
   red: {color: c.sos},
-});
+}));

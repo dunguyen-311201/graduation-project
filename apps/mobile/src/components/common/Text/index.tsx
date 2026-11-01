@@ -1,8 +1,8 @@
 import React, {memo} from 'react';
 import {Text, TextStyle, StyleSheet, GestureResponderEvent} from 'react-native';
 
-import {WHITE_COLOR} from '@theme';
 import {colors, styles} from '@utils';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 type CustomTextProps = {
   text?: string;
@@ -44,13 +44,13 @@ const CustomText = ({
 
 export default memo(CustomText);
 
-const _styles = StyleSheet.create({
+const _styles = themedStyles(() => StyleSheet.create({
   text: {},
   border: {
-    borderColor: WHITE_COLOR,
+    borderColor: themeColors.text,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
-});
+}));

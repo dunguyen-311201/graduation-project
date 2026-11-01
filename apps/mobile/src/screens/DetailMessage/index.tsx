@@ -1,6 +1,6 @@
 import {
   AppButton,
-  BackButton,
+  ScreenHeader,
   EmptyListComponent,
   Loading,
   StatusPill,
@@ -25,6 +25,7 @@ import {useMessage, useWorker} from '@features/rescue';
 import {Context} from '@context';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -117,7 +118,8 @@ const DetailMessage = () => {
   }, [workerID]);
 
   const isDelete = useMemo(
-    () => message?.status === MESSAGE_PENDING || message?.status === 'expired',
+    // Only an open request can be cancelled; closed ones show no action.
+    () => message?.status === MESSAGE_PENDING,
     [message],
   );
 
@@ -156,10 +158,7 @@ const DetailMessage = () => {
   return (
     <View style={styles.container}>
       {loading && <Loading />}
-      <View style={styles.header}>
-        <BackButton onPress={goBack} />
-        <Txt variant="title">Request</Txt>
-      </View>
+      <ScreenHeader title="Request" onBack={goBack} />
       {message && currentUser ? (
         <>
           <ScrollView contentContainerStyle={styles.body}>
@@ -249,10 +248,10 @@ const DetailMessage = () => {
 
 export default DetailMessage;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   header: {paddingHorizontal: space.xl, paddingTop: space.lg, rowGap: space.md},
-  body: {padding: space.xl, rowGap: space.lg},
+  body: {paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl, rowGap: space.md},
   card: {
     padding: space.lg,
     rowGap: space.sm,
@@ -270,7 +269,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  optionOn: {borderColor: colors.primary, backgroundColor: 'rgba(83, 90, 255, 0.12)'},
+  optionOn: {borderColor: colors.primary, backgroundColor: colors.primarySoft},
   radio: {
     width: 20,
     height: 20,
@@ -288,4 +287,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));

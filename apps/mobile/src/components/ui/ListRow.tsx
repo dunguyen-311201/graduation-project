@@ -3,6 +3,7 @@ import React, {memo} from 'react';
 
 import {TOUCH, colors, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 type ListRowProps = {
   title: string;
@@ -41,7 +42,7 @@ const ListRow = ({title, subtitle, onPress, right, danger}: ListRowProps) => (
 
 export default memo(ListRow);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -52,4 +53,4 @@ const styles = StyleSheet.create({
   },
   pressed: {backgroundColor: colors.surfaceRaised},
   flex: {flex: 1, rowGap: 2},
-});
+}));

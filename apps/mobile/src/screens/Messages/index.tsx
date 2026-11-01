@@ -16,6 +16,7 @@ import {RootScreenNavigationProps} from '@navigation';
 import {TMessage} from '@types';
 import {isFreeUser} from '@features/auth';
 import {useMessages} from '@features/rescue';
+import {themedStyles} from '../../theme/tokens';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 
@@ -108,7 +109,7 @@ const Messages = () => {
 
 export default Messages;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -124,4 +125,4 @@ const styles = StyleSheet.create({
     right: 10,
     bottom: 10,
   },
-});
+}));

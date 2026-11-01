@@ -7,6 +7,7 @@ import {RootScreenNavigationProps} from '@navigation/index';
 import {TTask} from '@types';
 import {tokens} from '@theme';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -31,7 +32,7 @@ const TaskItem = ({task}: {task: TTask}) => {
 
 export default memo(TaskItem);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   card: {
     padding: space.lg,
     rowGap: space.sm,
@@ -39,4 +40,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   pressed: {backgroundColor: colors.surfaceRaised},
-});
+}));

@@ -20,14 +20,19 @@ import {
   SplashScreen,
   WorkerScreen,
 } from '@screens';
-import {BACKGROUND_COLOR, DARK_GRAY_COLOR, WHITE_COLOR} from '@theme';
+import {tokens} from '@theme';
 import {ERole, EScreen} from '@enums';
 import React, {useContext} from 'react';
 
 import {Context} from '@context';
 import MainTabs from './MainTabs';
 import {Location} from '@types';
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+  NavigationState,
+} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
 export type RootParamList = {
@@ -66,26 +71,46 @@ export type RootParamList = {
   [EScreen.PRIVACY_LEGAL]: undefined;
 };
 
+// Survives the remount that a theme change causes.
+let savedState: NavigationState | undefined;
+
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
   const {isAuthenticated, currentUser} = useContext(Context);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      initialState={savedState}
+      onStateChange={state => {
+        savedState = state;
+      }}
+      theme={{
+        ...(tokens.currentScheme() === 'dark' ? DarkTheme : DefaultTheme),
+        colors: {
+          ...(tokens.currentScheme() === 'dark' ? DarkTheme : DefaultTheme)
+            .colors,
+          primary: tokens.colors.primary,
+          background: tokens.colors.bg,
+          card: tokens.colors.surface,
+          text: tokens.colors.text,
+          border: tokens.colors.border,
+        },
+      }}>
       <Stack.Navigator
         initialRouteName={EScreen.SPLASH}
         screenOptions={{
           headerTitleStyle: {
-            color: WHITE_COLOR,
-            fontWeight: '500',
-            fontSize: 22,
+            color: tokens.colors.text,
+            fontWeight: '600',
+            fontSize: 17,
           },
-          headerTintColor: DARK_GRAY_COLOR,
+          headerTintColor: tokens.colors.text,
           title: '',
           headerStyle: {
-            backgroundColor: BACKGROUND_COLOR,
+            backgroundColor: tokens.colors.bg,
           },
+          cardStyle: {backgroundColor: tokens.colors.bg},
         }}>
         <Stack.Screen
           name={EScreen.SPLASH}

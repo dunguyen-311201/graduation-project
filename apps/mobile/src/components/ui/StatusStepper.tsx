@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 
 import {colors, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 // Mirrors the RescueRequest state machine in packages/domain.
 const STEPS = [
@@ -73,7 +74,7 @@ export default memo(StatusStepper);
 
 const DOT = 14;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   wrap: {paddingVertical: space.xs},
   row: {flexDirection: 'row', columnGap: space.md},
   rail: {alignItems: 'center', width: DOT + 6},
@@ -98,4 +99,4 @@ const styles = StyleSheet.create({
   lineDone: {backgroundColor: colors.primary},
   label: {paddingBottom: space.md},
   closed: {paddingVertical: space.sm},
-});
+}));

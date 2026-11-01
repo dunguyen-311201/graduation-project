@@ -8,7 +8,7 @@ import {
 import React, {memo} from 'react';
 
 import {CustomText} from '../common';
-import {LIGHT_BLUE_COLOR, WHITE_COLOR} from '@theme';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 export type CardProps = {
   title: string;
@@ -33,17 +33,17 @@ const Card = ({title, icon, onPress}: CardProps) => {
 
 export default memo(Card);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   card: {
     alignItems: 'center',
   },
   button: {
     paddingHorizontal: 10,
     paddingVertical: 10,
-    backgroundColor: WHITE_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     borderRadius: 5,
 
-    shadowColor: LIGHT_BLUE_COLOR,
+    shadowColor: themeColors.primary,
     shadowOffset: {
       height: -5,
       width: -5,
@@ -60,4 +60,4 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
-});
+}));

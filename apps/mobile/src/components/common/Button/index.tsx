@@ -14,6 +14,7 @@ import React, {memo} from 'react';
 import {EButton} from '@enums';
 import Txt from '../../ui/Txt';
 import {TOUCH, colors, radius, space} from '../../../theme/tokens';
+import {themedStyles} from '../../../theme/tokens';
 
 type ButtonProps = {
   label?: string;
@@ -26,6 +27,8 @@ type ButtonProps = {
   onPress?: () => void;
   disabled?: boolean;
   iconSize?: {height: number; width: number};
+  /** Tint for one-colour icons so they follow the theme. */
+  iconTint?: string;
   isLoading?: boolean;
   reverse?: boolean;
   accessibilityLabel?: string;
@@ -33,19 +36,20 @@ type ButtonProps = {
 
 // Same sizes as ui/AppButton: filled buttons are 52 high with a 15/600 label,
 // text buttons (secondary) keep a 48 touch target.
-const LABEL_COLOR: Record<keyof typeof EButton, string> = {
+const LABEL_COLOR = (): Record<keyof typeof EButton, string> => ({
   default: colors.onPrimary,
   primary: colors.onPrimary,
   outline: colors.text,
   notify: colors.onPrimary,
   secondary: colors.primary,
-};
+});
 
 const CustomButton = ({
   label = '',
   type = 'default',
   icon,
   iconSize,
+  iconTint,
   customStyle,
   onPress,
   children,
@@ -80,14 +84,17 @@ const CustomButton = ({
         label !== '' && (
           <Txt
             variant={type === 'notify' ? 'caption' : 'label'}
-            color={LABEL_COLOR[type]}>
+            color={LABEL_COLOR()[type]}>
             {label}
           </Txt>
         )
       )}
       {icon && (
         <View style={reverse && styles.reverseIcon}>
-          <Image source={icon} style={iconSize} />
+          <Image
+            source={icon}
+            style={[iconSize, iconTint ? {tintColor: iconTint} : null]}
+          />
         </View>
       )}
       {isLoading && !filled && <ActivityIndicator color={colors.primary} />}
@@ -97,7 +104,7 @@ const CustomButton = ({
 
 export default memo(CustomButton);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   base: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -106,14 +113,14 @@ const styles = StyleSheet.create({
   },
   default: {
     width: '100%',
-    minHeight: TOUCH + 4,
+    minHeight: TOUCH,
     paddingHorizontal: space.xl,
     borderRadius: radius.card,
     backgroundColor: colors.primary,
   },
   primary: {
     alignSelf: 'flex-start',
-    minHeight: TOUCH + 4,
+    minHeight: TOUCH,
     paddingHorizontal: space.xl,
     borderRadius: radius.card,
     backgroundColor: colors.primary,
@@ -147,4 +154,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors.surfaceRaised,
   },
-});
+}));

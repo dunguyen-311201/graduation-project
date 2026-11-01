@@ -21,6 +21,7 @@ import {TNotification} from '@types';
 import {rejectAssign} from '@features/rescue';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useNotifications} from '@features/notification';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -124,7 +125,7 @@ const Notification = () => {
 
 export default Notification;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, marginTop: 20},
   separator: {height: space.md},
   scrim: {flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim},
@@ -144,4 +145,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     marginBottom: space.sm,
   },
-});
+}));

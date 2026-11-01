@@ -1,8 +1,8 @@
 import React, {memo} from 'react';
 import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
 
-import {BLACK_COLOR} from '@theme';
 import CustomLinearGradient from '../CustomLinearGradient';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 type ShadowProps = {
   customStyle?: StyleProp<ViewStyle>;
@@ -23,10 +23,10 @@ const Shadow = ({customStyle, children, paddingVertical}: ShadowProps) => {
 
 export default memo(Shadow);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   shadow1: {
     borderRadius: 20,
-    shadowColor: BLACK_COLOR,
+    shadowColor: themeColors.bg,
     shadowOffset: {
       width: -4,
       height: 4,
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-});
+}));

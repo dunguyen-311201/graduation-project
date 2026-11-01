@@ -6,14 +6,7 @@ import {
   SearchInput,
   Txt,
 } from '@components';
-import {
-  CloseIcon,
-  FromLocationIcon,
-  TEXT_COLOR,
-  ToLocationIcon,
-  WHITE_COLOR,
-  tokens,
-} from '@theme';
+import {CloseIcon, FromLocationIcon, ToLocationIcon, tokens} from '@theme';
 import {
   Dimensions,
   Image,
@@ -48,6 +41,7 @@ import {Location} from '@types';
 import MapViewDirections from 'react-native-maps-directions';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 const GOOGLE_MAPS_API_KEY = ENV.GOOGLE_MAPS_API_KEY;
 
@@ -273,7 +267,7 @@ const MapScreen = () => {
 
 export default MapScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -293,7 +287,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: TEXT_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     width: '100%',
     height: 80,
   },
@@ -306,7 +300,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 40,
     left: 40,
-    backgroundColor: TEXT_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     zIndex: 3,
   },
   direction: {minHeight: 150, paddingLeft: 40},
@@ -324,6 +318,7 @@ const styles = StyleSheet.create({
   },
 
   icon: {
+    tintColor: themeColors.text,
     width: 20,
     height: 20,
     resizeMode: 'contain',
@@ -332,7 +327,7 @@ const styles = StyleSheet.create({
   distanceInfo: {
     position: 'absolute',
     zIndex: 2,
-    backgroundColor: WHITE_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     borderRadius: 10,
     flexDirection: 'row',
     bottom: 20,
@@ -343,4 +338,4 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
-});
+}));

@@ -13,6 +13,7 @@ import React, {forwardRef, useCallback, useState} from 'react';
 
 import CustomButton from '../Button';
 import Txt from '../../ui/Txt';
+import {themedStyles} from '../../../theme/tokens';
 
 export type CustomInputProps = {
   title?: string;
@@ -122,6 +123,7 @@ const CustomInput: React.ForwardRefRenderFunction<
         {inputMode === 'password' && (
           <CustomButton
             icon={secureTextEntry ? EyeIcon : HideIcon}
+            iconTint={colors.textMuted}
             iconSize={styles.eyeIcon}
             type="secondary"
             accessibilityLabel={secureTextEntry ? 'Show password' : 'Hide password'}
@@ -144,12 +146,12 @@ const CustomInput: React.ForwardRefRenderFunction<
 
 export default forwardRef(CustomInput);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   group: {rowGap: space.sm},
   field: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: TOUCH + 4,
+    minHeight: TOUCH,
     paddingLeft: space.lg,
     paddingRight: space.xs,
     borderRadius: radius.card,
@@ -168,4 +170,4 @@ const styles = StyleSheet.create({
     paddingRight: space.md,
   },
   eyeIcon: {width: 22, height: 22},
-});
+}));

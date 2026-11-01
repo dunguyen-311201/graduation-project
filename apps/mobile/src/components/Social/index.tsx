@@ -8,6 +8,7 @@ import {
 import React, {memo} from 'react';
 
 import {CustomText} from '../common';
+import {themedStyles} from '../../theme/tokens';
 
 type SocialProps = {
   title: string;
@@ -31,7 +32,7 @@ const Social = ({icon, title, customStyle, onPress}: SocialProps) => {
 
 export default memo(Social);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -43,4 +44,4 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-});
+}));

@@ -9,6 +9,7 @@ import type {TextInputInstance} from 'react-native';
 
 import Txt from '../../ui/Txt';
 import {colors, radius, space, type as typeScale} from '../../../theme/tokens';
+import {themedStyles} from '../../../theme/tokens';
 
 interface TextareaProps extends Omit<TextInputProps, 'onChangeText'> {
   field: string;
@@ -64,7 +65,7 @@ const Textarea = (
 
 export default forwardRef<TextareaRef, TextareaProps>(Textarea);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {rowGap: space.sm},
   input: {
     minHeight: 120,
@@ -78,4 +79,4 @@ const styles = StyleSheet.create({
     lineHeight: typeScale.body.lineHeight,
     textAlignVertical: 'top',
   },
-});
+}));

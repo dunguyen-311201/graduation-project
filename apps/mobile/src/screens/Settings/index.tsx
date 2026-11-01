@@ -1,6 +1,7 @@
 import {
   AppButton,
   Avatar,
+  ChipGroup,
   CustomInput,
   ListRow,
   ScreenBase,
@@ -11,7 +12,7 @@ import {useEmergencyContacts, useSavedPlaces} from '@features/profile';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
-import {tokens} from '@theme';
+import {ThemePreference, tokens, useTheme} from '@theme';
 import React, {
   useCallback,
   useContext,
@@ -28,6 +29,7 @@ import {
   putFile,
   ref,
 } from '@react-native-firebase/storage';
+import {themedStyles} from '../../theme/tokens';
 
 type FormData = {
   [EUser.displayName]?: string | null;
@@ -44,6 +46,7 @@ const SettingsScreen = () => {
   const {contacts} = useEmergencyContacts();
   const {places} = useSavedPlaces();
   const isUser = currentUser?.role === ERole.USER;
+  const {preference, setPreference} = useTheme();
   const placeCount = Object.keys(places).length;
 
   const [formData, setFormData] = useState<FormData>();
@@ -161,6 +164,22 @@ const SettingsScreen = () => {
           />
         )}
 
+        <View style={styles.appearance}>
+          <Txt variant="label" color={tokens.colors.textMuted}>
+            Appearance
+          </Txt>
+          <ChipGroup
+            options={[
+              {value: 'dark', label: 'Dark'},
+              {value: 'light', label: 'Light'},
+              {value: 'system', label: 'System'},
+            ]}
+            value={preference}
+            onChange={v => setPreference(v as ThemePreference)}
+            accessibilityLabel="Appearance"
+          />
+        </View>
+
         <View style={styles.menu}>
           {isUser && (
             <>
@@ -198,12 +217,13 @@ const SettingsScreen = () => {
 
 export default SettingsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   flex: {flex: 1},
   container: {
     rowGap: 16,
     paddingBottom: 16,
   },
+  appearance: {marginTop: 8, rowGap: 8},
   menu: {
     marginTop: 8,
     borderRadius: tokens.radius.card,
@@ -235,6 +255,6 @@ const styles = StyleSheet.create({
   percent: {
     borderRadius: 8,
     height: 10,
-    backgroundColor: 'green',
+    backgroundColor: tokens.colors.success,
   },
-});
+}));

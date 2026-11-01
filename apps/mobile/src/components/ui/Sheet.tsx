@@ -2,6 +2,7 @@ import React, {memo} from 'react';
 import {StyleProp, StyleSheet, View, ViewStyle} from 'react-native';
 
 import {colors, radius, space} from '../../theme/tokens';
+import {themedStyles} from '../../theme/tokens';
 
 // A bottom sheet that sits over a full-screen map.
 const Sheet = ({
@@ -19,7 +20,7 @@ const Sheet = ({
 
 export default memo(Sheet);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   sheet: {
     position: 'absolute',
     left: 0,
@@ -45,4 +46,4 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.border,
   },
-});
+}));

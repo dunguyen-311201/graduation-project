@@ -17,6 +17,7 @@ import {tokens} from '@theme';
 import {useMessage} from '@features/rescue';
 import {useRatings} from '@features/profile';
 import {useUsers} from '@features/auth';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius, type} = tokens;
 
@@ -157,7 +158,7 @@ const Row = ({label, value}: {label: string; value: string}) => (
 
 export default RescueCompletedScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   body: {padding: space.xl, paddingTop: space.xxl, rowGap: space.lg},
   check: {
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(48, 164, 108, 0.16)',
+    backgroundColor: colors.successSoft,
   },
   checkMark: {fontSize: 44, lineHeight: 52, fontWeight: '700'},
   card: {
@@ -201,4 +202,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));

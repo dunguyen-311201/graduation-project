@@ -6,6 +6,7 @@ import {AppButton, Txt} from '@components';
 import {FromLocationIcon, tokens} from '@theme';
 import {requestLocationPermission} from '@utils';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -67,7 +68,7 @@ const LocationPermissionScreen = () => {
 
 export default LocationPermissionScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg, padding: space.xl},
   body: {flex: 1, justifyContent: 'center', rowGap: space.lg},
   badge: {
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(83, 90, 255, 0.16)',
+    backgroundColor: colors.primarySoft,
   },
   icon: {width: 44, height: 44, tintColor: colors.primary},
   points: {
@@ -96,4 +97,4 @@ const styles = StyleSheet.create({
   },
   flex: {flex: 1},
   footer: {rowGap: space.sm},
-});
+}));

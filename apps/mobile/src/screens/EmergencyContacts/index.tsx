@@ -19,6 +19,7 @@ import {
 import {MAX_CONTACTS, useEmergencyContacts} from '@features/profile';
 import {tokens} from '@theme';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -145,7 +146,7 @@ const EmergencyContactsScreen = () => {
 
 export default EmergencyContactsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   body: {padding: space.xl, rowGap: space.xl},
   card: {
@@ -163,4 +164,4 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   form: {rowGap: space.lg},
-});
+}));
