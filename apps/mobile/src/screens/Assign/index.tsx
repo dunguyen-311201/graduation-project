@@ -6,7 +6,7 @@ import {TTask} from '@types';
 import {EScreen} from '@enums';
 import {useTasks} from '@features/rescue';
 import {TaskItem} from './components';
-import {ScreenBase} from '@components';
+import {EmptyListComponent, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
 
@@ -32,13 +32,16 @@ const Assign = () => {
   );
 
   return (
-    <ScreenBase onBack={goBack}>
+    <ScreenBase onBack={goBack} title="Tasks" flexDirection="row" padding={20}>
       <View style={styles.container}>
         <FlatList
           data={tasks}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={ItemSeparatorComponent}
+          ListEmptyComponent={
+            <EmptyListComponent text="No tasks yet" hint="Requests assigned to this worker show up here." />
+          }
         />
       </View>
     </ScreenBase>
@@ -48,6 +51,6 @@ const Assign = () => {
 export default Assign;
 
 const styles = StyleSheet.create({
-  container: {flex: 1, overflow: 'scroll'},
-  separator: {height: 4},
+  container: {flex: 1, marginTop: 20},
+  separator: {height: 12},
 });

@@ -2,7 +2,9 @@ import {StyleSheet, View, TextInput} from 'react-native';
 import type {TextInputInstance} from 'react-native';
 import React, {useCallback, useEffect, useState, useRef, memo} from 'react';
 
-import {WHITE_COLOR} from '@theme';
+import {tokens} from '@theme';
+
+const {colors, radius} = tokens;
 import {CustomText} from '@components';
 
 const CODE_LENGTH = 6;
@@ -17,6 +19,7 @@ const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
     Array.from({length: CODE_LENGTH}, () => ''),
   );
   const textInputRefs = useRef<Array<TextInputInstance | null>>([]);
+  const [focused, setFocused] = useState(0);
 
   useEffect(() => {
     textInputRefs.current.at(0)?.focus();
@@ -83,7 +86,12 @@ const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
             onKeyPress={({nativeEvent}) =>
               handleKeyPress(nativeEvent.key, index)
             }
-            style={styles.input}
+            onFocus={() => setFocused(index)}
+            style={[
+              styles.input,
+              (focused === index || digit) && styles.inputActive,
+              error ? styles.inputError : null,
+            ]}
             selectTextOnFocus
           />
         ))}
@@ -106,14 +114,17 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    minWidth: 36,
+    width: 48,
+    height: 56,
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: WHITE_COLOR,
-    color: WHITE_COLOR,
+    borderRadius: radius.card,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    color: colors.text,
   },
+  inputActive: {borderColor: colors.primary},
+  inputError: {borderColor: colors.sos},
 });

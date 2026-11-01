@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import React, {memo, useCallback} from 'react';
 
-import {BACKGROUND_COLOR} from '@theme';
+import {BACKGROUND_COLOR, tokens} from '@theme';
+import Txt from '../ui/Txt';
 import BackButton from '../BackButton';
 import Loading from '../Loading';
 import Notification from '../Notification';
@@ -74,7 +75,11 @@ const ScreenBase = ({
               />
             )}
           </View>
-          {desc && <CustomText text={desc} type="text_medium_24" />}
+          {desc && (
+            <Txt variant="body" color={tokens.colors.textMuted}>
+              {desc}
+            </Txt>
+          )}
         </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
