@@ -20,7 +20,7 @@ import {
   SplashScreen,
   WorkerScreen,
 } from '@screens';
-import {tokens} from '@theme';
+import {colors, currentScheme} from '../theme/tokens';
 import {ERole, EScreen} from '@enums';
 import React, {useContext} from 'react';
 
@@ -86,31 +86,31 @@ const RootNavigation = () => {
         savedState = state;
       }}
       theme={{
-        ...(tokens.currentScheme() === 'dark' ? DarkTheme : DefaultTheme),
+        ...(currentScheme() === 'dark' ? DarkTheme : DefaultTheme),
         colors: {
-          ...(tokens.currentScheme() === 'dark' ? DarkTheme : DefaultTheme)
+          ...(currentScheme() === 'dark' ? DarkTheme : DefaultTheme)
             .colors,
-          primary: tokens.colors.primary,
-          background: tokens.colors.bg,
-          card: tokens.colors.surface,
-          text: tokens.colors.text,
-          border: tokens.colors.border,
+          primary: colors.primary,
+          background: colors.bg,
+          card: colors.surface,
+          text: colors.text,
+          border: colors.border,
         },
       }}>
       <Stack.Navigator
         initialRouteName={EScreen.SPLASH}
         screenOptions={{
           headerTitleStyle: {
-            color: tokens.colors.text,
+            color: colors.text,
             fontWeight: '600',
             fontSize: 17,
           },
-          headerTintColor: tokens.colors.text,
+          headerTintColor: colors.text,
           title: '',
           headerStyle: {
-            backgroundColor: tokens.colors.bg,
+            backgroundColor: colors.bg,
           },
-          cardStyle: {backgroundColor: tokens.colors.bg},
+          cardStyle: {backgroundColor: colors.bg},
         }}>
         <Stack.Screen
           name={EScreen.SPLASH}

@@ -3,7 +3,8 @@ import {StyleSheet, View} from 'react-native';
 import {useAuth} from '@features/auth';
 import {useNotification} from '@features/notification';
 
-import {ThemeProvider, tokens} from '@theme';
+import ThemeProvider from './theme/ThemeProvider';
+import {colors, themedStyles} from './theme/tokens';
 import React from 'react';
 import {RootNavigation} from './navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -54,8 +55,8 @@ function App() {
 
 export default App;
 
-const styles = tokens.themedStyles(() =>
+const styles = themedStyles(() =>
   StyleSheet.create({
-    container: {flex: 1, backgroundColor: tokens.colors.bg},
+    container: {flex: 1, backgroundColor: colors.bg},
   }),
 );
