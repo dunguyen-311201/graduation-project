@@ -15,6 +15,11 @@ import SignupBySocialScreen from './SignupBySocial';
 import SendDistreeSignal from './SendDistressSignal';
 import ConfirmPhoneNumberScreen from './ConfirmPhoneNumber';
 import SignupByPhoneNumberScreen from './SignupByPhoneNumber';
+import LocationPermissionScreen from './LocationPermission';
+import EmergencyContactsScreen from './EmergencyContacts';
+import RescueCompletedScreen from './RescueCompleted';
+import SavedPlacesScreen from './SavedPlaces';
+import PrivacyLegalScreen from './PrivacyLegal';
 
 export {
   NotificationScreen,
@@ -34,4 +39,9 @@ export {
   MessagesScreen,
   DetailMessageScreen,
   SignInByEmailScreen,
+  LocationPermissionScreen,
+  EmergencyContactsScreen,
+  RescueCompletedScreen,
+  SavedPlacesScreen,
+  PrivacyLegalScreen,
 };

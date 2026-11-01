@@ -23,6 +23,7 @@ import React, {memo, useCallback, useContext, useEffect, useRef, useState} from 
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {newIdempotencyKey, useMessages} from '@features/rescue';
+import {PLACE_LABEL, PlaceKind, useSavedPlaces} from '@features/profile';
 
 import {Context} from '@context';
 import {Location} from '@types';
@@ -58,6 +59,12 @@ const SendDistressSignal = () => {
 
   // Fixed per form, so sending again after a timeout cannot create a duplicate.
   const requestId = useRef(newIdempotencyKey());
+
+  const {places} = useSavedPlaces();
+  const placeOptions = (Object.keys(places) as PlaceKind[]).map(kind => ({
+    value: kind,
+    label: PLACE_LABEL[kind],
+  }));
 
   const [location, setLocation] = useState<Location | null>(null);
   const [editingLocation, setEditingLocation] = useState(false);
@@ -155,6 +162,23 @@ const SendDistressSignal = () => {
                   onPress={() => setEditingLocation(true)}
                 />
               </View>
+            )}
+            {!editingLocation && placeOptions.length > 0 && (
+              <ChipGroup
+                options={placeOptions}
+                value={
+                  placeOptions.find(
+                    o =>
+                      places[o.value]?.latitude === location?.latitude &&
+                      places[o.value]?.longitude === location?.longitude,
+                  )?.value ?? ''
+                }
+                onChange={kind => {
+                  const picked = places[kind as PlaceKind];
+                  picked && setLocation(picked);
+                }}
+                accessibilityLabel="Saved places"
+              />
             )}
           </View>
 

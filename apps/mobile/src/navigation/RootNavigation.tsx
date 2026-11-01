@@ -4,9 +4,14 @@ import {
   ConfirmPhoneNumberScreen,
   ConfirmPolicyScreen,
   DetailMessageScreen,
+  EmergencyContactsScreen,
+  LocationPermissionScreen,
   MapScreen,
   MessagesScreen,
   NotificationScreen,
+  PrivacyLegalScreen,
+  RescueCompletedScreen,
+  SavedPlacesScreen,
   SendDistreeSignal,
   SetupInfoScreen,
   SignInByEmailScreen,
@@ -54,6 +59,11 @@ export type RootParamList = {
   [EScreen.SPLASH]: undefined;
   [EScreen.NOTIFICATION]: undefined;
   [EScreen.ASSIGN]: {id: string};
+  [EScreen.LOCATION_PERMISSION]: undefined;
+  [EScreen.EMERGENCY_CONTACTS]: undefined;
+  [EScreen.RESCUE_COMPLETED]: {id: string};
+  [EScreen.SAVED_PLACES]: undefined;
+  [EScreen.PRIVACY_LEGAL]: undefined;
 };
 
 const RootNavigation = () => {
@@ -80,6 +90,12 @@ const RootNavigation = () => {
         <Stack.Screen
           name={EScreen.SPLASH}
           component={SplashScreen}
+          options={{headerShown: false}}
+        />
+        {/* Reachable before sign-in too, from the terms checkbox. */}
+        <Stack.Screen
+          name={EScreen.PRIVACY_LEGAL}
+          component={PrivacyLegalScreen}
           options={{headerShown: false}}
         />
 
@@ -136,6 +152,26 @@ const RootNavigation = () => {
             <Stack.Screen
               name={EScreen.SEND_DISTRESS_SIGNAL}
               component={SendDistreeSignal}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.LOCATION_PERMISSION}
+              component={LocationPermissionScreen}
+              options={{headerShown: false, presentation: 'modal'}}
+            />
+            <Stack.Screen
+              name={EScreen.EMERGENCY_CONTACTS}
+              component={EmergencyContactsScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.RESCUE_COMPLETED}
+              component={RescueCompletedScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.SAVED_PLACES}
+              component={SavedPlacesScreen}
               options={{headerShown: false}}
             />
           </>

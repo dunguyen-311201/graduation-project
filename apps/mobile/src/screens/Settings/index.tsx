@@ -1,5 +1,15 @@
-import {AppButton, Avatar, CustomInput, ScreenBase, Txt} from '@components';
-import {EUser} from '@enums';
+import {
+  AppButton,
+  Avatar,
+  CustomInput,
+  ListRow,
+  ScreenBase,
+  Txt,
+} from '@components';
+import {ERole, EScreen, EUser} from '@enums';
+import {useEmergencyContacts, useSavedPlaces} from '@features/profile';
+import {RootScreenNavigationProps} from '@navigation';
+import {useNavigation} from '@react-navigation/native';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {tokens} from '@theme';
 import React, {
@@ -28,6 +38,13 @@ type FormData = {
 
 const SettingsScreen = () => {
   const {currentUser, updateProfile, loading, signOut} = useContext(Context);
+
+  const {navigate} =
+    useNavigation<RootScreenNavigationProps<EScreen.DRAWER>>();
+  const {contacts} = useEmergencyContacts();
+  const {places} = useSavedPlaces();
+  const isUser = currentUser?.role === ERole.USER;
+  const placeCount = Object.keys(places).length;
 
   const [formData, setFormData] = useState<FormData>();
   const [_loading, setLoading] = useState(0);
@@ -143,6 +160,33 @@ const SettingsScreen = () => {
             title="Citizen Identification"
           />
         )}
+
+        <View style={styles.menu}>
+          {isUser && (
+            <>
+              <ListRow
+                title="Emergency contacts"
+                subtitle={
+                  contacts.length
+                    ? `${contacts.length} saved`
+                    : 'Tell family when you send an SOS'
+                }
+                onPress={() => navigate(EScreen.EMERGENCY_CONTACTS)}
+              />
+              <View style={styles.divider} />
+              <ListRow
+                title="Saved places"
+                subtitle={placeCount ? `${placeCount} saved` : 'Add Home and Work'}
+                onPress={() => navigate(EScreen.SAVED_PLACES)}
+              />
+              <View style={styles.divider} />
+            </>
+          )}
+          <ListRow
+            title="Privacy & terms"
+            onPress={() => navigate(EScreen.PRIVACY_LEGAL)}
+          />
+        </View>
       </ScrollView>
       <View style={styles.footer}>
         <AppButton label="Save changes" onPress={handleNext} />
@@ -159,6 +203,17 @@ const styles = StyleSheet.create({
   container: {
     rowGap: 16,
     paddingBottom: 16,
+  },
+  menu: {
+    marginTop: 8,
+    borderRadius: tokens.radius.card,
+    backgroundColor: tokens.colors.surface,
+    overflow: 'hidden',
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginLeft: 16,
+    backgroundColor: tokens.colors.border,
   },
   footer: {
     rowGap: 8,

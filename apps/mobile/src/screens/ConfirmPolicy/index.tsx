@@ -9,7 +9,7 @@ import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 
 const ConfirmPolicyScreen = () => {
-  const {setOptions} =
+  const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_POLICY>>();
   const {signUp, loading} = useContext(Context);
   const [agreed, setAgreed] = useState(false);
@@ -49,12 +49,14 @@ const ConfirmPolicyScreen = () => {
               text=" Terms & Conditions "
               type="text_medium_16"
               color="blue"
+              onPress={() => navigate(EScreen.PRIVACY_LEGAL)}
             />
             {'and acknowledge the'}
             <CustomText
               text=" Privacy Policy."
               type="text_medium_16"
               color="blue"
+              onPress={() => navigate(EScreen.PRIVACY_LEGAL)}
             />
           </CustomText>
         </Pressable>

@@ -26,19 +26,25 @@ import React, {
 } from 'react';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {newIdempotencyKey, useMessages} from '@features/rescue';
+import {useEmergencyContacts, useRatings} from '@features/profile';
+import * as ExpoLocation from 'expo-location';
 
 import {CURRENT_LOCATION, MAPS_ENABLED} from '@constants';
 import {Context} from '@context';
 import {Location} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
 import {isFreeUser} from '@features/auth';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const {colors, space} = tokens;
 
 // Time to cancel a quick SOS before it is sent.
 const UNDO_SECONDS = 5;
 const QUICK_SOS_TYPE = 'Rescue request';
+// Ask for a rating only for rescues finished in the last day.
+const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
+// Show the location explainer at most once per app launch.
+let primerShown = false;
 
 type SosState =
   | {kind: 'idle'}
@@ -70,6 +76,9 @@ const HomeScreen = () => {
   const [locating, setLocating] = useState(false);
   const [sos, setSos] = useState<SosState>({kind: 'idle'});
   const requestId = useRef(newIdempotencyKey());
+  const {contacts, alertContacts} = useEmergencyContacts();
+  const {ratings} = useRatings();
+  const [skipRating, setSkipRating] = useState<string>();
 
   const activeRequest = useMemo(
     () =>
@@ -77,11 +86,37 @@ const HomeScreen = () => {
     [messages],
   );
 
-  useEffect(() => {
-    getAsyncStorage<Location>(CURRENT_LOCATION).then(
-      cache => cache && setLocation(cache),
-    );
-  }, []);
+  const toRate = useMemo(
+    () =>
+      messages.find(
+        m =>
+          m.status === 'completed' &&
+          m.id !== skipRating &&
+          !ratings[m.id] &&
+          Date.now() - (m.endAt ?? m.time) < RATE_WINDOW_MS,
+      ),
+    [messages, ratings, skipRating],
+  );
+
+  // Re-read on focus: the location screen or Profile may have changed it.
+  useFocusEffect(
+    useCallback(() => {
+      getAsyncStorage<Location>(CURRENT_LOCATION).then(async cache => {
+        if (cache) {
+          setLocation(cache);
+          return;
+        }
+        if (!isUser || primerShown) {
+          return;
+        }
+        const {status} = await ExpoLocation.getForegroundPermissionsAsync();
+        if (status !== ExpoLocation.PermissionStatus.GRANTED) {
+          primerShown = true;
+          navigate(EScreen.LOCATION_PERMISSION);
+        }
+      });
+    }, [isUser, navigate]),
+  );
 
   const handleTurnOnLocation = useCallback(async () => {
     setLocating(true);
@@ -188,6 +223,40 @@ const HomeScreen = () => {
           <AppButton
             label="View request"
             onPress={() => handleOpenRequest(activeRequest.id)}
+          />
+          {contacts.length > 0 ? (
+            <AppButton
+              label="Text my emergency contacts"
+              variant="secondary"
+              onPress={() => alertContacts(activeRequest.location)}
+            />
+          ) : (
+            <AppButton
+              label="Add emergency contacts"
+              variant="ghost"
+              onPress={() => navigate(EScreen.EMERGENCY_CONTACTS)}
+            />
+          )}
+        </>
+      );
+    }
+
+    if (toRate && sos.kind === 'idle') {
+      return (
+        <>
+          <StatusPill status={toRate.status} />
+          <Txt variant="heading">Your rescue is complete</Txt>
+          <Txt variant="body" color={colors.textMuted}>
+            How did it go? Your rating helps rescue centers improve.
+          </Txt>
+          <AppButton
+            label="Rate the rescue"
+            onPress={() => navigate(EScreen.RESCUE_COMPLETED, {id: toRate.id})}
+          />
+          <AppButton
+            label="Not now"
+            variant="ghost"
+            onPress={() => setSkipRating(toRate.id)}
           />
         </>
       );

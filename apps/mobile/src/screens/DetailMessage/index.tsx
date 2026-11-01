@@ -11,7 +11,11 @@ import {
 } from '@components';
 import {Alert, ScrollView, StyleSheet, View} from 'react-native';
 import {ERole, EScreen} from '@enums';
-import {MESSAGE_IN_PROGRESS, MESSAGE_PENDING} from '@constants';
+import {
+  MESSAGE_COMPLETED,
+  MESSAGE_IN_PROGRESS,
+  MESSAGE_PENDING,
+} from '@constants';
 import React, {useCallback, useContext, useMemo, useState} from 'react';
 import {tokens} from '@theme';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -133,6 +137,15 @@ const DetailMessage = () => {
   }
   if (message && role !== ERole.CENTER && message.status === MESSAGE_IN_PROGRESS) {
     footer.push(<AppButton key="complete" label="Mark as completed" onPress={onComplete} />);
+  }
+  if (message && role === ERole.USER && message.status === MESSAGE_COMPLETED) {
+    footer.push(
+      <AppButton
+        key="rate"
+        label="Rate this rescue"
+        onPress={() => navigate(EScreen.RESCUE_COMPLETED, {id: message.id})}
+      />,
+    );
   }
   if (message && role === ERole.USER && isDelete) {
     footer.push(
