@@ -40,6 +40,11 @@ export default ({config}: ConfigContext): ExpoConfig => ({
       googleMapsApiKey: process.env.GOOGLE_MAPS_IOS_API_KEY,
     },
   },
+  extra: {
+    // The native Google map crashes the app when its key is missing, so
+    // screens only render MapView when this is true (see constants/env.ts).
+    hasNativeMapsKey: Boolean(process.env.GOOGLE_MAPS_ANDROID_API_KEY),
+  },
   plugins: [
     '@react-native-firebase/app',
     '@react-native-firebase/auth',

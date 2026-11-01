@@ -27,7 +27,7 @@ import React, {
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {newIdempotencyKey, useMessages} from '@features/rescue';
 
-import {CURRENT_LOCATION} from '@constants';
+import {CURRENT_LOCATION, MAPS_ENABLED} from '@constants';
 import {Context} from '@context';
 import {Location} from '@types';
 import {RootScreenNavigationProps} from '@navigation';
@@ -288,7 +288,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Notification />
-      {region ? (
+      {region && MAPS_ENABLED ? (
         <MapView
           provider={PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFill}

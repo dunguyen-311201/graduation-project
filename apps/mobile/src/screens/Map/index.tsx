@@ -1,12 +1,27 @@
-import {BackButton, CustomText, Notification, SearchInput} from '@components';
+import {
+  AppButton,
+  BackButton,
+  CustomText,
+  Notification,
+  SearchInput,
+  Txt,
+} from '@components';
 import {
   CloseIcon,
   FromLocationIcon,
   TEXT_COLOR,
   ToLocationIcon,
   WHITE_COLOR,
+  tokens,
 } from '@theme';
-import {Dimensions, Image, Pressable, StyleSheet, View} from 'react-native';
+import {
+  Dimensions,
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {ERole, EScreen} from '@enums';
 import MapView, {Circle, PROVIDER_GOOGLE} from 'react-native-maps';
 import React, {
@@ -25,7 +40,7 @@ import {
   requestLocationPermission,
 } from '@utils';
 
-import {CURRENT_LOCATION} from '@constants';
+import {CURRENT_LOCATION, MAPS_ENABLED, externalMapUrl} from '@constants';
 import {ENV} from '@constants';
 import {Context} from '@context';
 import {CustomMarker} from './components';
@@ -103,6 +118,28 @@ const MapScreen = () => {
   const handleChangeLocation = useCallback(() => {}, []);
 
   const map = useMemo(() => {
+    if (!MAPS_ENABLED) {
+      const target = locations?.to ?? locations?.from ?? to;
+      return (
+        <View style={styles.fallback}>
+          <Txt variant="heading" center>
+            Map is not set up
+          </Txt>
+          <Txt variant="body" color={tokens.colors.textMuted} center>
+            This build has no Google Maps key. You can still open the location
+            in Google Maps.
+          </Txt>
+          {target ? (
+            <AppButton
+              label="Open in Google Maps"
+              onPress={() =>
+                Linking.openURL(externalMapUrl(target.latitude, target.longitude))
+              }
+            />
+          ) : null}
+        </View>
+      );
+    }
     if (locations?.from) {
       return (
         <MapView
@@ -157,7 +194,7 @@ const MapScreen = () => {
       );
     }
     return <></>;
-  }, [handleChangeLocation, locations?.from, locations?.to]);
+  }, [handleChangeLocation, locations?.from, locations?.to, to]);
 
   return (
     <>
@@ -239,6 +276,13 @@ export default MapScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  fallback: {
+    flex: 1,
+    justifyContent: 'center',
+    rowGap: 16,
+    paddingHorizontal: 24,
+    backgroundColor: tokens.colors.bg,
   },
   map: {
     width: Dimensions.get('window').width,
