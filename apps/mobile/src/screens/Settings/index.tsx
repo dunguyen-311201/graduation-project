@@ -1,6 +1,6 @@
 import {AppButton, CustomInput, ScreenBase} from '@components';
 import {EUser} from '@enums';
-import {Image, Pressable, StyleSheet, View} from 'react-native';
+import {Image, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {ProfileIcon, WHITE_COLOR} from '@theme';
 import React, {
   useCallback,
@@ -92,10 +92,11 @@ const SettingsScreen = () => {
     <ScreenBase
       loading={loading}
       title="Profile"
-      flexDirection="row"
-      onNext={handleNext}
-      nextTitle="Update">
-      <View style={styles.container}>
+      flexDirection="row">
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled">
         <Pressable onPress={handleChangeAvatar} style={styles.boxAvatar}>
           <Image
             style={styles.avatar}
@@ -141,7 +142,10 @@ const SettingsScreen = () => {
             title="Citizen Identification"
           />
         )}
-        <AppButton label="Sign out" variant="secondary" onPress={signOut} />
+      </ScrollView>
+      <View style={styles.footer}>
+        <AppButton label="Save changes" onPress={handleNext} />
+        <AppButton label="Sign out" variant="ghost" onPress={signOut} />
       </View>
     </ScreenBase>
   );
@@ -150,9 +154,14 @@ const SettingsScreen = () => {
 export default SettingsScreen;
 
 const styles = StyleSheet.create({
+  flex: {flex: 1},
   container: {
-    flex: 1,
     rowGap: 16,
+    paddingBottom: 16,
+  },
+  footer: {
+    rowGap: 8,
+    paddingTop: 12,
   },
 
   boxAvatar: {
