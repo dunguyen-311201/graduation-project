@@ -151,6 +151,7 @@ const SettingsScreen = () => {
           editable={false}
           border
           title="Phone Number"
+          placeholder="Not set"
         />
 
         {formData?.citizenIdentification && (
@@ -163,6 +164,11 @@ const SettingsScreen = () => {
             title="Citizen Identification"
           />
         )}
+
+        {formData?.displayName !== undefined &&
+          (formData?.displayName ?? '') !== (currentUser?.displayName ?? '') && (
+            <AppButton label="Save changes" onPress={handleNext} />
+          )}
 
         <View style={styles.appearance}>
           <Txt variant="label" color={tokens.colors.textMuted}>
@@ -206,11 +212,11 @@ const SettingsScreen = () => {
             onPress={() => navigate(EScreen.PRIVACY_LEGAL)}
           />
         </View>
+
+        <View style={styles.menu}>
+          <ListRow title="Sign out" danger onPress={signOut} right={<View />} />
+        </View>
       </ScrollView>
-      <View style={styles.footer}>
-        <AppButton label="Save changes" onPress={handleNext} />
-        <AppButton label="Sign out" variant="ghost" onPress={signOut} />
-      </View>
     </ScreenBase>
   );
 };
