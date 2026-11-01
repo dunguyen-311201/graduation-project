@@ -165,10 +165,15 @@ const SettingsScreen = () => {
           />
         )}
 
-        {formData?.displayName !== undefined &&
-          (formData?.displayName ?? '') !== (currentUser?.displayName ?? '') && (
-            <AppButton label="Save changes" onPress={handleNext} />
-          )}
+        {/* Always visible; enabled once the name differs from the saved one. */}
+        <AppButton
+          label="Save changes"
+          disabled={
+            !formData?.displayName?.trim() ||
+            formData.displayName === (currentUser?.displayName ?? '')
+          }
+          onPress={handleNext}
+        />
 
         <View style={styles.appearance}>
           <Txt variant="label" color={tokens.colors.textMuted}>
