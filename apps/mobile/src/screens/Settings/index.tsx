@@ -167,16 +167,16 @@ const styles = StyleSheet.create({
   boxAvatar: {
     alignSelf: 'center',
     rowGap: 20,
-    height: 180,
+    height: 132,
   },
   avatar: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
+    width: 112,
+    height: 112,
+    borderRadius: 56,
     backgroundColor: WHITE_COLOR,
   },
   loading: {
-    width: 160,
+    width: 112,
     alignSelf: 'center',
     borderRadius: 8,
     height: 10,

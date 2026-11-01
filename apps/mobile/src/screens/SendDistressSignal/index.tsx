@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
@@ -118,18 +119,8 @@ const SendDistressSignal = () => {
     setSending(false);
   }, [location, currentUser, onNew, type, description, reset]);
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Notification />
-        <View style={styles.header}>
-          <BackButton onPress={goBack} />
-          <Txt variant="title">Request rescue</Txt>
-        </View>
-
-        <View style={styles.body}>
+  const sections = (
+    <>
           <View style={styles.section}>
             <Txt variant="label" color={colors.textMuted}>
               Where are you?
@@ -194,7 +185,31 @@ const SendDistressSignal = () => {
               accessibilityLabel="Details"
             />
           </View>
+    </>
+  );
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Notification />
+        <View style={styles.header}>
+          <BackButton onPress={goBack} />
+          <Txt variant="title">Request rescue</Txt>
         </View>
+
+        {/* Places autocomplete is a list, so it cannot sit inside a ScrollView. */}
+        {editingLocation ? (
+          <View style={[styles.flex1, styles.body]}>{sections}</View>
+        ) : (
+          <ScrollView
+            style={styles.flex1}
+            contentContainerStyle={styles.body}
+            keyboardShouldPersistTaps="handled">
+            {sections}
+          </ScrollView>
+        )}
 
         <View style={styles.footer}>
           {error && (
@@ -231,7 +246,8 @@ const styles = StyleSheet.create({
     paddingTop: space.lg,
     rowGap: space.md,
   },
-  body: {flex: 1, paddingHorizontal: space.xl, paddingTop: space.xl, rowGap: space.xl},
+  flex1: {flex: 1},
+  body: {paddingHorizontal: space.xl, paddingVertical: space.xl, rowGap: space.xl},
   section: {rowGap: space.sm},
   card: {
     flexDirection: 'row',
