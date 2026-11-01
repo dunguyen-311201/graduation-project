@@ -31,7 +31,11 @@ export class FcmNotifier implements Notifier {
 
   private async pushToUser(uid: string, message: PushMessage) {
     try {
-      const ref = getFirestore(this.app).doc(`users/${uid}`);
+      const db = getFirestore(this.app);
+      // The in-app list is how a center finds new requests, with or without a device token.
+      await db.collection("notifications").add({ ...message, userID: uid, time: Date.now() });
+
+      const ref = db.doc(`users/${uid}`);
       const tokens = ((await ref.get()).get("fcmTokens") ?? []) as string[];
       if (tokens.length === 0) return;
 

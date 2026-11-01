@@ -44,6 +44,7 @@ export const toMessage = (id: string, data: RequestDoc): TMessage => ({
     latitude: data.location.lat,
     longitude: data.location.lng,
     description: data.location.address,
+    city: data.location.address,
   },
 });
 
