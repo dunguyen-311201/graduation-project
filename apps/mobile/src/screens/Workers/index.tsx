@@ -130,7 +130,6 @@ const Worker = () => {
     <ScreenBase
       title="Workers"
       loading={loading}
-      padding={20}
       onBack={inTab ? undefined : goBack}
       flexDirection="row">
       <View style={styles.container}>
@@ -203,7 +202,7 @@ const Worker = () => {
 export default Worker;
 
 const styles = themedStyles(() => StyleSheet.create({
-  container: {marginTop: 20, flex: 1, rowGap: space.md},
+  container: {flex: 1, rowGap: space.md},
   list: {flexGrow: 1},
   separator: {height: space.md},
   scrim: {flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim},

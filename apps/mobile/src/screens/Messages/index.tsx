@@ -1,22 +1,21 @@
-import {Alert, FlatList, StyleSheet, View} from 'react-native';
+import {Alert, FlatList, Pressable, StyleSheet, View} from 'react-native';
 import {
-  CustomButton,
   EmptyListComponent,
   MessageInfo,
   ScreenBase,
+  Txt,
 } from '@components';
 import React, {useCallback, useContext, useLayoutEffect} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 import {Context} from '@context';
 import {EScreen} from '@enums';
-import {NewIcon} from '@theme';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 import {TMessage} from '@types';
 import {isFreeUser} from '@features/auth';
 import {useMessages} from '@features/rescue';
-import {themedStyles} from '../../theme/tokens';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.MESSAGES>;
 
@@ -78,7 +77,6 @@ const Messages = () => {
       title="Requests"
       onBack={inTab ? undefined : handleback}
       loading={loading}
-      padding={20}
       flexDirection="row">
       <View style={styles.content}>
         {messages.length > 0 ? (
@@ -87,6 +85,7 @@ const Messages = () => {
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             ItemSeparatorComponent={ItemSeparatorComponent}
+            contentContainerStyle={styles.list}
           />
         ) : (
           <View style={styles.content}>
@@ -94,13 +93,15 @@ const Messages = () => {
           </View>
         )}
         {currentUser?.role === 'user' && (
-          <CustomButton
-            icon={NewIcon}
-            type="secondary"
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="New rescue request"
-            customStyle={styles.btnNew}
             onPress={handleSendRescue}
-          />
+            style={({pressed}) => [styles.fab, pressed && styles.fabPressed]}>
+            <Txt style={styles.fabPlus} color={themeColors.onPrimary}>
+              +
+            </Txt>
+          </Pressable>
         )}
       </View>
     </ScreenBase>
@@ -115,14 +116,28 @@ const styles = themedStyles(() => StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginTop: 20,
   },
+  // Room under the last card for the floating button.
+  list: {paddingBottom: 88},
   separator: {
     height: 12,
   },
-  btnNew: {
+  fab: {
     position: 'absolute',
-    right: 10,
-    bottom: 10,
+    right: 0,
+    bottom: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: themeColors.primary,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: {width: 0, height: 3},
   },
+  fabPressed: {backgroundColor: themeColors.primaryPressed},
+  fabPlus: {fontSize: 30, lineHeight: 34, fontWeight: '400'},
 }));
