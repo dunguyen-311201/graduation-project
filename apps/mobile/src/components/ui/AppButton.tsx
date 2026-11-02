@@ -66,7 +66,13 @@ const AppButton = ({
           {icon}
           <Txt
             variant="label"
-            color={variant === 'ghost' ? colors.primary : colors.onPrimary}>
+            color={
+              variant === 'ghost'
+                ? colors.primary
+                : variant === 'secondary'
+                  ? colors.text
+                  : colors.onPrimary
+            }>
             {label}
           </Txt>
         </View>
