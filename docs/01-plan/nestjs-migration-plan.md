@@ -22,7 +22,13 @@ The app writes directly to Firestore and all coordination lives in triggers. Wit
 
 **Done in `services/api`:** Firebase ID token guard, error filter, `/health/live`, Dockerfile, `POST /v1/responders`, `PUT /v1/me/fcm-token`. The API runs at `https://sos-api-u0lh.onrender.com`. The `Scheduler` port, BullMQ adapter and `/health/ready` are live, with Redis on the same Render account.
 
-**Not done:** BullMQ worker, FCM adapter, `packages/domain`, and every command of the rescue flow.
+**Done since (2026-11-01, `fc14b872`):** phase 1 except the availability endpoint, and phase 2. Verified live: SOS through the API, center matching, the center's Notifications list, expiry after 3 minutes on real Redis.
+
+**Next:** phase 3, then a sweep job for lost timers, because a request stays stuck if the free Redis loses its expiry job.
+
+**Not done:** claim, assign, accept, reject, timeout, complete, availability. Assign, Confirm and Complete in the app still write the old collections.
+
+**Not verified:** FCM push on the emulator, the Location row fix, expiry across an API restart.
 
 **Legacy bugs not to port:**
 
