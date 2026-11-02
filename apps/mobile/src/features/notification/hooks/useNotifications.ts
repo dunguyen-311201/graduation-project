@@ -15,6 +15,7 @@ import {db} from '@services';
 const useNotifications = () => {
   const [notifications, setNotifications] = useState<TNotification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const {currentUser} = useContext(Context);
 
@@ -28,14 +29,19 @@ const useNotifications = () => {
       where('userID', '==', currentUser.id),
     );
 
-    const unsubscribe = onSnapshot(q, snap => {
-      const newData: TNotification[] = [];
-      snap?.docs.forEach(d => {
-        newData.push({...(d.data() as TNotification), id: d.id});
-      });
+    const unsubscribe = onSnapshot(
+      q,
+      snap => {
+        const newData: TNotification[] = [];
+        snap?.docs.forEach(d => {
+          newData.push({...(d.data() as TNotification), id: d.id});
+        });
 
-      setNotifications(newData.sort((a, b) => b.time - a.time));
-    });
+        setNotifications(newData.sort((a, b) => b.time - a.time));
+        setReady(true);
+      },
+      () => setReady(true),
+    );
 
     return () => unsubscribe();
   }, [currentUser?.id]);
@@ -47,7 +53,7 @@ const useNotifications = () => {
     setLoading(false);
   }, []);
 
-  return {notifications, loading, onDelete};
+  return {notifications, loading, ready, onDelete};
 };
 
 export default useNotifications;

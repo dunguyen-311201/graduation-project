@@ -47,6 +47,7 @@ const DetailMessage = () => {
     onReject: onRejectAssignment,
     onDelete: onDeleteMessage,
     loading,
+    ready,
   } = useMessage(id);
 
   const [workerID, setWorkerID] = useState<string>();
@@ -243,7 +244,10 @@ const DetailMessage = () => {
           {footer.length > 0 && <View style={styles.footer}>{footer}</View>}
         </>
       ) : (
-        <EmptyListComponent text="Request not found" />
+        <EmptyListComponent
+          loading={!ready}
+          text="This request is not available"
+        />
       )}
     </View>
   );

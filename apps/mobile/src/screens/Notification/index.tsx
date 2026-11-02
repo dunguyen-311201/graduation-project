@@ -27,7 +27,7 @@ import {themedStyles} from '../../theme/tokens';
 const {colors, space, radius} = tokens;
 
 const Notification = () => {
-  const {notifications, loading, onDelete} = useNotifications();
+  const {notifications, loading, ready, onDelete} = useNotifications();
   const [notification, setNotification] = useState<TNotification>();
 
   const {navigate, goBack} =
@@ -113,6 +113,7 @@ const Notification = () => {
           />
         ) : (
           <EmptyListComponent
+            loading={!ready}
             text="No notifications yet"
             hint="Updates about your requests will show up here."
           />

@@ -18,7 +18,7 @@ const Assign = () => {
 
   const {goBack} = useNavigation<RootScreenNavigationProps<EScreen.ASSIGN>>();
 
-  const {tasks} = useTasks(id);
+  const {tasks, ready} = useTasks(id);
 
   const renderItem = useCallback(
     ({item}: {item: TTask}) => <TaskItem task={item} />,
@@ -41,7 +41,7 @@ const Assign = () => {
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={ItemSeparatorComponent}
           ListEmptyComponent={
-            <EmptyListComponent text="No tasks yet" hint="Requests assigned to this worker show up here." />
+            <EmptyListComponent loading={!ready} text="No tasks yet" hint="Requests assigned to this worker show up here." />
           }
         />
       </View>

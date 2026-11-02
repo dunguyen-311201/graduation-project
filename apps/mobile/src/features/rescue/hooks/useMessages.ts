@@ -16,6 +16,7 @@ import {toMessage, toRaiseSosBody} from '../utils/request';
 const useMessages = (workerID?: string) => {
   const [messages, setMessages] = useState<TMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const {currentUser} = useContext(Context);
 
@@ -23,6 +24,8 @@ const useMessages = (workerID?: string) => {
     if (!currentUser) {
       return;
     }
+
+    setReady(false);
 
     // Matches the read rule: participants, or centers that were notified.
     const filter =
@@ -36,8 +39,12 @@ const useMessages = (workerID?: string) => {
         const newData = snap?.docs.map(d => toMessage(d.id, d.data() as any));
 
         setMessages(newData.sort((a, b) => b.time - a.time));
+        setReady(true);
       },
-      err => console.log(err),
+      err => {
+        console.log(err);
+        setReady(true);
+      },
     );
 
     return () => unsubscribe();
@@ -65,7 +72,7 @@ const useMessages = (workerID?: string) => {
     }
   }, []);
 
-  return {messages, onDelete, onNew, loading};
+  return {messages, onDelete, onNew, loading, ready};
 };
 
 export default useMessages;

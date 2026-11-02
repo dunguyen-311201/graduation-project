@@ -15,6 +15,7 @@ import {Route} from '@constants';
 const useWorker = (free?: boolean) => {
   const [workers, setData] = useState<TUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
 
   const {currentUser} = useContext(Context);
@@ -37,8 +38,12 @@ const useWorker = (free?: boolean) => {
       source,
       snap => {
         setData(snap?.docs.map(d => ({id: d.id, ...d.data()}) as TUser) ?? []);
+        setReady(true);
       },
-      err => console.log(err),
+      err => {
+        console.log(err);
+        setReady(true);
+      },
     );
 
     return () => unsubscribe();
@@ -89,6 +94,7 @@ const useWorker = (free?: boolean) => {
   return {
     workers,
     loading,
+    ready,
     error,
     deleteWorker,
     activeWorker,

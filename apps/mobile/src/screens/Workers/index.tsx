@@ -38,7 +38,7 @@ const Worker = () => {
 
   const [id, setId] = useState<string>();
 
-  const {workers, deleteWorker, activeWorker, loading} = useWorker();
+  const {workers, deleteWorker, activeWorker, loading, ready} = useWorker();
 
   const workerSelect = useMemo(
     () => workers.find(item => item.id === id),
@@ -141,6 +141,7 @@ const Worker = () => {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <EmptyListComponent
+              loading={!ready}
               text="No workers yet"
               hint="Add your first rescue worker to start assigning requests."
             />

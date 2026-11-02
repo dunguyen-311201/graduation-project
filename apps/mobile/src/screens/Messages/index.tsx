@@ -28,7 +28,7 @@ const Messages = () => {
 
   const {currentUser} = useContext(Context);
 
-  const {messages, onDelete, onNew, loading} = useMessages(workerID);
+  const {messages, onDelete, onNew, loading, ready} = useMessages(workerID);
 
   useLayoutEffect(() => {
     mode && navigate(EScreen.SEND_DISTRESS_SIGNAL, {onNew});
@@ -89,7 +89,7 @@ const Messages = () => {
           />
         ) : (
           <View style={styles.content}>
-            <EmptyListComponent text="No rescue requests yet" />
+            <EmptyListComponent loading={!ready} text="No rescue requests yet" />
           </View>
         )}
         {currentUser?.role === 'user' && (

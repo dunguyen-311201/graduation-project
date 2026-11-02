@@ -11,6 +11,7 @@ import {toMessage} from '../utils/request';
 const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const {currentUser} = useContext(Context);
 
@@ -22,9 +23,13 @@ const useMessage = (id: string) => {
         if (data) {
           setMessage(toMessage(id, data as any));
         }
+        setReady(true);
       },
       // A worker loses read access as soon as they reject or time out.
-      () => setMessage(undefined),
+      () => {
+        setMessage(undefined);
+        setReady(true);
+      },
     );
 
     return () => unsubcribe();
@@ -85,6 +90,7 @@ const useMessage = (id: string) => {
   return {
     message,
     loading,
+    ready,
     onComfirm,
     onComplete,
     onReject,
