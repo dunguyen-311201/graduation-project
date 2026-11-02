@@ -56,7 +56,8 @@ const ScreenBase = ({
           styles.container,
           {paddingHorizontal: padding || 24},
           {
-            ...(onBack && {paddingTop: 24}),
+            // Keep the title clear of the status bar on tab screens too.
+            paddingTop: onBack ? 24 : 16,
 
             // ...(onBack && styles.header),
           },
