@@ -33,7 +33,7 @@ const MessageInfo = ({
       onPress={handlePress}
       style={({pressed}) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.top}>
-        <StatusPill status={item.status} />
+        <StatusPill status={item.status} stage={item.stage} />
         {when ? (
           <Txt variant="caption" color={colors.textMuted}>
             {when}

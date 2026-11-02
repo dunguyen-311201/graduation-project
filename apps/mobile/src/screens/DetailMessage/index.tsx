@@ -163,7 +163,7 @@ const DetailMessage = () => {
         <>
           <ScrollView contentContainerStyle={styles.body}>
             <View style={styles.card}>
-              <StatusPill status={message.status} />
+              <StatusPill status={message.status} stage={message.stage} />
               <Txt variant="heading">{message.type}</Txt>
               <Txt variant="caption" color={colors.textMuted}>
                 {new Date(message.time).toLocaleString()}
