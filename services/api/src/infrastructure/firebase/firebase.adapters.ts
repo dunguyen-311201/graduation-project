@@ -70,4 +70,14 @@ export class FirestoreUserDirectory implements UserDirectory {
       .doc(`users/${uid}`)
       .set({ fcmTokens: FieldValue.arrayUnion(token) }, { merge: true });
   }
+
+  async removeFcmToken(uid: string, token: string) {
+    await getFirestore(this.app)
+      .doc(`users/${uid}`)
+      .set({ fcmTokens: FieldValue.arrayRemove(token) }, { merge: true });
+  }
+
+  async setDisabled(uid: string, disabled: boolean) {
+    await getFirestore(this.app).doc(`users/${uid}`).update({ disabled });
+  }
 }

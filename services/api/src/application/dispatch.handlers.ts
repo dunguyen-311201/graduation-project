@@ -274,10 +274,29 @@ export class DispatchHandlers {
     return { status: "COMPLETED" };
   }
 
+  /** Replaces deleting the worker document: history keeps pointing at the responder. */
+  async setDisabled(responderId: string, disabled: boolean, actor: Actor) {
+    await this.requireCenter(actor);
+    await this.store.run(async (tx) => {
+      const responder = await tx.getResponder(responderId);
+      if (!responder || responder.centerId !== actor.uid) {
+        throw new ForbiddenError(ErrorCode.RESPONDER_NOT_IN_CENTER, "This responder is not in your center");
+      }
+      if (responder.availability === "ON_MISSION") {
+        throw new ConflictError(ErrorCode.ON_MISSION, "This responder is on a mission");
+      }
+      tx.setResponder({ ...responder, disabled, availability: "OFF_DUTY" });
+      if (responder.availability === "AVAILABLE") tx.adjustCenterResponders(actor.uid, -1);
+    });
+    await this.users.setDisabled(responderId, disabled);
+    return { ok: true };
+  }
+
   async setAvailability(availability: "AVAILABLE" | "OFF_DUTY", actor: Actor) {
     return this.store.run(async (tx) => {
       const responder = await tx.getResponder(actor.uid);
       if (!responder) throw new ForbiddenError(ErrorCode.NOT_A_RESPONDER, "Only a responder can do this");
+      if (responder.disabled) throw new ForbiddenError(ErrorCode.DISABLED, "This account has been disabled");
       if (responder.availability === "ON_MISSION") {
         throw new ConflictError(ErrorCode.ON_MISSION, "Finish the current mission first");
       }

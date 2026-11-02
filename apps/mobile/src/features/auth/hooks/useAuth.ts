@@ -72,6 +72,11 @@ const useAuth = () => {
 
         await updateDoc(doc(db, 'users', currentUser.id), update);
 
+        const token = await getToken(messaging).catch(() => null);
+        if (token) {
+          await callAPI({method: 'DELETE', route: Route.FCM_TOKEN, data: {token}});
+        }
+
         await firebaseSignOut(auth);
         setIsAuthenticated(false);
       }

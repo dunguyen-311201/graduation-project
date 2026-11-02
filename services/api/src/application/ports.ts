@@ -43,6 +43,8 @@ export interface UserDirectory {
   create(uid: string, record: LegacyUserRecord): Promise<void>;
   /** Adds the device token to `fcmTokens`; repeating a token changes nothing. */
   addFcmToken(uid: string, token: string): Promise<void>;
+  removeFcmToken(uid: string, token: string): Promise<void>;
+  setDisabled(uid: string, disabled: boolean): Promise<void>;
 }
 export const USER_DIRECTORY = Symbol("USER_DIRECTORY");
 

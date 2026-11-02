@@ -26,5 +26,6 @@ export const ErrorCode = {
   NOT_ASSIGNEE: 'NOT_ASSIGNEE',
   NOT_A_RESPONDER: 'NOT_A_RESPONDER',
   ON_MISSION: 'ON_MISSION',
+  DISABLED: 'DISABLED',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

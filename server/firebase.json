@@ -1,26 +1,6 @@
 {
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ],
-      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint"]
-    }
-  ],
   "emulators": {
-    "functions": {
-      "host": "0.0.0.0",
-      "port": "3000"
-    },
     "singleProjectMode": true,
-    "database": {
-      "port": "9000"
-    },
     "ui": {
       "enabled": true
     },

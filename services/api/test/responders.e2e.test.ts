@@ -102,4 +102,12 @@ describe("PUT /v1/me/fcm-token", () => {
     }
     expect([...(users.fcmTokens.get("user-1") ?? [])]).toEqual(["device-1"]);
   });
+
+  it("removes the device token on sign-out", async () => {
+    const send = (method: "put" | "delete") =>
+      http()[method]("/v1/me/fcm-token").set("Authorization", "Bearer token-user-1").send({ token: "device-1" });
+    await send("put").expect(200);
+    await send("delete").expect(200, { ok: true });
+    expect(users.fcmTokens.get("user-1")?.size).toBe(0);
+  });
 });

@@ -1,9 +1,7 @@
 rules_version = '2';
 
-// G0 interim rules (see docs/01-plan/roadmap.md).
-// Closes anonymous access and role self-promotion while the app still writes
-// business state from the client. Replaced by the full rules in
-// docs/03-design/lld.md section 7 during G2.
+// Clients read their own data; business state is written only by the NestJS
+// API through the Admin SDK, which bypasses these rules.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
@@ -22,7 +20,7 @@ service cloud.firestore {
       allow read: if signedIn();
 
       // Self sign-up as a requester or as a center awaiting approval.
-      // Workers are created by the new-worker function (Admin SDK).
+      // Workers are created by the API (Admin SDK).
       allow create: if isOwner(userId)
         && request.resource.data.get('role', 'user') in ['user', 'center']
         && request.resource.data.get('statusRegistration', 'pending') != 'approved';
@@ -30,13 +28,6 @@ service cloud.firestore {
       // Users may edit their own profile but never their role or approval.
       allow update: if isOwner(userId)
         && !changes(['role', 'statusRegistration', 'centerID']);
-
-      // A center may re-enable or delete its own workers.
-      allow update: if signedIn()
-        && resource.data.get('centerID', null) == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['disabled']);
-      allow delete: if signedIn()
-        && resource.data.get('centerID', null) == request.auth.uid;
     }
 
     // Written only by the NestJS API (LLD section 7).
@@ -64,15 +55,9 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Interim: any signed-in user. Moves to the NestJS API in G2.
-    match /messages/{id} {
-      allow read, write: if signedIn();
-    }
-    match /assigns/{id} {
-      allow read, write: if signedIn();
-    }
+    // Written by the API; users may dismiss their own.
     match /notifications/{id} {
-      allow read, write: if signedIn();
+      allow read, delete: if signedIn() && request.auth.uid == resource.data.userID;
     }
 
     // Everything else is denied by default.

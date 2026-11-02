@@ -71,6 +71,14 @@ export class InMemoryUserDirectory implements UserDirectory {
   async addFcmToken(uid: string, token: string) {
     this.fcmTokens.set(uid, (this.fcmTokens.get(uid) ?? new Set()).add(token));
   }
+
+  async removeFcmToken(uid: string, token: string) {
+    this.fcmTokens.get(uid)?.delete(token);
+  }
+
+  async setDisabled(uid: string, disabled: boolean) {
+    this.docs.set(uid, { ...this.docs.get(uid), disabled });
+  }
 }
 
 export class FakeScheduler implements Scheduler {

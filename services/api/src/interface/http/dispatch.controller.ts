@@ -47,6 +47,18 @@ export class DispatchController {
     return this.dispatch.reject(id, actor);
   }
 
+  @Post("responders/:id/disable")
+  @HttpCode(200)
+  disable(@Param("id") id: string, @CurrentActor() actor: Actor) {
+    return this.dispatch.setDisabled(id, true, actor);
+  }
+
+  @Post("responders/:id/enable")
+  @HttpCode(200)
+  enable(@Param("id") id: string, @CurrentActor() actor: Actor) {
+    return this.dispatch.setDisabled(id, false, actor);
+  }
+
   @Put("responders/me/availability")
   setAvailability(@Body({ schema: setAvailabilitySchema }) body: SetAvailabilityBody, @CurrentActor() actor: Actor) {
     return this.dispatch.setAvailability(body.availability, actor);

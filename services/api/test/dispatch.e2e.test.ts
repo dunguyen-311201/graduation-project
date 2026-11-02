@@ -202,6 +202,30 @@ describe("PUT /v1/responders/me/availability", () => {
   });
 });
 
+describe("POST /v1/responders/:id/disable and enable", () => {
+  it("takes the responder out of service and back", async () => {
+    await post("/v1/responders/worker-1/disable", "center-1").expect(200, { ok: true });
+    expect(store.responders.get("worker-1")).toMatchObject({ disabled: true, availability: "OFF_DUTY" });
+    expect(store.availableResponders.get("center-1")).toBe(1);
+    const res = await http()
+      .put("/v1/responders/me/availability")
+      .set("Authorization", "Bearer token-worker-1")
+      .send({ availability: "AVAILABLE" })
+      .expect(403);
+    expect(res.body.code).toBe("DISABLED");
+    await post("/v1/responders/worker-1/enable", "center-1").expect(200);
+    expect(store.responders.get("worker-1")?.disabled).toBe(false);
+  });
+
+  it("rejects other centers and a responder on a mission", async () => {
+    expect((await post("/v1/responders/worker-1/disable", "center-2").expect(403)).body.code).toBe(
+      "RESPONDER_NOT_IN_CENTER",
+    );
+    await assigned();
+    expect((await post("/v1/responders/worker-1/disable", "center-1").expect(409)).body.code).toBe("ON_MISSION");
+  });
+});
+
 describe("sweep (ADR-0012)", () => {
   const sixMinutesAgo = () => Date.now() - 6 * 60 * 1000;
 

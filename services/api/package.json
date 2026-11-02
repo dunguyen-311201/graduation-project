@@ -2,7 +2,7 @@
   "name": "@sos/api",
   "version": "0.1.0",
   "private": true,
-  "description": "SOS App backend (NestJS). Replaces server/functions, see docs/04-adr/0011.",
+  "description": "SOS App backend (NestJS), see docs/04-adr/0011.",
   "type": "module",
   "engines": {
     "node": ">=22"

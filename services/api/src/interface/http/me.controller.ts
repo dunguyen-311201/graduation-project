@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Inject, Put } from "@nestjs/common";
 import { registerFcmTokenSchema, type RegisterFcmTokenBody } from "@sos/contracts";
 import { type Actor, USER_DIRECTORY, type UserDirectory } from "../../application/ports.js";
 import { CurrentActor } from "./auth.guard.js";
@@ -14,6 +14,16 @@ export class MeController {
     @CurrentActor() actor: Actor,
   ) {
     await this.users.addFcmToken(actor.uid, body.token);
+    return { ok: true };
+  }
+
+  /** Called on sign-out, so a shared device stops getting this account's pushes. */
+  @Delete("fcm-token")
+  async removeFcmToken(
+    @Body({ schema: registerFcmTokenSchema }) body: RegisterFcmTokenBody,
+    @CurrentActor() actor: Actor,
+  ) {
+    await this.users.removeFcmToken(actor.uid, body.token);
     return { ok: true };
   }
 }
