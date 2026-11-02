@@ -26,7 +26,7 @@ export default memo(Shadow);
 const styles = themedStyles(() => StyleSheet.create({
   shadow1: {
     borderRadius: 20,
-    shadowColor: themeColors.bg,
+    shadowColor: '#000',
     shadowOffset: {
       width: -4,
       height: 4,

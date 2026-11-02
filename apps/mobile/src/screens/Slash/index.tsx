@@ -13,7 +13,7 @@ import {FIRST_INSTALLED} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
 import {getAsyncStorage} from '@utils';
 import {useNavigation} from '@react-navigation/native';
-import {themedStyles} from '../../theme/tokens';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
@@ -51,13 +51,24 @@ function SplashScreen() {
       <SafeAreaView style={[styles.container, styles.flex]}>
         <View style={styles.top}>
           <Shadow customStyle={styles['box-logo']}>
-            <CustomText text="SOS" type="text_large_64" />
+            <CustomText
+              text="SOS"
+              type="text_large_64"
+              customStyle={{color: themeColors.onPrimary}}
+            />
           </Shadow>
 
           {firstSignedIn && (
             <View style={styles.tagline} accessible>
-              <CustomText text="Move with safety" type="text_large_20" />
-              <Image source={CheckShieldIcon} />
+              <CustomText
+                text="Move with safety"
+                type="text_large_20"
+                customStyle={{color: themeColors.onPrimary}}
+              />
+              <Image
+                source={CheckShieldIcon}
+                style={{tintColor: themeColors.onPrimary}}
+              />
             </View>
           )}
         </View>
