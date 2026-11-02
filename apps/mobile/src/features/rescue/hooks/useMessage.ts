@@ -15,12 +15,17 @@ const useMessage = (id: string) => {
   const {currentUser} = useContext(Context);
 
   useEffect(() => {
-    const unsubcribe = onSnapshot(doc(db, 'requests', id), snap => {
-      const data = snap.data();
-      if (data) {
-        setMessage(toMessage(id, data as any));
-      }
-    });
+    const unsubcribe = onSnapshot(
+      doc(db, 'requests', id),
+      snap => {
+        const data = snap.data();
+        if (data) {
+          setMessage(toMessage(id, data as any));
+        }
+      },
+      // A worker loses read access as soon as they reject or time out.
+      () => setMessage(undefined),
+    );
 
     return () => unsubcribe();
   }, [currentUser, id]);
