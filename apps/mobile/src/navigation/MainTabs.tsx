@@ -1,12 +1,5 @@
 import {Image, ImageSourcePropType, StyleSheet} from 'react-native';
-import {
-  BellIcon,
-  GoMapIcon,
-  MWorkerIcon,
-  MessageIcon,
-  ProfileIcon,
-  tokens,
-} from '@theme';
+import {BellIcon, GoMapIcon, MWorkerIcon, MessageIcon, ProfileIcon, tokens} from '@theme';
 import {ERole, EScreen} from '@enums';
 import {
   HomeScreen,
@@ -19,6 +12,7 @@ import React, {useContext} from 'react';
 
 import {Context} from '@context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {themedStyles} from '../theme/tokens';
 
 const {colors} = tokens;
 
@@ -86,7 +80,7 @@ const MainTabs = () => {
 
 export default MainTabs;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   bar: {
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
@@ -96,4 +90,4 @@ const styles = StyleSheet.create({
   },
   label: {fontSize: 12, fontWeight: '600'},
   icon: {width: 24, height: 24, resizeMode: 'contain'},
-});
+}));

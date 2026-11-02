@@ -6,6 +6,7 @@ import NotifyCard from './NotifyCard';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 import {useNotification} from '@features/notification';
+import {themedStyles} from '../../theme/tokens';
 
 const Notification = () => {
   const hideAnim = useRef(new Animated.Value(0)).current;
@@ -77,7 +78,7 @@ export default memo(Notification);
 
 export {NotifyCard};
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     position: 'absolute',
     top: 10,
@@ -86,4 +87,4 @@ const styles = StyleSheet.create({
     zIndex: 2,
     opacity: 0,
   },
-});
+}));

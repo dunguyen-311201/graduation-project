@@ -9,7 +9,8 @@ import React, {useCallback} from 'react';
 
 import CustomText from '../Text';
 import CustomButton from '../Button';
-import {CloseIcon, WHITE_COLOR} from '@theme';
+import {CloseIcon} from '@theme';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 const CustomModal = ({
   children,
@@ -44,6 +45,7 @@ const CustomModal = ({
                 />
                 <CustomButton
                   icon={CloseIcon}
+                  iconTint={themeColors.text}
                   type="secondary"
                   onPress={onClose}
                 />
@@ -59,14 +61,14 @@ const CustomModal = ({
 
 export default CustomModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   content: {
-    backgroundColor: WHITE_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
@@ -84,4 +86,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actions: {},
-});
+}));

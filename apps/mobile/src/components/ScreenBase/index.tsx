@@ -1,4 +1,3 @@
-import {CustomButton, CustomText} from '../common';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -11,11 +10,13 @@ import {
 } from 'react-native';
 import React, {memo, useCallback} from 'react';
 
-import {BACKGROUND_COLOR, tokens} from '@theme';
+import {tokens} from '@theme';
 import Txt from '../ui/Txt';
+import AppButton from '../ui/AppButton';
 import BackButton from '../BackButton';
 import Loading from '../Loading';
 import Notification from '../Notification';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 type ScreenBaseProps = {
   title?: string;
@@ -66,13 +67,11 @@ const ScreenBase = ({
           <View style={[styles.nav, {flexDirection}]}>
             {onBack && <BackButton onPress={onBack} />}
             {title && (
-              <CustomText
-                text={title}
-                type="text_medium_30"
-                customStyle={{
-                  ...(flexDirection === 'column' && styles.title),
-                }}
-              />
+              <Txt
+                variant="title"
+                style={flexDirection === 'column' && styles.title}>
+                {title}
+              </Txt>
             )}
           </View>
           {desc && (
@@ -94,11 +93,10 @@ const ScreenBase = ({
           </View>
         </KeyboardAvoidingView>
         {onNext && (
-          <CustomButton
+          <AppButton
             onPress={onNext}
             label={nextTitle}
             disabled={disableNext}
-            customStyle={styles.button}
           />
         )}
       </View>
@@ -108,24 +106,23 @@ const ScreenBase = ({
 
 export default memo(ScreenBase);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_COLOR,
+    backgroundColor: themeColors.bg,
     paddingBottom: 24,
   },
   keyboard: {
     flex: 1,
   },
   header: {
-    columnGap: 20,
+    rowGap: 8,
   },
   nav: {
     flexDirection: 'row',
     columnGap: 36,
   },
   title: {
-    marginTop: 35,
+    marginTop: 16,
   },
-  button: {},
-});
+}));

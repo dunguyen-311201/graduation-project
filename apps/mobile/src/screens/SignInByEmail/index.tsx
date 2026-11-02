@@ -10,6 +10,7 @@ import {EScreen} from '@enums';
 import {Field, validate} from '@utils';
 import {CustomInput, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
+import {themedStyles} from '../../theme/tokens';
 
 type FormData = {
   email?: string;
@@ -172,8 +173,8 @@ const SignInByEmail = () => {
 
 export default SignInByEmail;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   content: {
     rowGap: 20,
   },
-});
+}));

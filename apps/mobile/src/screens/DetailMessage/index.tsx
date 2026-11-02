@@ -1,17 +1,21 @@
 import {
   AppButton,
-  BackButton,
-  DropDown2,
+  ScreenHeader,
   EmptyListComponent,
   Loading,
   StatusPill,
+  Avatar,
   StatusStepper,
   Txt,
   UserInfo,
 } from '@components';
-import {Alert, ScrollView, StyleSheet, View} from 'react-native';
+import {Alert, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {ERole, EScreen} from '@enums';
-import {MESSAGE_IN_PROGRESS, MESSAGE_PENDING} from '@constants';
+import {
+  MESSAGE_COMPLETED,
+  MESSAGE_IN_PROGRESS,
+  MESSAGE_PENDING,
+} from '@constants';
 import React, {useCallback, useContext, useMemo, useState} from 'react';
 import {tokens} from '@theme';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
@@ -21,6 +25,7 @@ import {useMessage, useWorker} from '@features/rescue';
 import {Context} from '@context';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -113,7 +118,8 @@ const DetailMessage = () => {
   }, [workerID]);
 
   const isDelete = useMemo(
-    () => message?.status === MESSAGE_PENDING || message?.status === 'expired',
+    // Only an open request can be cancelled; closed ones show no action.
+    () => message?.status === MESSAGE_PENDING,
     [message],
   );
 
@@ -134,6 +140,15 @@ const DetailMessage = () => {
   if (message && role !== ERole.CENTER && message.status === MESSAGE_IN_PROGRESS) {
     footer.push(<AppButton key="complete" label="Mark as completed" onPress={onComplete} />);
   }
+  if (message && role === ERole.USER && message.status === MESSAGE_COMPLETED) {
+    footer.push(
+      <AppButton
+        key="rate"
+        label="Rate this rescue"
+        onPress={() => navigate(EScreen.RESCUE_COMPLETED, {id: message.id})}
+      />,
+    );
+  }
   if (message && role === ERole.USER && isDelete) {
     footer.push(
       <AppButton key="remove" label="Cancel request" variant="ghost" onPress={handleDelete} />,
@@ -143,10 +158,7 @@ const DetailMessage = () => {
   return (
     <View style={styles.container}>
       {loading && <Loading />}
-      <View style={styles.header}>
-        <BackButton onPress={goBack} />
-        <Txt variant="title">Request</Txt>
-      </View>
+      <ScreenHeader title="Request" onBack={goBack} />
       {message && currentUser ? (
         <>
           <ScrollView contentContainerStyle={styles.body}>
@@ -182,28 +194,46 @@ const DetailMessage = () => {
               <Txt variant="label" color={colors.textMuted}>
                 People
               </Txt>
-              <View style={styles.people}>
-                <UserInfo id={message.userID} customStyle={styles.flex} />
-                {message.workerID ? (
-                  <UserInfo id={message.workerID} customStyle={styles.flex} />
-                ) : (
-                  <Txt variant="body" color={colors.textMuted} style={styles.flex}>
-                    No worker yet
-                  </Txt>
-                )}
-              </View>
+              <UserInfo id={message.userID} label="Requester" />
+              <View style={styles.divider} />
+              {message.workerID ? (
+                <UserInfo id={message.workerID} label="Rescue worker" />
+              ) : (
+                <Txt variant="body" color={colors.textMuted}>
+                  No worker assigned yet
+                </Txt>
+              )}
             </View>
 
             {role === ERole.CENTER && message.status === MESSAGE_PENDING && (
-              <View style={[styles.card, styles.raised]}>
+              <View style={styles.card} accessibilityRole="radiogroup">
                 <Txt variant="label" color={colors.textMuted}>
                   Choose a worker
                 </Txt>
-                <DropDown2
-                  data={workerDropdown}
-                  value={workerID}
-                  onSelect={handleSelect}
-                />
+                {workerDropdown.length === 0 ? (
+                  <Txt variant="body" color={colors.textMuted}>
+                    No worker is free right now.
+                  </Txt>
+                ) : (
+                  workerDropdown.map(w => {
+                    const selected = w.id === workerID;
+                    return (
+                      <Pressable
+                        key={w.id}
+                        onPress={() => handleSelect(w.id)}
+                        accessibilityRole="radio"
+                        accessibilityState={{selected}}
+                        accessibilityLabel={w.value}
+                        style={[styles.option, selected && styles.optionOn]}>
+                        <Avatar name={w.value} size={36} />
+                        <Txt variant="body" style={styles.flex}>
+                          {w.value || 'Worker'}
+                        </Txt>
+                        <View style={[styles.radio, selected && styles.radioOn]} />
+                      </Pressable>
+                    );
+                  })
+                )}
               </View>
             )}
           </ScrollView>
@@ -218,18 +248,36 @@ const DetailMessage = () => {
 
 export default DetailMessage;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   header: {paddingHorizontal: space.xl, paddingTop: space.lg, rowGap: space.md},
-  body: {padding: space.xl, rowGap: space.lg},
+  body: {paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl, rowGap: space.md},
   card: {
     padding: space.lg,
     rowGap: space.sm,
     borderRadius: radius.card,
     backgroundColor: colors.surface,
   },
-  raised: {zIndex: 2},
-  people: {flexDirection: 'row', columnGap: space.md},
+  divider: {height: StyleSheet.hairlineWidth, backgroundColor: colors.border},
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: space.md,
+    minHeight: 56,
+    paddingHorizontal: space.md,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  optionOn: {borderColor: colors.primary, backgroundColor: colors.primarySoft},
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+  },
+  radioOn: {borderColor: colors.primary, borderWidth: 6},
   flex: {flex: 1},
   footer: {
     paddingHorizontal: space.xl,
@@ -239,4 +287,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
   },
-});
+}));

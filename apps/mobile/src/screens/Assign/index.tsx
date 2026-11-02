@@ -9,6 +9,7 @@ import {TaskItem} from './components';
 import {EmptyListComponent, ScreenBase} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
 import {RootParamList} from '@navigation/RootNavigation';
+import {themedStyles} from '../../theme/tokens';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.ASSIGN>;
 
@@ -50,7 +51,7 @@ const Assign = () => {
 
 export default Assign;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, marginTop: 20},
   separator: {height: 12},
-});
+}));

@@ -7,8 +7,9 @@ import React, {
 import {StyleSheet, View, TextInput, TextInputProps} from 'react-native';
 import type {TextInputInstance} from 'react-native';
 
-import CustomText from '../Text';
-import {DARK_GRAY_COLOR, GRAY_COLOR, WHITE_COLOR} from '@theme';
+import Txt from '../../ui/Txt';
+import {colors, radius, space, type as typeScale} from '../../../theme/tokens';
+import {themedStyles} from '../../../theme/tokens';
 
 interface TextareaProps extends Omit<TextInputProps, 'onChangeText'> {
   field: string;
@@ -42,15 +43,18 @@ const Textarea = (
 
   return (
     <View style={styles.container}>
-      <CustomText text={props.title} type="text_medium_14" />
+      <Txt variant="label" color={colors.textMuted}>
+        {props.title}
+      </Txt>
       <TextInput
         ref={textInputRef}
         {...props}
         multiline
         numberOfLines={3}
         style={styles.input}
-        placeholder="Type more infomation"
-        placeholderTextColor={DARK_GRAY_COLOR}
+        placeholder="Add more information"
+        placeholderTextColor={colors.textMuted}
+        accessibilityLabel={props.title}
         clearTextOnFocus
         value={props?.value || ''}
         onChangeText={handleChangeText}
@@ -61,21 +65,18 @@ const Textarea = (
 
 export default forwardRef<TextareaRef, TextareaProps>(Textarea);
 
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 10,
-  },
+const styles = themedStyles(() => StyleSheet.create({
+  container: {rowGap: space.sm},
   input: {
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
+    minHeight: 120,
+    padding: space.lg,
+    borderRadius: radius.card,
     borderWidth: 1,
-    borderColor: GRAY_COLOR,
-    color: WHITE_COLOR,
-    borderRadius: 8,
-    padding: 10,
-    height: 120,
-    marginTop: 10,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    fontSize: typeScale.body.fontSize,
+    lineHeight: typeScale.body.lineHeight,
     textAlignVertical: 'top',
   },
-});
+}));

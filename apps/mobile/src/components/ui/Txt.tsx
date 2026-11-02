@@ -2,6 +2,7 @@ import React, {memo} from 'react';
 import {StyleProp, StyleSheet, Text, TextProps, TextStyle} from 'react-native';
 
 import {colors, type as typeScale} from '../../theme/tokens';
+import {themedStyles} from '../../theme/tokens';
 
 type Variant = keyof typeof typeScale;
 
@@ -32,4 +33,4 @@ const Txt = ({
 
 export default memo(Txt);
 
-const styles = StyleSheet.create({center: {textAlign: 'center'}});
+const styles = themedStyles(() => StyleSheet.create({center: {textAlign: 'center'}}));

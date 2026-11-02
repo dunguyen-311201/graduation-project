@@ -23,4 +23,9 @@ export enum EScreen {
   TAB_REQUESTS = 'tab-requests',
   TAB_ALERTS = 'tab-alerts',
   TAB_WORKERS = 'tab-workers',
+  LOCATION_PERMISSION = 'location-permission-screen',
+  EMERGENCY_CONTACTS = 'emergency-contacts-screen',
+  RESCUE_COMPLETED = 'rescue-completed-screen',
+  SAVED_PLACES = 'saved-places-screen',
+  PRIVACY_LEGAL = 'privacy-legal-screen',
 }

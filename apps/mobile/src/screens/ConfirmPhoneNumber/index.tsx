@@ -17,6 +17,7 @@ import {RootScreenNavigationProps} from '@navigation';
 import {CustomButton, ScreenBase} from '@components';
 import {doc, getDoc} from '@react-native-firebase/firestore';
 import {auth, db} from '@services';
+import {themedStyles} from '../../theme/tokens';
 
 type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 
@@ -139,9 +140,9 @@ const ConfirmPhoneNumberScreen = () => {
 
 export default ConfirmPhoneNumberScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   content: {
     marginTop: 20,
     rowGap: 16,
   },
-});
+}));

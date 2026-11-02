@@ -13,6 +13,7 @@ import {FIRST_INSTALLED} from '@constants';
 import {RootScreenNavigationProps} from '@navigation';
 import {getAsyncStorage} from '@utils';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 function SplashScreen() {
   const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
@@ -67,7 +68,7 @@ function SplashScreen() {
 
 export default memo(SplashScreen);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   flex: {
     flex: 1,
   },
@@ -102,4 +103,4 @@ const styles = StyleSheet.create({
   img: {
     marginLeft: 20,
   },
-});
+}));

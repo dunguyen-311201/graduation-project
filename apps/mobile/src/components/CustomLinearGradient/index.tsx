@@ -1,8 +1,8 @@
 import React from 'react';
 import {StyleProp, ViewStyle} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
+import {colors as themeColors} from '../../theme/tokens';
 
-import {DARK_BLUE_COLOR, LIGHT_BLUE_COLOR} from '@theme';
 
 type CustomLinearGradientProps = {
   lineColor?: [color1: string, color2: string];
@@ -11,7 +11,7 @@ type CustomLinearGradientProps = {
 };
 
 const CustomLinearGradient = ({
-  lineColor = [DARK_BLUE_COLOR, LIGHT_BLUE_COLOR],
+  lineColor = [themeColors.primaryPressed, themeColors.primary],
   children,
   customStyle,
 }: CustomLinearGradientProps) => {

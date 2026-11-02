@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import React from 'react';
 import Txt from '../ui/Txt';
 import {colors, space} from '../../theme/tokens';
+import {themedStyles} from '../../theme/tokens';
 
 const EmptyListComponent = ({text, hint}: {text?: string; hint?: string}) => (
   <View style={styles.container}>
@@ -19,7 +20,7 @@ const EmptyListComponent = ({text, hint}: {text?: string; hint?: string}) => (
 
 export default EmptyListComponent;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -27,4 +28,4 @@ const styles = StyleSheet.create({
     rowGap: space.sm,
     paddingHorizontal: space.xl,
   },
-});
+}));

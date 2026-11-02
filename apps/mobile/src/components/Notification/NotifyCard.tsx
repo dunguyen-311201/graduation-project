@@ -9,6 +9,7 @@ import {Context} from '@context';
 import {ERole} from '@enums';
 import {TNotification} from '@types';
 import {formatTimeAgo} from '@utils';
+import {themedStyles} from '../../theme/tokens';
 
 const Notify = ({
   onClose,
@@ -79,7 +80,7 @@ const Notify = ({
 
 export default Notify;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     padding: space.lg,
     borderRadius: radius.card,
@@ -99,4 +100,4 @@ const styles = StyleSheet.create({
   image: {borderRadius: 20, width: 40, height: 40},
   actions: {flexDirection: 'row', columnGap: space.sm, marginTop: space.md},
   flex: {flex: 1},
-});
+}));

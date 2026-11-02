@@ -6,6 +6,7 @@ import {tokens} from '@theme';
 
 const {colors, radius} = tokens;
 import {CustomText} from '@components';
+import {themedStyles} from '../../../theme/tokens';
 
 const CODE_LENGTH = 6;
 
@@ -103,7 +104,7 @@ const ComfirmInput = ({onChange, error}: ComfirmInputProps) => {
 
 export default memo(ComfirmInput);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     width: '100%',
     rowGap: 10,
@@ -127,4 +128,4 @@ const styles = StyleSheet.create({
   },
   inputActive: {borderColor: colors.primary},
   inputError: {borderColor: colors.sos},
-});
+}));

@@ -1,4 +1,4 @@
-import {DirectionIcon, TEXT_COLOR} from '@theme';
+import {DirectionIcon} from '@theme';
 import {
   GooglePlaceData,
   GooglePlaceDetail,
@@ -17,6 +17,7 @@ import React, {memo, useCallback, useEffect, useState} from 'react';
 
 import {ENV} from '@constants';
 import {Location} from '@types';
+import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 const GOOGLE_MAPS_API_KEY = ENV.GOOGLE_MAPS_API_KEY;
 
@@ -95,6 +96,7 @@ const SearchInput = ({
           textInputProps={{
             value: search,
             selectTextOnFocus: true,
+            placeholderTextColor: themeColors.textMuted,
             onChangeText: (value: string) => {
               setSearch(value);
             },
@@ -118,7 +120,7 @@ const SearchInput = ({
 
 export default memo(SearchInput);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     position: 'absolute',
     zIndex: 3,
@@ -166,16 +168,16 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: TEXT_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
   },
   directionIcon: {
     width: 30,
     height: 30,
     resizeMode: 'contain',
   },
-});
+}));
 
-const inputSearch = StyleSheet.create({
+const inputSearch = themedStyles(() => StyleSheet.create({
   container: {
     position: 'absolute',
     left: 0,
@@ -184,8 +186,18 @@ const inputSearch = StyleSheet.create({
     zIndex: 5,
   },
   textInput: {
-    fontSize: 18,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    height: 48,
+    fontSize: 15,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: themeColors.border,
+    backgroundColor: themeColors.surface,
+    color: themeColors.text,
   },
-});
+  listView: {borderRadius: 12, backgroundColor: themeColors.surface},
+  row: {backgroundColor: themeColors.surface},
+  description: {color: themeColors.text},
+  separator: {backgroundColor: themeColors.border},
+  poweredContainer: {backgroundColor: themeColors.surface},
+}));

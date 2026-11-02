@@ -10,6 +10,7 @@ import React, {memo} from 'react';
 
 import {TOUCH, colors, radius, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
@@ -24,12 +25,12 @@ type AppButtonProps = {
   accessibilityHint?: string;
 };
 
-const BG: Record<Variant, [string, string]> = {
+const BG = (): Record<Variant, [string, string]> => ({
   primary: [colors.primary, colors.primaryPressed],
   secondary: [colors.surfaceRaised, colors.border],
   danger: [colors.sos, colors.sosPressed],
   ghost: ['transparent', colors.surfaceRaised],
-};
+});
 
 const AppButton = ({
   label,
@@ -53,7 +54,7 @@ const AppButton = ({
       onPress={onPress}
       style={({pressed}) => [
         styles.base,
-        {backgroundColor: BG[variant][pressed ? 1 : 0]},
+        {backgroundColor: BG()[variant][pressed ? 1 : 0]},
         variant === 'ghost' && styles.ghost,
         inactive && styles.disabled,
         style,
@@ -76,15 +77,15 @@ const AppButton = ({
 
 export default memo(AppButton);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   base: {
-    minHeight: TOUCH + 4,
+    minHeight: TOUCH,
     borderRadius: radius.card,
     paddingHorizontal: space.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ghost: {minHeight: TOUCH},
+  ghost: {minHeight: TOUCH - 4},
   row: {flexDirection: 'row', alignItems: 'center', columnGap: space.sm},
   disabled: {opacity: 0.4},
-});
+}));

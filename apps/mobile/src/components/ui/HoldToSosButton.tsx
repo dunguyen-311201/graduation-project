@@ -3,6 +3,7 @@ import React, {memo, useCallback, useEffect, useRef} from 'react';
 
 import {colors, space} from '../../theme/tokens';
 import Txt from './Txt';
+import {themedStyles} from '../../theme/tokens';
 
 type HoldToSosButtonProps = {
   onTrigger: () => void;
@@ -124,7 +125,7 @@ const HoldToSosButton = ({
 
 export default memo(HoldToSosButton);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   wrap: {alignItems: 'center', justifyContent: 'center', alignSelf: 'center'},
   glow: {position: 'absolute', backgroundColor: colors.sosGlow},
   button: {
@@ -137,4 +138,4 @@ const styles = StyleSheet.create({
   fill: {position: 'absolute', backgroundColor: colors.sosPressed},
   sos: {fontSize: 44, lineHeight: 50, letterSpacing: 2, marginBottom: space.xs},
   disabled: {opacity: 0.5},
-});
+}));

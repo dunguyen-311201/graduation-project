@@ -9,6 +9,7 @@ import {RootScreenNavigationProps} from '@navigation';
 import {signInWithPhoneNumber} from '@react-native-firebase/auth';
 import {auth} from '@services';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 const SignupByPhoneNumberScreen = () => {
   const {navigate, setOptions} =
@@ -82,8 +83,8 @@ const SignupByPhoneNumberScreen = () => {
 
 export default SignupByPhoneNumberScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     rowGap: 22,
   },
-});
+}));

@@ -1,17 +1,11 @@
-import {
-  BLACK_COLOR,
-  DARK_GRAY_COLOR,
-  GRAY_COLOR,
-  LIGHT_BLUE_COLOR,
-  TEXT_COLOR,
-  WHITE_COLOR,
-} from '@theme';
+import {tokens} from '@theme';
 import {StyleSheet} from 'react-native';
+import {colors as themeColors, themedStyles} from '../theme/tokens';
 
-const BaseStyles = StyleSheet.create({
+const BaseStyles = themedStyles(() => StyleSheet.create({
   text_default: {
     fontFamily: 'Roboto',
-    color: WHITE_COLOR,
+    color: themeColors.text,
     fontSize: 20,
     fontWeight: '500',
   },
@@ -46,28 +40,28 @@ const BaseStyles = StyleSheet.create({
     fontSize: 27,
     fontWeight: '400',
   },
-});
+}));
 
-const ColorStyles = StyleSheet.create({
+const ColorStyles = themedStyles(() => StyleSheet.create({
   dedault: {
-    color: TEXT_COLOR,
+    color: themeColors.text,
   },
   gray: {
-    color: GRAY_COLOR,
+    color: themeColors.border,
   },
   white: {
-    color: WHITE_COLOR,
+    color: themeColors.text,
   },
   black: {
-    color: BLACK_COLOR,
+    color: themeColors.bg,
   },
   light_blue: {
-    color: LIGHT_BLUE_COLOR,
+    color: themeColors.primary,
   },
   dark_gray: {
-    color: DARK_GRAY_COLOR,
+    color: themeColors.textMuted,
   },
-});
+}));
 
 export const Styles = {
   text_large_white: {
@@ -134,91 +128,29 @@ export const Styles = {
   },
 };
 
-export const styles = StyleSheet.create({
-  text_large_64: {
-    fontSize: 64,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-    color: TEXT_COLOR,
-  },
-  text_large_20: {
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: 'Open Sans',
-    color: TEXT_COLOR,
-  },
-  text_xLarge: {
-    fontSize: 22,
-    fontWeight: '700',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-    textAlign: 'center',
-  },
-  text_medium_30: {
-    fontSize: 30,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_24: {
-    fontSize: 24,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_20: {
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_24: {
-    fontSize: 24,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_regular_20: {
-    fontSize: 20,
-    fontWeight: '400',
-    fontFamily: 'Roboto',
-    color: TEXT_COLOR,
-  },
-  text_medium_16: {
-    fontSize: 16,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_18: {
-    fontSize: 18,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_14: {
-    fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-  text_medium_10: {
-    fontSize: 10,
-    fontWeight: '500',
-    fontFamily: 'Roboto',
-    color: GRAY_COLOR,
-  },
-});
+// Legacy CustomText types, mapped onto the token type scale (theme/tokens.ts)
+// so every screen uses the same five sizes and the system font.
+const t = tokens.type;
+const c = tokens.colors;
 
-export const colors = StyleSheet.create({
-  blue: {
-    color: LIGHT_BLUE_COLOR,
-  },
-  white: {
-    color: TEXT_COLOR,
-  },
-  black: {color: BLACK_COLOR},
-  red: {
-    color: 'red',
-  },
-});
+export const styles = themedStyles(() => StyleSheet.create({
+  text_large_64: {fontSize: 40, lineHeight: 48, fontWeight: '700', color: c.text},
+  text_large_20: {...t.body, fontWeight: '600', color: c.text},
+  text_xLarge: {...t.heading, color: c.text, textAlign: 'center'},
+  text_medium_30: {...t.title, color: c.text},
+  text_medium_24: {...t.heading, color: c.text},
+  text_medium_20: {...t.body, color: c.text},
+  text_regular_24: {...t.heading, fontWeight: '400', color: c.text},
+  text_regular_20: {...t.body, color: c.text},
+  text_medium_18: {...t.body, color: c.textMuted},
+  text_medium_16: {...t.label, fontWeight: '400', color: c.textMuted},
+  text_medium_14: {...t.caption, color: c.textMuted},
+  text_medium_10: {...t.caption, color: c.textMuted},
+}));
+
+export const colors = themedStyles(() => StyleSheet.create({
+  blue: {color: c.primary},
+  white: {color: c.text},
+  black: {color: themeColors.text},
+  red: {color: c.sos},
+}));

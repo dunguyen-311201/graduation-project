@@ -6,6 +6,7 @@ import {MESSAGE_COMPLETED} from '@constants';
 import {TMessage} from '@types';
 import {formatTimeAgo} from '@utils';
 import {tokens} from '@theme';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -56,7 +57,7 @@ const MessageInfo = ({
 
 export default memo(MessageInfo);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   card: {
     padding: space.lg,
     rowGap: space.sm,
@@ -69,4 +70,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-});
+}));

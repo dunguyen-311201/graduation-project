@@ -20,6 +20,7 @@ import {
 import {Context} from '@context';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
+import {themedStyles} from '../../theme/tokens';
 
 type FormData = {
   [EUser.displayName]?: string;
@@ -159,10 +160,10 @@ const SetupInfoScreen = () => {
 
 export default SetupInfoScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   content: {
     justifyContent: 'space-between',
     marginTop: 20,
     rowGap: 16,
   },
-});
+}));

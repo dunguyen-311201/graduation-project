@@ -3,6 +3,7 @@ import {StyleSheet, View, Image, Pressable} from 'react-native';
 
 import {Nation} from '@types';
 import {CustomText} from '@components';
+import {themedStyles} from '../../../theme/tokens';
 
 type NationSelectProps = {
   nation: Nation;
@@ -27,7 +28,7 @@ const NationSelect = ({nation, onSelect}: NationSelectProps) => {
 
 export default memo(NationSelect);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   nationOption: {
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -51,4 +52,4 @@ const styles = StyleSheet.create({
     width: 52,
     height: 31,
   },
-});
+}));

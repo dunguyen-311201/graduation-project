@@ -7,6 +7,7 @@ import {
   TEXT_COLOR,
 } from '@theme/color';
 import CustomText from '../Text';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 type SwitchProps = {
   value: boolean;
@@ -20,8 +21,8 @@ const CustomSwitch = ({title, value, onChange}: SwitchProps) => {
       <Switch
         value={value}
         onChange={onChange}
-        trackColor={{false: DARK_GRAY_COLOR, true: LIGHT_BLUE_COLOR}}
-        thumbColor={value ? DARK_BLUE_COLOR : TEXT_COLOR}
+        trackColor={{false: themeColors.textMuted, true: themeColors.primary}}
+        thumbColor={value ? themeColors.primaryPressed : themeColors.text}
       />
       <CustomText text={title} />
     </View>
@@ -30,8 +31,8 @@ const CustomSwitch = ({title, value, onChange}: SwitchProps) => {
 
 export default CustomSwitch;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   switchGroup: {
     flexDirection: 'row',
   },
-});
+}));

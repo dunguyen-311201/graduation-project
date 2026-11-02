@@ -1,6 +1,6 @@
 import {
   AppButton,
-  BackButton,
+  ScreenHeader,
   ChipGroup,
   Notification,
   SearchInput,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
@@ -22,12 +23,14 @@ import React, {memo, useCallback, useContext, useEffect, useRef, useState} from 
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {getAsyncStorage, requestLocationPermission} from '@utils';
 import {newIdempotencyKey, useMessages} from '@features/rescue';
+import {PLACE_LABEL, PlaceKind, useSavedPlaces} from '@features/profile';
 
 import {Context} from '@context';
 import {Location} from '@types';
 import {RootParamList} from '@navigation/RootNavigation';
 import {RootScreenNavigationProps} from '@navigation';
 import {tokens} from '@theme';
+import {themedStyles} from '../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -57,6 +60,12 @@ const SendDistressSignal = () => {
 
   // Fixed per form, so sending again after a timeout cannot create a duplicate.
   const requestId = useRef(newIdempotencyKey());
+
+  const {places} = useSavedPlaces();
+  const placeOptions = (Object.keys(places) as PlaceKind[]).map(kind => ({
+    value: kind,
+    label: PLACE_LABEL[kind],
+  }));
 
   const [location, setLocation] = useState<Location | null>(null);
   const [editingLocation, setEditingLocation] = useState(false);
@@ -118,18 +127,8 @@ const SendDistressSignal = () => {
     setSending(false);
   }, [location, currentUser, onNew, type, description, reset]);
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Notification />
-        <View style={styles.header}>
-          <BackButton onPress={goBack} />
-          <Txt variant="title">Request rescue</Txt>
-        </View>
-
-        <View style={styles.body}>
+  const sections = (
+    <>
           <View style={styles.section}>
             <Txt variant="label" color={colors.textMuted}>
               Where are you?
@@ -165,6 +164,23 @@ const SendDistressSignal = () => {
                 />
               </View>
             )}
+            {!editingLocation && placeOptions.length > 0 && (
+              <ChipGroup
+                options={placeOptions}
+                value={
+                  placeOptions.find(
+                    o =>
+                      places[o.value]?.latitude === location?.latitude &&
+                      places[o.value]?.longitude === location?.longitude,
+                  )?.value ?? ''
+                }
+                onChange={kind => {
+                  const picked = places[kind as PlaceKind];
+                  picked && setLocation(picked);
+                }}
+                accessibilityLabel="Saved places"
+              />
+            )}
           </View>
 
           <View style={styles.section}>
@@ -194,7 +210,28 @@ const SendDistressSignal = () => {
               accessibilityLabel="Details"
             />
           </View>
-        </View>
+    </>
+  );
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Notification />
+        <ScreenHeader title="Request rescue" onBack={goBack} />
+
+        {/* Places autocomplete is a list, so it cannot sit inside a ScrollView. */}
+        {editingLocation ? (
+          <View style={[styles.flex1, styles.body]}>{sections}</View>
+        ) : (
+          <ScrollView
+            style={styles.flex1}
+            contentContainerStyle={styles.body}
+            keyboardShouldPersistTaps="handled">
+            {sections}
+          </ScrollView>
+        )}
 
         <View style={styles.footer}>
           {error && (
@@ -224,14 +261,15 @@ const SendDistressSignal = () => {
 
 export default memo(SendDistressSignal);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {flex: 1, backgroundColor: colors.bg},
   header: {
     paddingHorizontal: space.xl,
     paddingTop: space.lg,
     rowGap: space.md,
   },
-  body: {flex: 1, paddingHorizontal: space.xl, paddingTop: space.xl, rowGap: space.xl},
+  flex1: {flex: 1},
+  body: {paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl, rowGap: space.lg},
   section: {rowGap: space.sm},
   card: {
     flexDirection: 'row',
@@ -249,7 +287,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     color: colors.text,
-    fontSize: 17,
+    fontSize: tokens.type.body.fontSize,
     textAlignVertical: 'top',
   },
   footer: {
@@ -261,4 +299,4 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   error: {rowGap: space.sm},
-});
+}));

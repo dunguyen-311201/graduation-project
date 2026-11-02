@@ -6,6 +6,7 @@ import {EScreen} from '@enums';
 import {ScreenBase, Social} from '@components';
 import {RootScreenNavigationProps} from '@navigation';
 import {GmailIcon} from '@theme';
+import {themedStyles} from '../../theme/tokens';
 
 const SignupBySocialScreen = () => {
   const {navigate, goBack} =
@@ -31,7 +32,7 @@ const SignupBySocialScreen = () => {
 
 export default SignupBySocialScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     paddingTop: 30,
   },
@@ -39,4 +40,4 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginLeft: 16,
   },
-});
+}));

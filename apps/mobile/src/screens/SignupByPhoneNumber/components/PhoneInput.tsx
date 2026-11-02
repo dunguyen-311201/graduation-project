@@ -1,4 +1,4 @@
-import {DARK_GRAY_COLOR, DropDownIcon, WHITE_COLOR} from '@theme';
+import {DropDownIcon, tokens} from '@theme';
 import {
   FlatList,
   Image,
@@ -14,6 +14,7 @@ import {CustomText} from '@components';
 import {Nation} from '@types';
 import NationSelect from './NationSelect';
 import {PHONES} from '@constants';
+import {colors as themeColors, themedStyles} from '../../../theme/tokens';
 
 type PhoneInputProps = {
   errorMessage?: string;
@@ -100,7 +101,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
             <Image source={{uri: national?.url}} style={styles.flag} />
             <Image source={DropDownIcon} style={styles.dropDown} />
           </Pressable>
-          <CustomText text={national?.code} type="text_medium_24" />
+          <CustomText text={national?.code} type="text_medium_20" />
         </View>
         <View style={styles.inputGroup}>
           <TextInput
@@ -111,7 +112,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
             autoComplete="tel-national"
             accessibilityLabel="Phone number"
             placeholder="912 345 678"
-            placeholderTextColor={DARK_GRAY_COLOR}
+            placeholderTextColor={tokens.colors.textMuted}
             ref={refInput}
           />
           {errorMessage && (
@@ -125,7 +126,7 @@ const PhoneInput = ({onEndEditing, errorMessage}: PhoneInputProps) => {
 
 export default memo(PhoneInput);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   container: {
     rowGap: 10,
     position: 'relative',
@@ -138,15 +139,17 @@ const styles = StyleSheet.create({
   },
   inputGroup: {flex: 6},
   input: {
-    borderBottomWidth: 1,
-    borderBottomColor: WHITE_COLOR,
-    color: WHITE_COLOR,
-    fontSize: 24,
-
-    padding: 0,
+    minHeight: tokens.TOUCH,
+    paddingHorizontal: tokens.space.lg,
+    borderRadius: tokens.radius.card,
+    borderWidth: 1,
+    borderColor: tokens.colors.border,
+    backgroundColor: tokens.colors.surface,
+    color: tokens.colors.text,
+    fontSize: tokens.type.body.fontSize,
   },
   nationList: {
-    backgroundColor: WHITE_COLOR,
+    backgroundColor: themeColors.surfaceRaised,
     borderRadius: 10,
     position: 'absolute',
     top: 50,
@@ -157,18 +160,22 @@ const styles = StyleSheet.create({
   },
   nation: {
     flexDirection: 'row',
-    columnGap: 10,
-    flex: 4,
+    alignItems: 'center',
+    columnGap: 8,
+    minHeight: tokens.TOUCH,
+    marginRight: tokens.space.sm,
   },
   flagSelect: {
     alignItems: 'center',
     flexDirection: 'row',
   },
   flag: {
-    width: 52,
-    height: 31,
+    width: 32,
+    height: 20,
+    borderRadius: 3,
   },
   dropDown: {
+    tintColor: themeColors.text,
     marginLeft: 5,
   },
-});
+}));

@@ -1,9 +1,10 @@
 import {ImageSourcePropType, Pressable, StyleSheet, View} from 'react-native';
 import React, {memo, useCallback} from 'react';
-import {Txt} from '@components';
+import {Avatar, Txt} from '@components';
 
 import {TUser} from '@types';
 import {tokens} from '@theme';
+import {themedStyles} from '../../../theme/tokens';
 
 const {colors, space, radius} = tokens;
 
@@ -39,9 +40,7 @@ const WorkerItem = ({
       accessibilityHint="Shows actions for this worker"
       onPress={handle}
       style={({pressed}) => [styles.card, pressed && styles.pressed]}>
-      <View style={styles.avatar}>
-        <Txt variant="label">{name.charAt(0).toUpperCase()}</Txt>
-      </View>
+      <Avatar name={name} uri={user.photoURL} />
       <View style={styles.flex}>
         <Txt variant="label" style={styles.name}>
           {name}
@@ -62,7 +61,7 @@ const WorkerItem = ({
 
 export default memo(WorkerItem);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -72,16 +71,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   pressed: {backgroundColor: colors.surfaceRaised},
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceRaised,
-  },
   flex: {flex: 1, rowGap: 2},
   name: {textTransform: 'capitalize'},
   row: {flexDirection: 'row', alignItems: 'center', columnGap: 6},
   dot: {width: 8, height: 8, borderRadius: 4},
-});
+}));
