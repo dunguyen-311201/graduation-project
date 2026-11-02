@@ -119,7 +119,10 @@ const Worker = () => {
   );
 
   const handleToRequestByWorker = useCallback(() => {
-    id && navigate(EScreen.ASSIGN, {id});
+    if (id) {
+      setId(undefined);
+      navigate(EScreen.ASSIGN, {id});
+    }
   }, [id]);
 
   const handleActive = useCallback(async () => {

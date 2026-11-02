@@ -13,7 +13,16 @@ import {getToken} from '@react-native-firebase/messaging';
 
 import {ERole} from '@enums';
 import {TUser} from '@types';
+import {signOutOfGoogle} from '../utils/google';
 import {auth, callAPI, db, messaging} from '@services';
+
+// What still blocks a signed-in account from the app.
+type PendingStep = 'phone' | 'profile' | null;
+
+// Rescue teams sign in by email and have no phone; everyone else must verify one.
+const needsPhone = (user: AuthUser) =>
+  !user.phoneNumber &&
+  user.providerData.some(({providerId}) => providerId === 'google.com');
 
 const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<TUser | null>(null);
@@ -21,6 +30,7 @@ const useAuth = () => {
   // True until the saved session has been checked once.
   const [initializing, setInitializing] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pendingStep, setPendingStep] = useState<PendingStep>(null);
 
   // Loads the users/{uid} profile, which only exists once sign-up has finished.
   // Accounts made in the Firebase console have no displayName, so that is not
@@ -34,10 +44,17 @@ const useAuth = () => {
           | undefined;
 
         // Signed out while the profile was loading: do not sign back in.
-        if (data && auth.currentUser?.uid === user.uid) {
-          setCurrentUser({...data, id: user.uid});
-          await setAsyncStorage(FIRST_INSTALLED, 1);
-          setIsAuthenticated(true);
+        if (auth.currentUser?.uid === user.uid) {
+          if (needsPhone(user)) {
+            setPendingStep('phone');
+          } else if (data) {
+            setPendingStep(null);
+            setCurrentUser({...data, id: user.uid});
+            await setAsyncStorage(FIRST_INSTALLED, 1);
+            setIsAuthenticated(true);
+          } else {
+            setPendingStep(user.phoneNumber ? 'profile' : null);
+          }
         }
       }
     } catch (error) {}
@@ -53,6 +70,7 @@ const useAuth = () => {
         } else {
           setCurrentUser(null);
           setIsAuthenticated(false);
+          setPendingStep(null);
           setLoading(false);
         }
       } catch (error) {
@@ -93,8 +111,17 @@ const useAuth = () => {
     try {
       await firebaseSignOut(auth);
     } catch (err) {}
+    await signOutOfGoogle().catch(() => {});
     setLoading(false);
   }, [currentUser]);
+
+  // Linking a phone does not fire onAuthStateChanged.
+  const refreshAuth = useCallback(async () => {
+    if (auth.currentUser) {
+      await reload(auth.currentUser);
+      await loadProfile(auth.currentUser);
+    }
+  }, [loadProfile]);
 
   const signUp = useCallback(async () => {
     setLoading(true);
@@ -205,6 +232,8 @@ const useAuth = () => {
   return {
     isAuthenticated,
     initializing,
+    pendingStep,
+    refreshAuth,
     signIn,
     signUp,
     signOut,

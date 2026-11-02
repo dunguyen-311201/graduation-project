@@ -2,12 +2,11 @@ import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {StyleSheet, View} from 'react-native';
 import {
-  onAuthStateChanged as onAuthChanged,
+  linkWithCredential,
   PhoneAuthProvider,
   signInWithCredential,
   signInWithPhoneNumber,
 } from '@react-native-firebase/auth';
-import type {User} from '@react-native-firebase/auth';
 
 import ComfirmInput from './components/ComfirmInput';
 import {Context} from '@context';
@@ -24,7 +23,7 @@ type ConfirmRoute = RouteProp<RootParamList, EScreen.CONFIRM_PHONE_NUMBER>;
 const RESEND_SECONDS = 60;
 
 const ConfirmPhoneNumberScreen = () => {
-  const {navigate, goBack} =
+  const {goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
 
   const {phone, verificationId: firstVerificationId} =
@@ -36,7 +35,7 @@ const ConfirmPhoneNumberScreen = () => {
   const [loading, setLoading] = useState(false);
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
 
-  const {signIn} = useContext(Context);
+  const {pendingStep, refreshAuth, signIn} = useContext(Context);
 
   useEffect(() => {
     if (resendIn <= 0) {
@@ -66,56 +65,34 @@ const ConfirmPhoneNumberScreen = () => {
     setLoading(false);
   }, [phone]);
 
-  const onAuthStateChanged = useCallback(async (user: User | null) => {
-    try {
-      setLoading(true);
-      if (user) {
-        if (user?.displayName && user.metadata.lastSignInTime) {
-          await signIn(user.uid);
-          return;
-        }
-        navigate(EScreen.SIGNUP_INFO);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const subscriber = onAuthChanged(auth, onAuthStateChanged);
-    return subscriber;
-  }, [onAuthStateChanged]);
-
   const handleNext = useCallback(async () => {
     try {
       setLoading(true);
 
       const credential = PhoneAuthProvider.credential(verificationId, code);
 
-      const userCredential = await signInWithCredential(auth, credential);
+      const linking = pendingStep === 'phone' && auth.currentUser;
+      const {user} = linking
+        ? await linkWithCredential(auth.currentUser!, credential)
+        : await signInWithCredential(auth, credential);
 
-      if (userCredential) {
-        const {user} = userCredential;
+      if (linking) {
+        await refreshAuth();
+      }
 
-        const u = await getDoc(doc(db, 'users', user.uid));
-
-        if (!u.exists()) {
-          setLoading(false);
-          navigate(EScreen.SIGNUP_INFO);
-          return;
-        }
-
+      // Without a profile the auth state opens the setup screens.
+      if ((await getDoc(doc(db, 'users', user.uid))).exists()) {
         await signIn(user.uid);
-      } else {
-        setError('Please check your sms credentials and try again!');
       }
     } catch (err: any) {
-      setError('Please check your sms credentials and try again!');
+      setError(
+        err?.code === 'auth/credential-already-in-use'
+          ? 'This number already belongs to another account.'
+          : 'Please check your sms credentials and try again!',
+      );
     }
     setLoading(false);
-  }, [code, verificationId]);
+  }, [code, pendingStep, refreshAuth, signIn, verificationId]);
 
   return (
     <ScreenBase

@@ -6,6 +6,7 @@ export const ENV = {
   APP_ENV: process.env.EXPO_PUBLIC_APP_ENV ?? 'prod',
   API_URL: process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:4000/',
   GOOGLE_MAPS_API_KEY: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
+  GOOGLE_WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
 };
 
 // False when the app was built without GOOGLE_MAPS_ANDROID_API_KEY. Rendering

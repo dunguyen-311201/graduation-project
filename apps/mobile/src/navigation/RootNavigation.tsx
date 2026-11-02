@@ -77,7 +77,8 @@ let savedState: NavigationState | undefined;
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
-  const {isAuthenticated, initializing, currentUser} = useContext(Context);
+  const {isAuthenticated, initializing, pendingStep, currentUser} =
+    useContext(Context);
 
   return (
     <NavigationContainer
@@ -195,6 +196,32 @@ const RootNavigation = () => {
               options={{headerShown: false}}
             />
           </>
+        ) : pendingStep === 'phone' ? (
+          <>
+            <Stack.Screen
+              name={EScreen.SIGNUP_BY_PHONE_NUMBER}
+              component={SignupByPhoneNumberScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.CONFIRM_PHONE_NUMBER}
+              component={ConfirmPhoneNumberScreen}
+              options={{headerShown: false}}
+            />
+          </>
+        ) : pendingStep === 'profile' ? (
+          <>
+            <Stack.Screen
+              name={EScreen.SIGNUP_INFO}
+              component={SetupInfoScreen}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name={EScreen.CONFIRM_POLICY}
+              component={ConfirmPolicyScreen}
+              options={{headerShown: false}}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen
@@ -217,16 +244,6 @@ const RootNavigation = () => {
             <Stack.Screen
               name={EScreen.CONFIRM_PHONE_NUMBER}
               component={ConfirmPhoneNumberScreen}
-              options={{headerShown: false}}
-            />
-            <Stack.Screen
-              name={EScreen.SIGNUP_INFO}
-              component={SetupInfoScreen}
-              options={{headerShown: false}}
-            />
-            <Stack.Screen
-              name={EScreen.CONFIRM_POLICY}
-              component={ConfirmPolicyScreen}
               options={{headerShown: false}}
             />
           </>

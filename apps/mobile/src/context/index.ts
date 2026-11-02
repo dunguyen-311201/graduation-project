@@ -5,6 +5,8 @@ import {createContext} from 'react';
 export type ContextProps = {
   isAuthenticated: boolean;
   initializing: boolean;
+  pendingStep: 'phone' | 'profile' | null;
+  refreshAuth: () => Promise<void>;
   currentUser: TUser | null;
   loading: boolean;
   signIn: (id: string) => Promise<boolean>;
@@ -18,6 +20,8 @@ export type ContextProps = {
 export const Context = createContext<ContextProps>({
   isAuthenticated: false,
   initializing: true,
+  pendingStep: null,
+  refreshAuth: async () => {},
   loading: false,
   signIn: async () => false,
   signOut: async () => {},

@@ -15,6 +15,8 @@ function App() {
     currentUser,
     isAuthenticated,
     initializing,
+    pendingStep,
+    refreshAuth,
     updateProfile,
     signIn,
     signOut,
@@ -27,6 +29,8 @@ function App() {
   const store: ContextProps = {
     isAuthenticated,
     initializing,
+    pendingStep,
+    refreshAuth,
     loading,
     currentUser,
     signIn,

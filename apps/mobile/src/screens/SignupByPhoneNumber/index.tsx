@@ -1,8 +1,9 @@
 import {StyleSheet, View} from 'react-native';
 import {CustomButton, ScreenBase} from '@components';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {ArrowRightBlueIcon} from '@theme';
+import {Context} from '@context';
 import {EScreen} from '@enums';
 import PhoneInput from './components/PhoneInput';
 import {RootScreenNavigationProps} from '@navigation';
@@ -14,6 +15,9 @@ import {themedStyles} from '../../theme/tokens';
 const SignupByPhoneNumberScreen = () => {
   const {navigate, setOptions} =
     useNavigation<RootScreenNavigationProps<EScreen.CONFIRM_PHONE_NUMBER>>();
+
+  const {pendingStep, signOut} = useContext(Context);
+  const linking = pendingStep === 'phone';
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -43,6 +47,8 @@ const SignupByPhoneNumberScreen = () => {
     } catch (err: any) {
       if (err?.code === 'auth/too-many-requests') {
         setError('Too many attempts. Please try again later.');
+      } else if (err?.code === 'auth/operation-not-allowed') {
+        setError('SMS is not available in this region yet.');
       } else if (err?.code === 'auth/network-request-failed') {
         setError('No connection. Check your network and try again.');
       } else {
@@ -63,19 +69,32 @@ const SignupByPhoneNumberScreen = () => {
 
   return (
     <ScreenBase
-      title="Enter your phone number"
+      title={linking ? 'Verify your phone number' : 'Enter your phone number'}
+      desc={
+        linking
+          ? 'SOS needs your number so rescue teams can reach you.'
+          : undefined
+      }
       onNext={handleNext}
       loading={loading}
       disableNext={!phone}>
       <View style={styles.container}>
         <PhoneInput onEndEditing={handleChangePhone} errorMessage={error} />
 
-        <CustomButton
-          label="Other sign-in options"
-          type="secondary"
-          icon={ArrowRightBlueIcon}
-          onPress={handleNavigateSocial}
-        />
+        {linking ? (
+          <CustomButton
+            label="Use another account"
+            type="secondary"
+            onPress={signOut}
+          />
+        ) : (
+          <CustomButton
+            label="Other sign-in options"
+            type="secondary"
+            icon={ArrowRightBlueIcon}
+            onPress={handleNavigateSocial}
+          />
+        )}
       </View>
     </ScreenBase>
   );

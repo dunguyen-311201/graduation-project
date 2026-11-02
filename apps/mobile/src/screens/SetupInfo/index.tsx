@@ -18,6 +18,7 @@ import {
 } from '@utils';
 
 import {Context} from '@context';
+import {auth} from '@services';
 import {RootScreenNavigationProps} from '@navigation';
 import {useNavigation} from '@react-navigation/native';
 import {themedStyles} from '../../theme/tokens';
@@ -29,7 +30,25 @@ type FormData = {
   [EUser.location]?: Location;
   [EUser.first]?: string;
   [EUser.last]?: string;
+  email?: string;
+  photoURL?: string;
 };
+
+// Google gives one display name, so the first word fills the first-name field.
+const fromSocialAccount = (): FormData | undefined => {
+  const {displayName, email, photoURL} = auth.currentUser ?? {};
+  if (!displayName && !email && !photoURL) {
+    return undefined;
+  }
+  const [firstName, ...rest] = (displayName ?? '').trim().split(/\s+/);
+  return {
+    firstName,
+    lastName: rest.join(' '),
+    ...(email && {email}),
+    ...(photoURL && {photoURL}),
+  };
+};
+
 const SetupInfoScreen = () => {
   const {setOptions, navigate} =
     useNavigation<RootScreenNavigationProps<EScreen.SIGNUP_INFO>>();
@@ -38,7 +57,7 @@ const SetupInfoScreen = () => {
   const inputLastRef = useRef<TextInputInstance>(null);
   const inputcitizenRef = useRef<TextInputInstance>(null);
 
-  const [data, setData] = useState<FormData>();
+  const [data, setData] = useState<FormData | undefined>(fromSocialAccount);
   const [isCenter, setIsCenter] = useState(false);
 
   const {currentUser} = useContext(Context);

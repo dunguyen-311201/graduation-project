@@ -71,5 +71,6 @@ export default ({config}: ConfigContext): ExpoConfig => ({
       },
     ],
     '@react-native-community/datetimepicker',
+    '@react-native-google-signin/google-signin',
   ],
 });
