@@ -11,13 +11,14 @@ const STYLE = (): Record<TStatus, {label: string; color: string}> => ({
   pending: {label: 'Waiting for rescue', color: colors.warning},
   'in progress': {label: 'Rescue on the way', color: colors.primary},
   completed: {label: 'Completed', color: colors.success},
-  expired: {label: 'Closed', color: colors.textMuted},
+  expired: {label: 'Expired', color: colors.textMuted},
 });
 
 // Status is always written out, never shown by colour or icon alone.
-const StatusPill = ({status}: {status: TStatus}) => {
+const StatusPill = ({status, stage}: {status: TStatus; stage?: string}) => {
   const map = STYLE();
-  const {label, color} = map[status] ?? map.expired;
+  const {label: statusLabel, color} = map[status] ?? map.expired;
+  const label = stage === 'CANCELLED' ? 'Cancelled' : statusLabel;
 
   return (
     <View style={[styles.pill, {borderColor: color}]}>
