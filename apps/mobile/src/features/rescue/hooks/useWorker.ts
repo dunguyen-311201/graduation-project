@@ -26,17 +26,19 @@ const useWorker = (free?: boolean) => {
       return;
     }
 
-    const constraints = [where('centerID', '==', currentUser.id)];
-    if (free) {
-      constraints.push(where('status', '==', 'free'));
-    }
+    // Who can take a mission lives in `responders`, the same data the API checks.
+    const source = free
+      ? query(
+          collection(db, 'responders'),
+          where('centerId', '==', currentUser.id),
+          where('availability', '==', 'AVAILABLE'),
+        )
+      : query(collection(db, 'users'), where('centerID', '==', currentUser.id));
 
     const unsubscribe = onSnapshot(
-      query(collection(db, 'users'), ...constraints),
+      source,
       snap => {
-        if (snap?.docs.length > 0) {
-          setData(snap.docs.map(d => ({id: d.id, ...d.data()}) as TUser));
-        }
+        setData(snap?.docs.map(d => ({id: d.id, ...d.data()}) as TUser) ?? []);
       },
       err => console.log(err),
     );

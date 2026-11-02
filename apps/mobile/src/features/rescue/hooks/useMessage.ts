@@ -1,33 +1,16 @@
-import {
-  CURRENT_LOCATION,
-  Route,
-  MESSAGE_COMPLETED,
-  MESSAGE_IN_PROGRESS,
-  MESSAGE_PENDING,
-} from '@constants';
-import {Location, TMessage} from '@types';
-import {fetchDistanceAndTime, getAsyncStorage} from '@utils';
+import {Route} from '@constants';
+import {TMessage} from '@types';
 import {useCallback, useContext, useEffect, useState} from 'react';
+import {Alert} from 'react-native';
 
 import {Context} from '@context';
-import {EStatusUser} from '@enums';
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from '@react-native-firebase/firestore';
+import {doc, onSnapshot} from '@react-native-firebase/firestore';
 import {callAPI, db} from '@services';
 import {toMessage} from '../utils/request';
 
 const useMessage = (id: string) => {
   const [message, setMessage] = useState<TMessage>();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const {currentUser} = useContext(Context);
 
@@ -42,103 +25,60 @@ const useMessage = (id: string) => {
     return () => unsubcribe();
   }, [currentUser, id]);
 
-  const onComplete = useCallback(async () => {
-    setLoading(true);
-
-    try {
-      const update = {
-        status: MESSAGE_COMPLETED,
-        endAt: Date.now(),
-        userCompleted: currentUser?.id,
-      };
-
-      await updateDoc(doc(db, 'messages', id), update);
-    } catch (err: any) {
-      setError(err);
+  // Every state change is a command; the screen follows through onSnapshot.
+  const command = useCallback(async (route: string, data?: object) => {
+    const res = await callAPI({method: 'POST', route, data});
+    if (res.status >= 400) {
+      Alert.alert('Could not complete this', res.data?.message || 'Please try again.');
     }
+    return res.status < 400;
+  }, []);
 
-    setLoading(false);
-  }, [currentUser?.id, id]);
-
-  const onComfirm = useCallback(async () => {
-    if (message) {
-      setLoading(true);
-      try {
-        const from = await getAsyncStorage<Location>(CURRENT_LOCATION);
-        const to = message.location;
-        if (from && to) {
-          const res = await fetchDistanceAndTime({to, from});
-
-          if (res) {
-            const {distance, timeout} = res;
-
-            const update = {
-              status: MESSAGE_IN_PROGRESS,
-              workerID: currentUser?.id,
-              startAt: Date.now(),
-              distance,
-              timeout,
-            };
-
-            await updateDoc(doc(db, 'users', String(currentUser?.id)), {
-              location: from,
-              status: EStatusUser.BUSY,
-              startAt: Date.now(),
-            });
-
-            await updateDoc(doc(db, 'messages', id), update);
-          }
-        }
-      } catch (err: any) {
-        setError(err);
-      }
-
-      setLoading(false);
-    }
-  }, [currentUser?.id, id, message]);
-
-  const onAssign = useCallback(async (workerID: string) => {
+  const run = useCallback(async (work: () => Promise<unknown>) => {
     setLoading(true);
-
-    await addDoc(collection(db, 'assigns'), {
-      workerID,
-      messID: id,
-      time: Date.now(),
-      status: MESSAGE_PENDING,
-    });
-
+    await work();
     setLoading(false);
   }, []);
 
-  const onReject = useCallback(async () => {
-    if (currentUser) {
-      try {
-        setLoading(true);
-        const document = await getDocs(
-          query(
-            collection(db, 'assigns'),
-            where('userID', '==', currentUser.id),
-            where('messID', '==', id),
-          ),
-        );
-        const nId = document.docs.at(0)?.id;
-        nId && (await updateDoc(doc(db, 'assigns', nId), {status: 'reject'}));
-      } catch (err) {}
-      setLoading(false);
-    }
-  }, [currentUser, id]);
+  const onComplete = useCallback(
+    () => run(() => command(`${Route.REQUESTS}/${id}/complete`)),
+    [command, id, run],
+  );
 
-  const onDelete = useCallback(async () => {
-    setLoading(true);
+  const onComfirm = useCallback(
+    () =>
+      run(() =>
+        command(`${Route.ASSIGNMENTS}/${message?.assignmentId}/accept`),
+      ),
+    [command, message?.assignmentId, run],
+  );
 
-    await callAPI({method: 'POST', route: `${Route.REQUESTS}/${id}/cancel`});
+  const onReject = useCallback(
+    () =>
+      run(() =>
+        command(`${Route.ASSIGNMENTS}/${message?.assignmentId}/reject`),
+      ),
+    [command, message?.assignmentId, run],
+  );
 
-    setLoading(false);
-  }, [id]);
+  // Claiming again is a no-op, so this also works after a failed assignment.
+  const onAssign = useCallback(
+    (responderId: string) =>
+      run(
+        async () =>
+          (await command(`${Route.REQUESTS}/${id}/claim`)) &&
+          command(`${Route.REQUESTS}/${id}/assignments`, {responderId}),
+      ),
+    [command, id, run],
+  );
+
+  const onDelete = useCallback(
+    () => run(() => command(`${Route.REQUESTS}/${id}/cancel`)),
+    [command, id, run],
+  );
 
   return {
     message,
-    error,
     loading,
     onComfirm,
     onComplete,

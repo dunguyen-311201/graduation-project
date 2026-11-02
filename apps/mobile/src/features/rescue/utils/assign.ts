@@ -1,5 +1,6 @@
-import {doc, getFirestore, updateDoc} from '@react-native-firebase/firestore';
+import {Route} from '@constants';
+import {callAPI} from '@services';
 
 export const rejectAssign = async (id: string) => {
-  await updateDoc(doc(getFirestore(), 'assigns', id), {status: 'reject'});
+  await callAPI({method: 'POST', route: `${Route.ASSIGNMENTS}/${id}/reject`});
 };

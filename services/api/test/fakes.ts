@@ -1,6 +1,7 @@
 import { isActive, type CenterCandidate } from "@sos/domain";
 import { ConflictError, NotFoundError } from "../src/application/errors.js";
 import type {
+  AssignmentRecord,
   CenterDirectory,
   IdentityProvider,
   LegacyUserRecord,
@@ -8,6 +9,9 @@ import type {
   PushMessage,
   RequestRepository,
   RescueRequestRecord,
+  RescueStore,
+  RescueTx,
+  ResponderRecord,
   Scheduler,
   TimerJob,
   UserDirectory,
@@ -71,6 +75,7 @@ export class InMemoryUserDirectory implements UserDirectory {
 
 export class FakeScheduler implements Scheduler {
   jobs = new Map<string, TimerJob>();
+  repeating = new Map<string, number>();
   healthy = true;
   private handler?: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>;
 
@@ -88,6 +93,10 @@ export class FakeScheduler implements Scheduler {
 
   onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>) {
     this.handler = handler;
+  }
+
+  async scheduleEvery(name: TimerJob["name"], everyMs: number) {
+    this.repeating.set(name, everyMs);
   }
 
   /** Fast-forwards a scheduled timer. */
@@ -108,13 +117,50 @@ export class FakeNotifier implements Notifier {
   }
 }
 
-export class InMemoryRequests implements RequestRepository {
+export class InMemoryRequests implements RequestRepository, RescueStore {
   docs = new Map<string, RescueRequestRecord>();
+  assignments = new Map<string, AssignmentRecord>();
+  responders = new Map<string, Omit<ResponderRecord, "uid">>();
+  availableResponders = new Map<string, number>();
   private locks = new Set<string>();
   private seq = 0;
 
   newId() {
     return `req-${++this.seq}`;
+  }
+
+  /** Handlers check before they write, so a thrown error leaves nothing to roll back. */
+  async run<T>(work: (tx: RescueTx) => Promise<T>) {
+    return work({
+      newAssignmentId: () => `assignment-${++this.seq}`,
+      getRequest: async (id) => this.docs.get(id) ?? null,
+      getAssignment: async (id) => this.assignments.get(id) ?? null,
+      getResponder: async (uid) => {
+        const record = this.responders.get(uid);
+        return record ? { ...record, uid } : null;
+      },
+      setRequest: (record) => {
+        this.docs.set(record.id, record);
+        if (!isActive(record.status)) this.locks.delete(record.requesterId);
+      },
+      setAssignment: (record) => {
+        this.assignments.set(record.id, record);
+      },
+      setResponder: ({ uid, ...record }) => {
+        this.responders.set(uid, record);
+      },
+      adjustCenterResponders: (centerId, delta) => {
+        this.availableResponders.set(centerId, (this.availableResponders.get(centerId) ?? 0) + delta);
+      },
+    });
+  }
+
+  async listPendingBefore(time: number) {
+    return [...this.docs.values()].filter((r) => r.status === "PENDING" && r.createdAt < time).map((r) => r.id);
+  }
+
+  async listOfferedBefore(time: number) {
+    return [...this.assignments.values()].filter((a) => a.status === "OFFERED" && a.offeredAt < time).map((a) => a.id);
   }
 
   async findByIdempotencyKey(requesterId: string, key: string) {

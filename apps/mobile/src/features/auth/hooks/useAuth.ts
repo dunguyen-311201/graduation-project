@@ -146,6 +146,13 @@ const useAuth = () => {
               data: {token},
             });
           }
+          if (data.role === ERole.WORKER) {
+            await callAPI({
+              method: 'PUT',
+              route: Route.AVAILABILITY,
+              data: {availability: 'AVAILABLE'},
+            });
+          }
           await loadProfile(auth.currentUser);
         }
       } catch (error) {}

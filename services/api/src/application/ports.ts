@@ -46,7 +46,7 @@ export interface UserDirectory {
 }
 export const USER_DIRECTORY = Symbol("USER_DIRECTORY");
 
-export type TimerJobName = "expire-request" | "expand-radius" | "timeout-assignment";
+export type TimerJobName = "expire-request" | "expand-radius" | "timeout-assignment" | "sweep";
 
 /** A durable timer (ADR-0012). Survives API restarts, unlike setTimeout. */
 export interface TimerJob {
@@ -62,6 +62,8 @@ export interface Scheduler {
   cancel(id: string): Promise<void>;
   /** Throws when the queue backend cannot be reached. */
   ping(): Promise<void>;
+  /** Creates or updates one repeating job. */
+  scheduleEvery(name: TimerJobName, everyMs: number): Promise<void>;
   /** Registers the single handler for fired timers. */
   onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>): void;
 }
@@ -104,6 +106,9 @@ export interface RescueRequestRecord {
 export interface RequestRepository {
   newId(): string;
   findByIdempotencyKey(requesterId: string, key: string): Promise<RescueRequestRecord | null>;
+  /** Ids of timers that should already have fired. */
+  listPendingBefore(time: number): Promise<string[]>;
+  listOfferedBefore(time: number): Promise<string[]>;
   /** Throws ConflictError("ACTIVE_REQUEST_EXISTS") when the requester has an active request (INV-01). */
   create(record: RescueRequestRecord): Promise<void>;
   /** Transactional. `change` returns null to skip; ending a request frees the requester's lock. */
@@ -118,3 +123,43 @@ export interface CenterDirectory {
   listApproved(): Promise<CenterCandidate[]>;
 }
 export const CENTER_DIRECTORY = Symbol("CENTER_DIRECTORY");
+
+/** `assignments/{id}` (LLD section 2.2). */
+export interface AssignmentRecord {
+  id: string;
+  requestId: string;
+  centerId: string;
+  responderId: string;
+  status: "OFFERED" | "ACCEPTED" | "REJECTED" | "TIMED_OUT" | "COMPLETED" | "CANCELLED";
+  offeredAt: number;
+  respondedAt?: number;
+  version: number;
+}
+
+/** `responders/{uid}` (LLD section 2.2). */
+export interface ResponderRecord {
+  uid: string;
+  centerId: string;
+  displayName: string;
+  availability: "AVAILABLE" | "ON_MISSION" | "OFF_DUTY";
+  currentAssignmentId: string | null;
+  disabled: boolean;
+}
+
+/** One transaction. All reads must come before the first write. */
+export interface RescueTx {
+  newAssignmentId(): string;
+  getRequest(id: string): Promise<RescueRequestRecord | null>;
+  getAssignment(id: string): Promise<AssignmentRecord | null>;
+  getResponder(uid: string): Promise<ResponderRecord | null>;
+  /** Ending a request also frees the requester's lock (INV-01). */
+  setRequest(record: RescueRequestRecord): void;
+  setAssignment(record: AssignmentRecord): void;
+  setResponder(record: ResponderRecord): void;
+  adjustCenterResponders(centerId: string, delta: number): void;
+}
+
+export interface RescueStore {
+  run<T>(work: (tx: RescueTx) => Promise<T>): Promise<T>;
+}
+export const RESCUE_STORE = Symbol("RESCUE_STORE");

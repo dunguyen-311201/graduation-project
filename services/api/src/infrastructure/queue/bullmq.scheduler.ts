@@ -31,6 +31,10 @@ export class BullMqScheduler implements Scheduler, OnApplicationShutdown {
     await this.queue.remove(id);
   }
 
+  async scheduleEvery(name: TimerJob["name"], everyMs: number) {
+    await this.queue.upsertJobScheduler(name, { every: everyMs }, { name });
+  }
+
   onTimer(handler: (job: Pick<TimerJob, "name" | "payload">) => Promise<void>) {
     this.worker = new Worker(
       RESCUE_TIMERS_QUEUE,

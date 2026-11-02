@@ -1,9 +1,10 @@
 import type {IncidentCategory, RaiseSosBody} from '@sos/contracts';
-import {Location, TMessage, TStatus} from '@types';
+import {Location, TMessage, TStatus, TTask} from '@types';
 
 type RequestDoc = {
   requesterId: string;
   responderId?: string | null;
+  activeAssignmentId?: string | null;
   status: string;
   category: IncidentCategory;
   description?: string;
@@ -36,6 +37,7 @@ export const toMessage = (id: string, data: RequestDoc): TMessage => ({
   id,
   userID: data.requesterId,
   workerID: data.responderId ?? undefined,
+  assignmentId: data.activeAssignmentId ?? undefined,
   status: STATUS[data.status] ?? 'expired',
   stage: data.status,
   type: TYPE_BY_CATEGORY[data.category] ?? 'Rescue request',
@@ -47,6 +49,23 @@ export const toMessage = (id: string, data: RequestDoc): TMessage => ({
     description: data.location.address,
     city: data.location.address,
   },
+});
+
+const TASK_STATUS: Record<string, TTask['status']> = {
+  OFFERED: 'pending',
+  ACCEPTED: 'in progress',
+  COMPLETED: 'completed',
+};
+
+export const toTask = (
+  id: string,
+  data: {requestId: string; responderId: string; offeredAt: number; status: string},
+): TTask => ({
+  id,
+  messID: data.requestId,
+  workerID: data.responderId,
+  time: data.offeredAt,
+  status: TASK_STATUS[data.status] ?? 'expired',
 });
 
 export const toRaiseSosBody = (

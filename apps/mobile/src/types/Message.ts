@@ -12,6 +12,7 @@ export type TMessage = {
   onView?: () => void;
   onQuit?: () => void;
   workerID?: string;
+  assignmentId?: string;
   startAt?: number;
   endAt?: number;
   time: number;

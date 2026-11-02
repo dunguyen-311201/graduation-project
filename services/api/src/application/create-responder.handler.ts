@@ -6,6 +6,8 @@ import {
   IDENTITY_PROVIDER,
   type IdentityProvider,
   type LegacyUserRecord,
+  RESCUE_STORE,
+  type RescueStore,
   USER_DIRECTORY,
   type UserDirectory,
 } from "./ports.js";
@@ -25,6 +27,7 @@ export class CreateResponderHandler {
   constructor(
     @Inject(IDENTITY_PROVIDER) private readonly identity: IdentityProvider,
     @Inject(USER_DIRECTORY) private readonly users: UserDirectory,
+    @Inject(RESCUE_STORE) private readonly store: RescueStore,
   ) {}
 
   async execute(cmd: CreateResponderCommand, actor: Actor): Promise<{ responderId: string }> {
@@ -48,6 +51,17 @@ export class CreateResponderHandler {
     };
     try {
       await this.users.create(uid, record);
+      // Off duty until the responder signs in and goes available.
+      await this.store.run(async (tx) => {
+        tx.setResponder({
+          uid,
+          centerId: actor.uid,
+          displayName: cmd.displayName,
+          availability: "OFF_DUTY",
+          currentAssignmentId: null,
+          disabled: false,
+        });
+      });
       await this.identity.setClaims(uid, { role: "responder", centerId: actor.uid });
     } catch (error) {
       // Never leave an Auth account without its profile document.

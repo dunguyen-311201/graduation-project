@@ -35,7 +35,7 @@ const DetailMessage = () => {
   const {navigate, goBack} =
     useNavigation<RootScreenNavigationProps<EScreen.DETAIL_MESSAGE>>();
 
-  const {id, onReject, onDelete} = useRoute<ConfirmRoute>().params || {};
+  const {id, onDelete} = useRoute<ConfirmRoute>().params || {};
 
   const {currentUser} = useContext(Context);
 
@@ -44,6 +44,7 @@ const DetailMessage = () => {
     onComfirm,
     onComplete,
     onAssign,
+    onReject: onRejectAssignment,
     onDelete: onDeleteMessage,
     loading,
   } = useMessage(id);
@@ -99,9 +100,9 @@ const DetailMessage = () => {
   }, []);
 
   const handleReject = useCallback(async () => {
-    onReject && (await onReject());
+    await onRejectAssignment();
     navigate(EScreen.DRAWER);
-  }, [onReject]);
+  }, [onRejectAssignment]);
 
   const handleAssign = useCallback(async () => {
     if (workerID) {
@@ -115,7 +116,7 @@ const DetailMessage = () => {
         },
       ]);
     }
-  }, [workerID]);
+  }, [workerID, onAssign]);
 
   const isDelete = useMemo(
     // Only an open request can be cancelled; closed ones show no action.
@@ -124,20 +125,22 @@ const DetailMessage = () => {
   );
 
   const role = currentUser?.role;
+  const canAssign =
+    role === ERole.CENTER &&
+    (message?.stage === 'PENDING' || message?.stage === 'CLAIMED');
   const footer: React.ReactNode[] = [];
-  if (message && role === ERole.CENTER && message.status === MESSAGE_PENDING) {
+  if (message && canAssign) {
     footer.push(
       <AppButton key="assign" label="Assign worker" disabled={!workerID} onPress={handleAssign} />,
     );
   }
-  if (message && role === ERole.WORKER && message.status === MESSAGE_PENDING) {
+  if (message && role === ERole.WORKER && message.stage === 'ASSIGNED') {
     footer.push(<AppButton key="confirm" label="Accept task" onPress={onComfirm} />);
-    onReject &&
-      footer.push(
-        <AppButton key="reject" label="Reject" variant="secondary" onPress={handleReject} />,
-      );
+    footer.push(
+      <AppButton key="reject" label="Reject" variant="secondary" onPress={handleReject} />,
+    );
   }
-  if (message && role !== ERole.CENTER && message.status === MESSAGE_IN_PROGRESS) {
+  if (message && role === ERole.WORKER && message.status === MESSAGE_IN_PROGRESS) {
     footer.push(<AppButton key="complete" label="Mark as completed" onPress={onComplete} />);
   }
   if (message && role === ERole.USER && message.status === MESSAGE_COMPLETED) {
@@ -205,7 +208,7 @@ const DetailMessage = () => {
               )}
             </View>
 
-            {role === ERole.CENTER && message.status === MESSAGE_PENDING && (
+            {canAssign && (
               <View style={styles.card} accessibilityRole="radiogroup">
                 <Txt variant="label" color={colors.textMuted}>
                   Choose a worker

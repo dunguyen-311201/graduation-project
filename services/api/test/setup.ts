@@ -8,6 +8,7 @@ import {
   IDENTITY_PROVIDER,
   NOTIFIER,
   REQUEST_REPOSITORY,
+  RESCUE_STORE,
   SCHEDULER,
   USER_DIRECTORY,
 } from "../src/application/ports.js";
@@ -35,9 +36,10 @@ export async function createTestApp() {
       { provide: USER_DIRECTORY, useValue: users },
       { provide: NOTIFIER, useValue: notifier },
       { provide: REQUEST_REPOSITORY, useValue: requests },
+      { provide: RESCUE_STORE, useValue: requests },
       { provide: CENTER_DIRECTORY, useValue: centers },
     ],
-    exports: [IDENTITY_PROVIDER, USER_DIRECTORY, NOTIFIER, REQUEST_REPOSITORY, CENTER_DIRECTORY],
+    exports: [IDENTITY_PROVIDER, USER_DIRECTORY, NOTIFIER, REQUEST_REPOSITORY, CENTER_DIRECTORY, RESCUE_STORE],
   })
   class FakeFirebaseModule {}
 

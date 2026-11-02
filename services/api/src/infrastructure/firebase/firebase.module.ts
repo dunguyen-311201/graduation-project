@@ -5,10 +5,11 @@ import {
   IDENTITY_PROVIDER,
   NOTIFIER,
   REQUEST_REPOSITORY,
+  RESCUE_STORE,
   USER_DIRECTORY,
 } from "../../application/ports.js";
 import { FcmNotifier } from "./fcm.notifier.js";
-import { FirestoreCenterDirectory, FirestoreRequestRepository } from "./firestore-requests.js";
+import { FirestoreCenterDirectory, FirestoreRequestRepository, FirestoreRescueStore } from "./firestore-requests.js";
 import { createFirebaseApp, FirebaseIdentityProvider, FirestoreUserDirectory } from "./firebase.adapters.js";
 
 export const FIREBASE_APP = Symbol("FIREBASE_APP");
@@ -22,7 +23,8 @@ export const FIREBASE_APP = Symbol("FIREBASE_APP");
     { provide: NOTIFIER, inject: [FIREBASE_APP], useFactory: (app) => new FcmNotifier(app) },
     { provide: REQUEST_REPOSITORY, inject: [FIREBASE_APP], useFactory: (app) => new FirestoreRequestRepository(app) },
     { provide: CENTER_DIRECTORY, inject: [FIREBASE_APP], useFactory: (app) => new FirestoreCenterDirectory(app) },
+    { provide: RESCUE_STORE, inject: [FIREBASE_APP], useFactory: (app) => new FirestoreRescueStore(app) },
   ],
-  exports: [IDENTITY_PROVIDER, USER_DIRECTORY, NOTIFIER, REQUEST_REPOSITORY, CENTER_DIRECTORY],
+  exports: [IDENTITY_PROVIDER, USER_DIRECTORY, NOTIFIER, REQUEST_REPOSITORY, CENTER_DIRECTORY, RESCUE_STORE],
 })
 export class FirebaseModule {}

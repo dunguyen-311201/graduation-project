@@ -31,3 +31,15 @@ export type RaiseSosResponse = {
   requestId: string;
   status: string;
 };
+
+/** POST /v1/requests/:id/assignments (assignResponder). */
+export const assignResponderSchema = z.object({
+  responderId: z.string().min(1),
+});
+export type AssignResponderBody = z.infer<typeof assignResponderSchema>;
+
+/** PUT /v1/responders/me/availability (setAvailability). */
+export const setAvailabilitySchema = z.object({
+  availability: z.enum(['AVAILABLE', 'OFF_DUTY']),
+});
+export type SetAvailabilityBody = z.infer<typeof setAvailabilitySchema>;

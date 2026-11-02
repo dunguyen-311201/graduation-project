@@ -3,5 +3,5 @@ export type TTask = {
   messID: string;
   workerID: string;
   time: number;
-  status: 'pending' | 'completed' | 'in progress';
+  status: 'pending' | 'completed' | 'in progress' | 'expired';
 };
