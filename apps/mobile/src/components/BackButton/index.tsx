@@ -30,7 +30,6 @@ const styles = themedStyles(() =>
       borderRadius: TOUCH,
       alignItems: 'center',
       justifyContent: 'center',
-      alignSelf: 'center',
     },
     pressed: {backgroundColor: colors.surfaceRaised},
     chevron: {

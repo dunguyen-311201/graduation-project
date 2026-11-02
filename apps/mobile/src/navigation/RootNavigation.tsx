@@ -77,7 +77,7 @@ let savedState: NavigationState | undefined;
 const RootNavigation = () => {
   const Stack = createStackNavigator<RootParamList>();
 
-  const {isAuthenticated, currentUser} = useContext(Context);
+  const {isAuthenticated, initializing, currentUser} = useContext(Context);
 
   return (
     <NavigationContainer
@@ -97,8 +97,9 @@ const RootNavigation = () => {
           border: colors.border,
         },
       }}>
+      {/* The auth state alone picks the screens. React Navigation falls back to
+          the first screen of the new group, so history cannot leak between them. */}
       <Stack.Navigator
-        initialRouteName={EScreen.SPLASH}
         screenOptions={{
           headerTitleStyle: {
             color: colors.text,
@@ -112,20 +113,20 @@ const RootNavigation = () => {
           },
           cardStyle: {backgroundColor: colors.bg},
         }}>
-        <Stack.Screen
-          name={EScreen.SPLASH}
-          component={SplashScreen}
-          options={{headerShown: false}}
-        />
-        {/* Reachable before sign-in too, from the terms checkbox. */}
-        <Stack.Screen
-          name={EScreen.PRIVACY_LEGAL}
-          component={PrivacyLegalScreen}
-          options={{headerShown: false}}
-        />
-
-        {isAuthenticated ? (
+        {initializing ? (
+          <Stack.Screen
+            name={EScreen.SPLASH}
+            component={SplashScreen}
+            options={{headerShown: false}}
+          />
+        ) : isAuthenticated ? (
           <>
+            <Stack.Screen
+              name={EScreen.DRAWER}
+              component={MainTabs}
+              options={{headerShown: false}}
+            />
+
             {currentUser?.role === ERole.CENTER && (
               <>
                 <Stack.Screen
@@ -160,12 +161,6 @@ const RootNavigation = () => {
             <Stack.Screen
               name={EScreen.NOTIFICATION}
               component={NotificationScreen}
-              options={{headerShown: false}}
-            />
-
-            <Stack.Screen
-              name={EScreen.DRAWER}
-              component={MainTabs}
               options={{headerShown: false}}
             />
 
@@ -236,6 +231,13 @@ const RootNavigation = () => {
             />
           </>
         )}
+
+        {/* Reachable before sign-in too, from the terms checkbox. */}
+        <Stack.Screen
+          name={EScreen.PRIVACY_LEGAL}
+          component={PrivacyLegalScreen}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -40,6 +40,13 @@ const Notification = () => {
     }
   }, [hideAnim, notify]);
 
+  // Opened from the system tray: go straight to the request.
+  useEffect(() => {
+    if (notify?.background) {
+      navigate(EScreen.DETAIL_MESSAGE, notify);
+    }
+  }, [navigate, notify]);
+
   const handleAction = useCallback(() => {
     notify && navigate(EScreen.DETAIL_MESSAGE, notify);
   }, [notify]);

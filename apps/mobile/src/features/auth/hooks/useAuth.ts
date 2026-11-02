@@ -18,6 +18,8 @@ import {auth, callAPI, db, messaging} from '@services';
 const useAuth = () => {
   const [currentUser, setCurrentUser] = useState<TUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // True until the saved session has been checked once.
+  const [initializing, setInitializing] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Loads the users/{uid} profile, which only exists once sign-up has finished.
@@ -31,7 +33,8 @@ const useAuth = () => {
           | TUser
           | undefined;
 
-        if (data) {
+        // Signed out while the profile was loading: do not sign back in.
+        if (data && auth.currentUser?.uid === user.uid) {
           setCurrentUser({...data, id: user.uid});
           await setAsyncStorage(FIRST_INSTALLED, 1);
           setIsAuthenticated(true);
@@ -55,6 +58,7 @@ const useAuth = () => {
       } catch (error) {
         setLoading(false);
       }
+      setInitializing(false);
     });
 
     return () => unSubscribe();
@@ -62,6 +66,7 @@ const useAuth = () => {
 
   const signOut = useCallback(async () => {
     setLoading(true);
+    // A failed clean-up must never keep the person signed in.
     try {
       if (currentUser) {
         const update = {
@@ -76,10 +81,17 @@ const useAuth = () => {
         if (token) {
           await callAPI({method: 'DELETE', route: Route.FCM_TOKEN, data: {token}});
         }
-
-        await firebaseSignOut(auth);
-        setIsAuthenticated(false);
+        if (currentUser.role === ERole.WORKER) {
+          await callAPI({
+            method: 'PUT',
+            route: Route.AVAILABILITY,
+            data: {availability: 'OFF_DUTY'},
+          });
+        }
       }
+    } catch (err) {}
+    try {
+      await firebaseSignOut(auth);
     } catch (err) {}
     setLoading(false);
   }, [currentUser]);
@@ -192,6 +204,7 @@ const useAuth = () => {
 
   return {
     isAuthenticated,
+    initializing,
     signIn,
     signUp,
     signOut,

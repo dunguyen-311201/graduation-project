@@ -65,12 +65,19 @@ const ScreenBase = ({
         {loading && <Loading />}
         <Notification />
         <View style={styles.header}>
-          <View style={[styles.nav, {flexDirection}]}>
+          <View
+            style={[
+              styles.nav,
+              {
+                flexDirection,
+                alignItems: flexDirection === 'row' ? 'center' : 'flex-start',
+              },
+            ]}>
             {onBack && <BackButton onPress={onBack} />}
             {title && (
               <Txt
                 variant="title"
-                style={flexDirection === 'column' && styles.title}>
+                style={flexDirection === 'column' ? styles.title : styles.titleRow}>
                 {title}
               </Txt>
             )}
@@ -120,10 +127,12 @@ const styles = themedStyles(() => StyleSheet.create({
     rowGap: 8,
   },
   nav: {
-    flexDirection: 'row',
-    columnGap: 36,
+    columnGap: 8,
   },
   title: {
     marginTop: 16,
+  },
+  titleRow: {
+    flexShrink: 1,
   },
 }));

@@ -4,6 +4,7 @@ import {createContext} from 'react';
 
 export type ContextProps = {
   isAuthenticated: boolean;
+  initializing: boolean;
   currentUser: TUser | null;
   loading: boolean;
   signIn: (id: string) => Promise<boolean>;
@@ -16,6 +17,7 @@ export type ContextProps = {
 
 export const Context = createContext<ContextProps>({
   isAuthenticated: false,
+  initializing: true,
   loading: false,
   signIn: async () => false,
   signOut: async () => {},

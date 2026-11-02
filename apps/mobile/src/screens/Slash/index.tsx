@@ -4,21 +4,14 @@ import {
   CustomText,
   Shadow,
 } from '@components';
-import React, {memo, useContext, useEffect, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {Image, SafeAreaView, StyleSheet, View} from 'react-native';
 
-import {Context} from '@context';
-import {EScreen} from '@enums';
 import {FIRST_INSTALLED} from '@constants';
-import {RootScreenNavigationProps} from '@navigation';
 import {getAsyncStorage} from '@utils';
-import {useNavigation} from '@react-navigation/native';
 import {colors as themeColors, themedStyles} from '../../theme/tokens';
 
 function SplashScreen() {
-  const {navigate} = useNavigation<RootScreenNavigationProps<EScreen.SPLASH>>();
-
-  const {isAuthenticated, loading, notify} = useContext(Context);
   const [firstSignedIn, setFirstSignedIn] = useState(false);
 
   useEffect(() => {
@@ -28,22 +21,7 @@ function SplashScreen() {
     };
 
     setup();
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    if (!loading) {
-      if (notify) {
-        notify.background && navigate(EScreen.DETAIL_MESSAGE, notify);
-        return;
-      }
-
-      if (isAuthenticated) {
-        navigate(EScreen.DRAWER);
-        return;
-      }
-      navigate(EScreen.SIGNUP_BY_PHONE_NUMBER);
-    }
-  }, [isAuthenticated, loading]);
+  }, []);
 
 
   return (
