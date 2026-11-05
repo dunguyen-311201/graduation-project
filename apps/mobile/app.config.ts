@@ -72,5 +72,15 @@ export default ({config}: ConfigContext): ExpoConfig => ({
     ],
     '@react-native-community/datetimepicker',
     '@react-native-google-signin/google-signin',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-icon.png',
+        imageWidth: 180,
+        resizeMode: 'contain',
+        backgroundColor: '#535AFF',
+        dark: {image: './assets/splash-icon.png', backgroundColor: '#4A51F0'},
+      },
+    ],
   ],
 });

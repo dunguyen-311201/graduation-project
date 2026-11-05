@@ -1,0 +1,17 @@
+name: Keep API warm
+
+# Render's free plan sleeps after 15 minutes idle, and the first request then
+# takes long enough for the app's 15 second SOS timeout to fire (ADR-0011).
+# GitHub may delay scheduled runs by several minutes.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl --fail --silent --show-error --max-time 60 "${API_URL}/health/live"
+        env:
+          API_URL: ${{ vars.API_URL || 'https://sos-api-u0lh.onrender.com' }}

@@ -5,10 +5,14 @@ import {useNotification} from '@features/notification';
 
 import ThemeProvider from './theme/ThemeProvider';
 import {colors, themedStyles} from './theme/tokens';
-import React from 'react';
+import React, {useEffect} from 'react';
+import * as NativeSplash from 'expo-splash-screen';
 import {RootNavigation} from './navigation';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {StatusBar} from 'expo-status-bar';
+
+// One splash only: the native one stays until the saved session is checked.
+NativeSplash.preventAutoHideAsync().catch(() => {});
 
 function App() {
   const {
@@ -25,6 +29,12 @@ function App() {
   } = useAuth();
 
   const {notify, hideNotify} = useNotification();
+
+  useEffect(() => {
+    if (!initializing) {
+      NativeSplash.hideAsync().catch(() => {});
+    }
+  }, [initializing]);
 
   const store: ContextProps = {
     isAuthenticated,
